@@ -1,0 +1,72 @@
+{
+    "picture_url": "https://www.google.com.ar",
+    "user_string": "Alfredo E. Pérez Leal",
+    "title_string": "Bsc. in Computer Science",
+    "current_role_string": "iOS Software Engineer",
+    "trayectory": [
+        {
+            "logo": "https://www.google.com.ar",
+            "name": "Rappi",
+            "dates": {
+                "start": "timestamp",
+                "end": "timestamp"
+            },
+            "roles": [
+                {
+                "title":"iOS Developer",
+                "duties": [
+    
+                    ]
+                }
+            ]
+        },
+    {
+        "logo": "https://www.google.com.ar",
+        "name": "Rappi",
+        "dates": {
+            "start": "timestamp",
+            "end": "timestamp"
+        },
+        "roles": [
+            {
+            "title":"iOS Developer",
+            "duties": [
+
+                ]
+            },
+            {
+                "title":"iOS Developer",
+                "duties": [
+    
+                    ]
+                }
+        ]
+    },
+    {
+        "logo": "https://www.google.com.ar",
+        "name": "Rappi",
+        "dates": {
+            "start": "timestamp",
+            "end": "timestamp"
+        },
+        "roles": [
+            {
+            "title":"iOS Developer",
+            "duties": [
+
+                ]
+            }
+        ]
+    }
+    ],
+    "skills": [
+
+    ],
+    "projects": [
+
+    ],
+    "resume_string": "Lorem ipsum",
+    "social": [
+
+    ]
+}
