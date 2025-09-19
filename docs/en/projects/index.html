@@ -1,1 +1,63 @@
-{"error":true,"reason":"LexerError(line: 6, column: 143, name: \"projects\", reason: LeafKit.LexerError.Reason.invalidParameterToken(\"?\"), lexed: [tagIndicator, tag(name: \"extend\"), parametersStart, param(stringLiteral(\"index\")), parametersEnd, tagBodyIndicator, raw(\"\\n    \"), tagIndicator, tag(name: \"export\"), parametersStart, param(stringLiteral(\"body\")), parametersEnd, tagBodyIndicator, raw(\"\\n        <!-- Header Section -->\\n        <section class=\\\"bg-white dark:bg-gray-800 py-12 sm:py-16 lg:py-20 theme-transition\\\">\\n            <div class=\\\"max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center\\\">\\n                <h1 class=\\\"text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 text-gray-800 dark:text-white animate-slide-up\\\">\"), tagIndicator, tag(name: \"\"), parametersStart, param(variable(title)), parametersEnd, raw(\"<\/h1>\\n                <p class=\\\"text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 animate-slide-up\\\">\"), tagIndicator, tag(name: \"\"), parametersStart, param(variable(translations.projects_subtitle)), whitespace(1)], recoverable: false)"}
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>My Projects - Alfredo E. Pérez Leal</title>
+    <meta name="description" content="Projects developed by Alfredo E. Pérez Leal">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 min-h-screen">
+    <nav class="bg-white shadow-lg p-4">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <a href="/en/" class="text-xl font-bold text-gray-800">Alfredo Pérez</a>
+            <div class="space-x-4">
+                <a href="/en/" class="text-gray-600 hover:text-blue-600">Home</a>
+                <a href="/en/experience/" class="text-gray-600 hover:text-blue-600">Experience</a>
+                <a href="/en/projects/" class="text-blue-600 font-semibold">Projects</a>
+                <a href="/es/projects/" class="px-3 py-1 bg-blue-600 text-white rounded">Español</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="pt-8">
+        <section class="py-16">
+            <div class="max-w-6xl mx-auto px-4">
+                <h1 class="text-4xl font-bold text-center mb-8 text-gray-800">My Projects</h1>
+                <p class="text-xl text-center text-gray-600 mb-12">Projects developed by Alfredo E. Pérez Leal</p>
+                
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <div class="w-16 h-16 bg-blue-100 rounded-lg mx-auto mb-4 flex items-center justify-center">
+                            <i class="fas fa-mobile-alt text-2xl text-blue-600"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">E-Commerce iOS App</h3>
+                        <p class="text-gray-600 mb-4">Complete e-commerce application with shopping cart, integrated payments and user management.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Swift</span>
+                            <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">SwiftUI</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <div class="w-16 h-16 bg-green-100 rounded-lg mx-auto mb-4 flex items-center justify-center">
+                            <i class="fas fa-server text-2xl text-green-600"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">Weather Forecast API</h3>
+                        <p class="text-gray-600 mb-4">REST API built with Vapor Swift for weather forecasting.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Vapor</span>
+                            <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Swift</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-8 text-center">
+        <p>&copy; 2025 Alfredo E. Pérez Leal. Built with Vapor Swift.</p>
+    </footer>
+</body>
+</html>

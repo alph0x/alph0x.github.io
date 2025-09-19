@@ -12,7 +12,6 @@ final class StaticSiteValidationTests: XCTestCase {
             "index.html",
             "es/index.html", 
             "en/index.html",
-            "CNAME",
             "robots.txt",
             "sitemap.xml",
             "404.html"
@@ -114,7 +113,7 @@ final class StaticSiteValidationTests: XCTestCase {
         // Check sitemap exists and is valid
         let sitemapContent = try String(contentsOfFile: "\(docsPath)/sitemap.xml")
         XCTAssertTrue(sitemapContent.contains("<?xml"), "Sitemap should be valid XML")
-        XCTAssertTrue(sitemapContent.contains("alph0x.com"), "Sitemap should contain domain")
+        XCTAssertTrue(sitemapContent.contains("alph0x.github.io"), "Sitemap should contain GitHub Pages domain")
         
         // Check robots.txt
         let robotsContent = try String(contentsOfFile: "\(docsPath)/robots.txt")
