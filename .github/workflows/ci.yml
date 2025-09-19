@@ -1,0 +1,181 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    name: Test Suite
+    runs-on: macos-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Swift
+      uses: swift-actions/setup-swift@v1
+      with:
+        swift-version: '6.0'
+        
+    - name: Cache Swift packages
+      uses: actions/cache@v3
+      with:
+        path: .build
+        key: ${{ runner.os }}-swift-${{ hashFiles('Package.resolved') }}
+        restore-keys: |
+          ${{ runner.os }}-swift-
+          
+    - name: Build project
+      run: swift build
+      
+    - name: Run tests
+      run: swift test --enable-code-coverage
+      
+    - name: Run static site tests
+      run: swift test --filter StaticSiteTests
+      
+    - name: Generate code coverage report
+      run: |
+        xcrun llvm-cov export -format="lcov" \
+          .build/debug/personal-websitePackageTests.xctest/Contents/MacOS/personal-websitePackageTests \
+          -instr-profile .build/debug/codecov/default.profdata > coverage.lcov
+      continue-on-error: true
+      
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.lcov
+        flags: unittests
+        name: codecov-umbrella
+      continue-on-error: true
+
+  static-site:
+    name: Generate Static Site
+    runs-on: macos-latest
+    needs: test
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Swift
+      uses: swift-actions/setup-swift@v1
+      with:
+        swift-version: '6.0'
+        
+    - name: Cache Swift packages
+      uses: actions/cache@v3
+      with:
+        path: .build
+        key: ${{ runner.os }}-swift-${{ hashFiles('Package.resolved') }}
+        restore-keys: |
+          ${{ runner.os }}-swift-
+          
+    - name: Build project
+      run: swift build
+      
+    - name: Generate static site
+      run: |
+        chmod +x generate-static.sh
+        ./generate-static.sh
+        
+    - name: Validate generated site
+      run: |
+        # Check that all expected files were generated
+        expected_files=(
+          "docs/index.html"
+          "docs/es/index.html" 
+          "docs/en/index.html"
+          "docs/es/experience/index.html"
+          "docs/en/experience/index.html"
+          "docs/es/projects/index.html"
+          "docs/en/projects/index.html"
+          "docs/404.html"
+          "docs/robots.txt"
+          "docs/sitemap.xml"
+          "docs/CNAME"
+        )
+        
+        for file in "${expected_files[@]}"; do
+          if [ ! -f "$file" ]; then
+            echo "❌ Missing file: $file"
+            exit 1
+          else
+            echo "✅ Found file: $file"
+          fi
+        done
+        
+        # Validate HTML content
+        if ! grep -q "Alfredo" docs/index.html; then
+          echo "❌ index.html missing expected content"
+          exit 1
+        fi
+        
+        echo "🎉 All files generated and validated successfully!"
+        
+    - name: Deploy to GitHub Pages
+      if: success()
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./docs
+        publish_branch: gh-pages
+        user_name: 'github-actions[bot]'
+        user_email: 'github-actions[bot]@users.noreply.github.com'
+        commit_message: 'deploy: update static site from ${{ github.sha }}'
+
+  lighthouse:
+    name: Lighthouse Audit
+    runs-on: ubuntu-latest
+    needs: static-site
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Wait for deployment
+      run: sleep 30
+      
+    - name: Run Lighthouse CI
+      uses: treosh/lighthouse-ci-action@v10
+      with:
+        urls: |
+          https://alph0x.com
+          https://alph0x.com/es/
+          https://alph0x.com/en/
+          https://alph0x.com/es/experience/
+          https://alph0x.com/en/experience/
+          https://alph0x.com/es/projects/
+          https://alph0x.com/en/projects/
+        uploadArtifacts: true
+        temporaryPublicStorage: true
+      continue-on-error: true
+
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+      continue-on-error: true
+      
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif'
+      continue-on-error: true

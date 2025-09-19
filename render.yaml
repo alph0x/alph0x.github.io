@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: personal-website
+    env: docker
+    dockerfilePath: ./web.Dockerfile
+    plan: free
+    healthCheckPath: /
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: LOG_LEVEL
+        value: info

@@ -1,0 +1,31 @@
+repos:
+  - repo: local
+    hooks:
+      - id: swift-test
+        name: Swift Tests
+        entry: swift test
+        language: system
+        pass_filenames: false
+        stages: [commit]
+        
+      - id: static-site-tests
+        name: Static Site Generation Tests
+        entry: swift test --filter StaticSiteTests
+        language: system
+        pass_filenames: false
+        stages: [commit]
+        
+      - id: swift-build
+        name: Swift Build Check
+        entry: swift build
+        language: system
+        pass_filenames: false
+        stages: [commit]
+        
+      - id: generate-static-site
+        name: Generate Static Site
+        entry: ./generate-static.sh
+        language: system
+        pass_filenames: false
+        stages: [push]
+        always_run: true
