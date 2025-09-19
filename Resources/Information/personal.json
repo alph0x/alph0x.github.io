@@ -1,72 +1,112 @@
 {
-    "picture_url": "https://www.google.com.ar",
+    "picture_url": "https://via.placeholder.com/200x200/667eea/ffffff?text=AP",
     "user_string": "Alfredo E. Pérez Leal",
     "title_string": "Bsc. in Computer Science",
     "current_role_string": "iOS Software Engineer",
     "trayectory": [
         {
-            "logo": "https://www.google.com.ar",
+            "logo": "https://via.placeholder.com/64x64/ff6b6b/ffffff?text=R",
             "name": "Rappi",
             "dates": {
-                "start": "timestamp",
-                "end": "timestamp"
+                "start": "Enero 2022",
+                "end": "Presente"
             },
             "roles": [
                 {
-                "title":"iOS Developer",
-                "duties": [
-    
+                    "title": "Senior iOS Developer",
+                    "duties": [
+                        "Desarrollo de aplicaciones iOS nativas usando Swift y SwiftUI",
+                        "Implementación de arquitecturas MVVM y Clean Architecture",
+                        "Integración con APIs REST y GraphQL",
+                        "Optimización de rendimiento y experiencia de usuario",
+                        "Mentoring a desarrolladores junior"
                     ]
                 }
             ]
         },
-    {
-        "logo": "https://www.google.com.ar",
-        "name": "Rappi",
-        "dates": {
-            "start": "timestamp",
-            "end": "timestamp"
-        },
-        "roles": [
-            {
-            "title":"iOS Developer",
-            "duties": [
-
-                ]
+        {
+            "logo": "https://via.placeholder.com/64x64/4ecdc4/ffffff?text=T",
+            "name": "Tech Company",
+            "dates": {
+                "start": "Junio 2020",
+                "end": "Diciembre 2021"
             },
-            {
-                "title":"iOS Developer",
-                "duties": [
-    
+            "roles": [
+                {
+                    "title": "iOS Developer",
+                    "duties": [
+                        "Desarrollo de aplicaciones móviles multiplataforma",
+                        "Implementación de funcionalidades de comercio electrónico",
+                        "Integración con servicios de pago y autenticación",
+                        "Pruebas unitarias y de integración"
                     ]
                 }
-        ]
-    },
-    {
-        "logo": "https://www.google.com.ar",
-        "name": "Rappi",
-        "dates": {
-            "start": "timestamp",
-            "end": "timestamp"
+            ]
         },
-        "roles": [
-            {
-            "title":"iOS Developer",
-            "duties": [
-
-                ]
-            }
-        ]
-    }
+        {
+            "logo": "https://via.placeholder.com/64x64/45b7d1/ffffff?text=S",
+            "name": "Startup Inc",
+            "dates": {
+                "start": "Enero 2019",
+                "end": "Mayo 2020"
+            },
+            "roles": [
+                {
+                    "title": "Full Stack Developer",
+                    "duties": [
+                        "Desarrollo de aplicaciones web con React y Node.js",
+                        "Creación de APIs REST con Express.js",
+                        "Implementación de bases de datos MongoDB y PostgreSQL",
+                        "Desarrollo de aplicaciones móviles híbridas"
+                    ]
+                }
+            ]
+        }
     ],
     "skills": [
-
+        "Swift", "SwiftUI", "UIKit", "Objective-C", "iOS Development",
+        "Vapor", "Server-Side Swift", "REST APIs", "GraphQL",
+        "Git", "Xcode", "TestFlight", "App Store Connect",
+        "MVVM", "Clean Architecture", "TDD", "Unit Testing",
+        "JavaScript", "React", "Node.js", "TypeScript",
+        "Docker", "CI/CD", "AWS", "Firebase"
     ],
     "projects": [
-
+        {
+            "name": "E-Commerce iOS App",
+            "description": "Aplicación de comercio electrónico completa con carrito de compras, pagos integrados y gestión de usuarios.",
+            "technologies": ["Swift", "SwiftUI", "Core Data", "Stripe API"],
+            "url": "https://github.com/alph0x/ecommerce-ios"
+        },
+        {
+            "name": "Weather Forecast API",
+            "description": "API REST construida con Vapor Swift para pronósticos meteorológicos con integración a servicios externos.",
+            "technologies": ["Vapor", "Swift", "PostgreSQL", "Docker"],
+            "url": "https://github.com/alph0x/weather-api"
+        },
+        {
+            "name": "Task Management Web App",
+            "description": "Aplicación web para gestión de tareas con funcionalidades colaborativas y tiempo real.",
+            "technologies": ["React", "Node.js", "Socket.io", "MongoDB"],
+            "url": "https://github.com/alph0x/task-manager"
+        }
     ],
-    "resume_string": "Lorem ipsum",
+    "resume_string": "Desarrollador iOS apasionado con más de 5 años de experiencia creando aplicaciones móviles innovadoras. Especializado en Swift, SwiftUI y arquitecturas modernas. También experto en desarrollo backend con Vapor Swift y tecnologías web modernas.",
     "social": [
-
+        {
+            "platform": "github",
+            "url": "https://github.com/alph0x",
+            "username": "alph0x"
+        },
+        {
+            "platform": "linkedin",
+            "url": "https://linkedin.com/in/alfredo-perez-leal",
+            "username": "alfredo-perez-leal"
+        },
+        {
+            "platform": "twitter",
+            "url": "https://twitter.com/alph0x_dev",
+            "username": "alph0x_dev"
+        }
     ]
 }

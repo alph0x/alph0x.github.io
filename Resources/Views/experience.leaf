@@ -1,0 +1,75 @@
+#extend("index"):
+    #export("body"):
+        <!-- Header Section -->
+        <section class="bg-white dark:bg-gray-800 py-12 sm:py-16 lg:py-20 theme-transition">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 text-gray-800 dark:text-white animate-slide-up">#(title)</h1>
+                <p class="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 animate-slide-up">#(translations.experience_subtitle ?? "La trayectoria profesional de") #(name)</p>
+            </div>
+        </section>
+
+        <!-- Experience Timeline -->
+        <section class="py-12 sm:py-16 lg:py-20 bg-gray-50 dark:bg-gray-900 theme-transition">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                #if(count(experiences) > 0):
+                <div class="space-y-8 sm:space-y-12">
+                    #for(experience in experiences):
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 sm:p-8 card-hover animate-on-scroll theme-transition">
+                        <div class="flex flex-col sm:flex-row sm:items-center mb-6">
+                            <div class="flex items-center mb-4 sm:mb-0">
+                                <img src="#(experience.logo)" alt="#(experience.name)" 
+                                     class="w-12 h-12 sm:w-16 sm:h-16 rounded-lg mr-4 sm:mr-6 object-cover flex-shrink-0">
+                                <div class="min-w-0">
+                                    <h2 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white mb-1">#(experience.name)</h2>
+                                    <p class="text-blue-600 dark:text-blue-400 font-semibold text-sm sm:text-base">#(experience.dates.start) - #(experience.dates.end)</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-4 sm:space-y-6">
+                            #for(role in experience.roles):
+                            <div class="border-l-4 border-blue-500 dark:border-blue-400 pl-4 sm:pl-6">
+                                <h3 class="text-lg sm:text-xl font-semibold text-gray-800 dark:text-white mb-3">#(role.title)</h3>
+                                #if(count(role.duties) > 0):
+                                <ul class="space-y-2">
+                                    #for(duty in role.duties):
+                                    <li class="text-gray-600 dark:text-gray-300 flex items-start text-sm sm:text-base">
+                                        <i class="fas fa-chevron-right text-blue-500 dark:text-blue-400 mr-3 mt-1 text-xs flex-shrink-0"></i>
+                                        <span>#(duty)</span>
+                                    </li>
+                                    #endfor
+                                </ul>
+                                #endif
+                            </div>
+                            #endfor
+                        </div>
+                    </div>
+                    #endfor
+                </div>
+                #else:
+                <div class="text-center py-12 sm:py-16 lg:py-20">
+                    <i class="fas fa-briefcase text-4xl sm:text-5xl lg:text-6xl text-gray-300 dark:text-gray-600 mb-6"></i>
+                    <h2 class="text-xl sm:text-2xl font-bold text-gray-600 dark:text-gray-400 mb-4">#(translations.experience_empty_title ?? "Experiencia en construcción")</h2>
+                    <p class="text-gray-500 dark:text-gray-500 text-sm sm:text-base max-w-md mx-auto">#(translations.experience_empty_description ?? "Pronto agregaremos más detalles sobre la experiencia profesional.")</p>
+                </div>
+                #endif
+            </div>
+        </section>
+
+        <!-- Call to Action -->
+        <section class="py-12 sm:py-16 lg:py-20 bg-blue-600 dark:bg-blue-800 text-white theme-transition">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold mb-6 sm:mb-8 animate-slide-up">#(translations.experience_interested_title ?? "¿Te interesa mi experiencia?")</h2>
+                <p class="text-base sm:text-xl mb-8 sm:mb-12 opacity-90 max-w-2xl mx-auto leading-relaxed animate-slide-up">#(translations.experience_interested_description ?? "Contáctame para discutir oportunidades de colaboración.")</p>
+                <div class="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6 animate-slide-up">
+                    <a href="/#(lang != nil ? lang : "")" class="bg-white text-blue-600 px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold hover:bg-gray-100 hover:scale-105 transition duration-300 text-sm sm:text-base">
+                        #(translations.experience_back_home ?? "Volver al Inicio")
+                    </a>
+                    <a href="/#(lang != nil ? lang + "/" : "")projects" class="border-2 border-white text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold hover:bg-white hover:text-blue-600 hover:scale-105 transition duration-300 text-sm sm:text-base">
+                        #(translations.experience_view_projects ?? "Ver Proyectos")
+                    </a>
+                </div>
+            </div>
+        </section>
+    #endexport
+#endextend

@@ -1,0 +1,117 @@
+#extend("index"):
+    #export("body"):
+        <!-- Header Section -->
+        <section class="bg-white dark:bg-gray-800 py-12 sm:py-16 lg:py-20 theme-transition">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 text-gray-800 dark:text-white animate-slide-up">#(title)</h1>
+                <p class="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 animate-slide-up">#(translations.projects_subtitle ?? "Proyectos desarrollados por") #(name)</p>
+            </div>
+        </section>
+
+        <!-- Projects Grid -->
+        <section class="py-12 sm:py-16 lg:py-20 bg-gray-50 dark:bg-gray-900 theme-transition">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                #if(count(projects) > 0):
+                <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+                    #for(project in projects):
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden card-hover animate-on-scroll theme-transition">
+                        <div class="p-4 sm:p-6">
+                            <h3 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-white mb-3">#(project.name)</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4 text-sm sm:text-base leading-relaxed">#(project.description)</p>
+                            
+                            #if(count(project.technologies) > 0):
+                            <div class="mb-4">
+                                <h4 class="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">#(translations.projects_technologies ?? "Tecnologías:"):</h4>
+                                <div class="flex flex-wrap gap-1.5 sm:gap-2">
+                                    #for(tech in project.technologies):
+                                    <span class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium px-2 sm:px-2.5 py-0.5 rounded-full">
+                                        #(tech)
+                                    </span>
+                                    #endfor
+                                </div>
+                            </div>
+                            #endif
+                            
+                            #if(project.url):
+                            <div class="flex justify-between items-center">
+                                <a href="#(project.url)" target="_blank" rel="noopener noreferrer"
+                                   class="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium text-sm sm:text-base hover:scale-105 transition duration-300">
+                                    #(translations.projects_view_project ?? "Ver Proyecto")
+                                    <i class="fas fa-external-link-alt ml-2 text-xs"></i>
+                                </a>
+                            </div>
+                            #endif
+                        </div>
+                    </div>
+                    #endfor
+                </div>
+                #else:
+                <!-- Empty State -->
+                <div class="text-center py-12 sm:py-16 lg:py-20">
+                    <i class="fas fa-code text-4xl sm:text-5xl lg:text-6xl text-gray-300 dark:text-gray-600 mb-6"></i>
+                    <h2 class="text-xl sm:text-2xl font-bold text-gray-600 dark:text-gray-400 mb-4">#(translations.projects_empty_title ?? "Proyectos en desarrollo")</h2>
+                    <p class="text-gray-500 dark:text-gray-500 mb-8 sm:mb-12 text-sm sm:text-base max-w-md mx-auto">#(translations.projects_empty_description ?? "Estoy trabajando en varios proyectos emocionantes. ¡Vuelve pronto para ver las actualizaciones!")</p>
+                    
+                    <!-- Placeholder projects -->
+                    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mt-8 sm:mt-12">
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6 card-hover animate-on-scroll theme-transition">
+                            <div class="w-12 h-12 sm:w-16 sm:h-16 bg-blue-100 dark:bg-blue-900 rounded-lg mx-auto mb-4 flex items-center justify-center">
+                                <i class="fas fa-mobile-alt text-xl sm:text-2xl text-blue-600 dark:text-blue-400"></i>
+                            </div>
+                            <h3 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-white mb-3">Aplicación iOS</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4 text-sm sm:text-base">Desarrollo de aplicaciones nativas para iOS usando Swift y SwiftUI.</p>
+                            <div class="flex flex-wrap gap-1.5 sm:gap-2">
+                                <span class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium px-2 sm:px-2.5 py-0.5 rounded-full">Swift</span>
+                                <span class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium px-2 sm:px-2.5 py-0.5 rounded-full">SwiftUI</span>
+                                <span class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium px-2 sm:px-2.5 py-0.5 rounded-full">iOS</span>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6 card-hover animate-on-scroll theme-transition">
+                            <div class="w-12 h-12 sm:w-16 sm:h-16 bg-green-100 dark:bg-green-900 rounded-lg mx-auto mb-4 flex items-center justify-center">
+                                <i class="fas fa-server text-xl sm:text-2xl text-green-600 dark:text-green-400"></i>
+                            </div>
+                            <h3 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-white mb-3">API Backend</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4 text-sm sm:text-base">Desarrollo de APIs REST usando Vapor Swift para aplicaciones modernas.</p>
+                            <div class="flex flex-wrap gap-1.5 sm:gap-2">
+                                <span class="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium px-2 sm:px-2.5 py-0.5 rounded-full">Vapor</span>
+                                <span class="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium px-2 sm:px-2.5 py-0.5 rounded-full">Swift</span>
+                                <span class="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium px-2 sm:px-2.5 py-0.5 rounded-full">REST API</span>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6 card-hover animate-on-scroll theme-transition">
+                            <div class="w-12 h-12 sm:w-16 sm:h-16 bg-purple-100 dark:bg-purple-900 rounded-lg mx-auto mb-4 flex items-center justify-center">
+                                <i class="fas fa-globe text-xl sm:text-2xl text-purple-600 dark:text-purple-400"></i>
+                            </div>
+                            <h3 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-white mb-3">Página Web Personal</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4 text-sm sm:text-base">Esta misma página web, construida completamente con Vapor Swift.</p>
+                            <div class="flex flex-wrap gap-1.5 sm:gap-2">
+                                <span class="bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 text-xs font-medium px-2 sm:px-2.5 py-0.5 rounded-full">Vapor</span>
+                                <span class="bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 text-xs font-medium px-2 sm:px-2.5 py-0.5 rounded-full">Leaf</span>
+                                <span class="bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 text-xs font-medium px-2 sm:px-2.5 py-0.5 rounded-full">TailwindCSS</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                #endif
+            </div>
+        </section>
+
+        <!-- Call to Action -->
+        <section class="py-12 sm:py-16 lg:py-20 bg-blue-600 dark:bg-blue-800 text-white theme-transition">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold mb-6 sm:mb-8 animate-slide-up">#(translations.projects_idea_title ?? "¿Tienes una idea de proyecto?")</h2>
+                <p class="text-base sm:text-xl mb-8 sm:mb-12 opacity-90 max-w-2xl mx-auto leading-relaxed animate-slide-up">#(translations.projects_idea_description ?? "Me encanta trabajar en proyectos desafiantes e innovadores.")</p>
+                <div class="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6 animate-slide-up">
+                    <a href="/#(lang != nil ? lang : "")" class="bg-white text-blue-600 px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold hover:bg-gray-100 hover:scale-105 transition duration-300 text-sm sm:text-base">
+                        #(translations.projects_back_home ?? "Volver al Inicio")
+                    </a>
+                    <a href="/#(lang != nil ? lang + "/" : "")experience" class="border-2 border-white text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold hover:bg-white hover:text-blue-600 hover:scale-105 transition duration-300 text-sm sm:text-base">
+                        #(translations.projects_view_experience ?? "Ver Experiencia")
+                    </a>
+                </div>
+            </div>
+        </section>
+    #endexport
+#endextend
