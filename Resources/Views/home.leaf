@@ -1,0 +1,108 @@
+#extend("index"):
+    #export("body"):
+        <!-- Hero Section -->
+        <section class="gradient-bg dark:gradient-bg-dark text-white py-16 sm:py-20 lg:py-24 animate-fade-in">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <div class="mb-8 animate-slide-up">
+                    <img src="#(personalInfo.pictureUrl)" alt="#(personalInfo.userString)" 
+                         class="w-24 h-24 sm:w-32 sm:h-32 lg:w-40 lg:h-40 rounded-full mx-auto mb-6 border-4 border-white shadow-2xl hover:scale-105 transition duration-300">
+                </div>
+                <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 animate-slide-up">#(personalInfo.userString)</h1>
+                <h2 class="text-lg sm:text-xl md:text-2xl mb-4 sm:mb-6 opacity-90 animate-slide-up">#(personalInfo.titleString)</h2>
+                <h3 class="text-base sm:text-lg md:text-xl mb-6 sm:mb-8 opacity-80 animate-slide-up">#(personalInfo.currentRoleString)</h3>
+                <p class="text-base sm:text-lg max-w-2xl lg:max-w-3xl mx-auto mb-8 sm:mb-12 opacity-90 leading-relaxed animate-slide-up">#(personalInfo.resumeString)</p>
+                <div class="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6 animate-slide-up">
+                    #if(lang):
+                    <a href="/#(lang)/experience" class="bg-white text-blue-600 px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold hover:bg-gray-100 hover:scale-105 transition duration-300 text-sm sm:text-base">
+                    #else:
+                    <a href="/experience" class="bg-white text-blue-600 px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold hover:bg-gray-100 hover:scale-105 transition duration-300 text-sm sm:text-base">
+                    #endif
+                        Ver Experiencia
+                    </a>
+                    #if(lang):
+                    <a href="/#(lang)/projects" class="border-2 border-white text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold hover:bg-white hover:text-blue-600 hover:scale-105 transition duration-300 text-sm sm:text-base">
+                    #else:
+                    <a href="/projects" class="border-2 border-white text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold hover:bg-white hover:text-blue-600 hover:scale-105 transition duration-300 text-sm sm:text-base">
+                    #endif
+                        Mis Proyectos
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Skills Section -->
+        #if(count(personalInfo.skills) > 0):
+        <section class="py-12 sm:py-16 lg:py-20 bg-white dark:bg-gray-800 theme-transition">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-center mb-8 sm:mb-12 text-gray-800 dark:text-white animate-slide-up">Habilidades</h2>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
+                    #for(skill in personalInfo.skills):
+                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">
+                        #(skill)
+                    </div>
+                    #endfor
+                </div>
+            </div>
+        </section>
+        #endif
+
+        <!-- Recent Experience Preview -->
+        #if(count(personalInfo.trayectory) > 0):
+        <section class="py-12 sm:py-16 lg:py-20 bg-gray-50 dark:bg-gray-900 theme-transition">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-center mb-8 sm:mb-12 text-gray-800 dark:text-white animate-slide-up">Experiencia Reciente</h2>
+                <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+                    #for(experience in personalInfo.trayectory):
+                    #if(isFirst):
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6 card-hover animate-on-scroll theme-transition">
+                        <div class="flex items-center mb-4">
+                            <img src="#(experience.logo)" alt="#(experience.name)" class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg mr-3 sm:mr-4 object-cover">
+                            <div class="flex-1 min-w-0">
+                                <h3 class="font-bold text-base sm:text-lg text-gray-800 dark:text-white truncate">#(experience.name)</h3>
+                                <p class="text-gray-600 dark:text-gray-400 text-xs sm:text-sm">#(experience.dates.start) - #(experience.dates.end)</p>
+                            </div>
+                        </div>
+                        #for(role in experience.roles):
+                        #if(isFirst):
+                        <h4 class="font-semibold text-blue-600 dark:text-blue-400 mb-2 text-sm sm:text-base">#(role.title)</h4>
+                        <div class="text-gray-600 dark:text-gray-300 text-xs sm:text-sm">
+                            #if(count(role.duties) > 0):
+                                <p>#(role.duties[0])</p>
+                                #if(count(role.duties) > 1):
+                                    <p class="mt-1">+ #(count(role.duties) - 1) más...</p>
+                                #endif
+                            #endif
+                        </div>
+                        #endif
+                        #endfor
+                    </div>
+                    #endif
+                    #endfor
+                </div>
+                <div class="text-center mt-8 sm:mt-12">
+                    <a href="/es/experience" class="inline-block bg-blue-600 dark:bg-blue-700 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 hover:scale-105 transition duration-300 text-sm sm:text-base">
+                        Ver Toda la Experiencia
+                    </a>
+                </div>
+            </div>
+        </section>
+        #endif
+
+        <!-- Contact Section -->
+        <section class="py-12 sm:py-16 lg:py-20 bg-blue-600 dark:bg-blue-800 text-white theme-transition">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold mb-6 sm:mb-8 animate-slide-up">¿Interesado en trabajar juntos?</h2>
+                <p class="text-base sm:text-xl mb-8 sm:mb-12 opacity-90 max-w-2xl mx-auto leading-relaxed animate-slide-up">Siempre estoy abierto a nuevas oportunidades y colaboraciones.</p>
+                #if(count(personalInfo.social) > 0):
+                <div class="flex justify-center space-x-4 sm:space-x-6 lg:space-x-8 animate-slide-up">
+                    #for(social in personalInfo.social):
+                    <a href="#(social.url)" class="text-xl sm:text-2xl lg:text-3xl hover:text-blue-300 dark:hover:text-blue-200 hover:scale-125 transition duration-300 p-2 rounded-full hover:bg-white hover:bg-opacity-10" target="_blank" rel="noopener noreferrer" title="#(social.platform)">
+                        <i class="fab fa-#(social.platform)"></i>
+                    </a>
+                    #endfor
+                </div>
+                #endif
+            </div>
+        </section>
+    #endexport
+#endextend
