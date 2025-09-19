@@ -34,9 +34,10 @@ This is my personal website built entirely with **Vapor Swift**, a modern and po
 
 ### Prerequisites
 
-- Swift 5.8 or higher
+- Swift 6.0 or higher
 - Docker (optional)
 - Xcode (for macOS development)
+- Git hooks (automatically installed)
 
 ### Local Development
 
@@ -51,12 +52,17 @@ This is my personal website built entirely with **Vapor Swift**, a modern and po
    swift package resolve
    ```
 
-3. **Run the application:**
+3. **Install git hooks:**
+   ```bash
+   ./install-hooks.sh
+   ```
+
+4. **Run the application:**
    ```bash
    swift run
    ```
 
-4. **Visit the application:**
+5. **Visit the application:**
    Open your browser at `http://localhost:8080`
 
 ### Docker Development
@@ -179,8 +185,41 @@ The test suite includes:
 - **Localization testing**: Language detection and translations
 - **API testing**: JSON endpoints return valid data
 - **Redirect testing**: Legacy routes redirect properly
+- **Static site validation**: HTML structure, content, and SEO
 - **Theme testing**: Dark/light mode support
 - **Responsive testing**: Mobile-friendly markup
+- **Performance testing**: Load times and file sizes
+- **Accessibility testing**: Semantic HTML and ARIA attributes
+
+## 🔄 Automated Workflows
+
+### Git Hooks
+
+- **Pre-commit**: Runs Swift tests and validates code
+- **Pre-push**: Runs full test suite + generates static site
+- **Commit-msg**: Validates conventional commit format
+
+### GitHub Actions
+
+- **CI Pipeline**: Automated testing on every push/PR
+- **Static Site Generation**: Auto-updates GitHub Pages
+- **Lighthouse Audits**: Performance and accessibility scoring
+- **Security Scanning**: Vulnerability detection with Trivy
+
+### Static Site Generation
+
+Generate static HTML files for GitHub Pages:
+
+```bash
+./generate-static.sh
+```
+
+This script:
+- Builds and starts the Vapor server
+- Generates HTML files for all routes
+- Creates sitemap.xml and robots.txt
+- Validates generated content
+- Prepares files for GitHub Pages deployment
 
 ## 📄 License
 
