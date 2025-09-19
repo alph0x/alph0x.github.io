@@ -1,0 +1,123 @@
+#!/bin/bash
+
+# Pre-push hook that runs tests and generates static site
+echo "🚀 Pre-push hook: Running validation and static site generation..."
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# Function to print colored output
+print_status() {
+    local color=$1
+    local message=$2
+    echo -e "${color}${message}${NC}"
+}
+
+# Function to run command with status output
+run_with_status() {
+    local description=$1
+    local command=$2
+    
+    print_status $YELLOW "🔄 $description..."
+    
+    if eval "$command"; then
+        print_status $GREEN "✅ $description completed successfully"
+        return 0
+    else
+        print_status $RED "❌ $description failed"
+        return 1
+    fi
+}
+
+# Step 1: Run Swift build
+if ! run_with_status "Building project" "swift build"; then
+    print_status $RED "💥 Build failed. Push aborted."
+    exit 1
+fi
+
+# Step 2: Run all tests
+if ! run_with_status "Running all tests" "swift test"; then
+    print_status $RED "💥 Tests failed. Push aborted."
+    exit 1
+fi
+
+# Step 3: Run static site specific tests
+if ! run_with_status "Running static site tests" "swift test --filter StaticSiteTests"; then
+    print_status $RED "💥 Static site tests failed. Push aborted."
+    exit 1
+fi
+
+# Step 4: Generate static site
+if ! run_with_status "Generating static site" "./generate-static.sh"; then
+    print_status $RED "💥 Static site generation failed. Push aborted."
+    exit 1
+fi
+
+# Step 5: Check if docs directory was updated
+if [ -d "docs" ] && [ "$(ls -A docs)" ]; then
+    print_status $GREEN "📂 Static site generated successfully in docs/ directory"
+    
+    # Check if docs directory has changes that need to be committed
+    if ! git diff --quiet docs/; then
+        print_status $YELLOW "⚠️  Static site has changes that are not committed"
+        print_status $YELLOW "📋 Files with changes:"
+        git status --porcelain docs/ | head -10
+        
+        echo ""
+        print_status $YELLOW "🤔 Do you want to:"
+        print_status $YELLOW "   1. Auto-commit the static site changes and continue push"
+        print_status $YELLOW "   2. Cancel push to manually review changes"
+        print_status $YELLOW "   3. Continue push without committing static site changes"
+        
+        read -p "Enter choice (1/2/3): " choice
+        
+        case $choice in
+            1)
+                print_status $YELLOW "🔄 Auto-committing static site changes..."
+                git add docs/
+                git commit -m "chore: update static site
+
+Generated from latest changes
+- Updated HTML files
+- Updated sitemap and robots.txt
+- All tests passing
+
+[skip ci]"
+                print_status $GREEN "✅ Static site changes committed"
+                ;;
+            2)
+                print_status $YELLOW "🛑 Push cancelled for manual review"
+                print_status $YELLOW "📋 Review changes with: git diff docs/"
+                print_status $YELLOW "📋 Then commit and push when ready"
+                exit 1
+                ;;
+            3)
+                print_status $YELLOW "⚠️  Continuing push without committing static site changes"
+                ;;
+            *)
+                print_status $RED "❌ Invalid choice. Push cancelled."
+                exit 1
+                ;;
+        esac
+    else
+        print_status $GREEN "✅ Static site is up to date"
+    fi
+else
+    print_status $RED "💥 Static site directory is empty or missing"
+    exit 1
+fi
+
+# Step 6: Final validation
+print_status $GREEN "🎉 All pre-push checks passed!"
+print_status $GREEN "📋 Summary:"
+print_status $GREEN "   ✅ Build successful"
+print_status $GREEN "   ✅ All tests passing"
+print_status $GREEN "   ✅ Static site generated"
+print_status $GREEN "   ✅ Ready for push"
+
+echo ""
+print_status $GREEN "🚀 Push proceeding..."
+exit 0

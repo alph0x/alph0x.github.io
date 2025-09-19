@@ -188,9 +188,3 @@ extension XCTHTTPResponse {
         return body.string
     }
 }
-
-extension XCTestCase {
-    func XCTAssertContains(_ string: String, _ substring: String, file: StaticString = #filePath, line: UInt = #line) {
-        XCTAssertTrue(string.contains(substring), "String '\(string)' does not contain '\(substring)'", file: file, line: line)
-    }
-}

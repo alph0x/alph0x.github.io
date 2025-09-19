@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Alfredo E. Pérez Leal - iOS Software Engineer</title>
+    <meta name="description" content="Desarrollador iOS apasionado con más de 5 años de experiencia creando aplicaciones móviles innovadoras.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.6s ease-out',
+                        'bounce-gentle': 'bounceGentle 2s infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(30px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' }
+                        },
+                        bounceGentle: {
+                            '0%, 20%, 50%, 80%, 100%': { transform: 'translateY(0)' },
+                            '40%': { transform: 'translateY(-10px)' },
+                            '60%': { transform: 'translateY(-5px)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .gradient-bg-dark {
+            background: linear-gradient(135deg, #1e3a8a 0%, #581c87 100%);
+        }
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-hover:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        .dark .card-hover:hover {
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        .theme-transition {
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+        .mobile-menu {
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+        }
+        .mobile-menu.open {
+            transform: translateX(0);
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            @apply bg-gray-100 dark:bg-gray-800;
+        }
+        ::-webkit-scrollbar-thumb {
+            @apply bg-gray-400 dark:bg-gray-600 rounded-full;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            @apply bg-gray-500 dark:bg-gray-500;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 font-sans theme-transition min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-lg fixed w-full top-0 z-50 theme-transition">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <!-- Logo -->
+                <div class="flex items-center space-x-4">
+                    <a href="/" class="text-xl font-bold text-gray-800 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition duration-300">
+                        Alfredo Pérez
+                    </a>
+                </div>
+                
+                <!-- Desktop Navigation -->
+                <div class="hidden lg:flex items-center space-x-8">
+                    <a href="/" class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition duration-300 font-medium">
+                        Inicio
+                    </a>
+                    <a href="/es/experience/" class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition duration-300 font-medium">
+                        Experiencia
+                    </a>
+                    <a href="/es/projects/" class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition duration-300 font-medium">
+                        Proyectos
+                    </a>
+                    
+                    <!-- Theme Toggle -->
+                    <button id="theme-toggle" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition duration-300" title="Cambiar tema">
+                        <i id="theme-icon" class="fas fa-moon dark:hidden"></i>
+                        <i id="theme-icon-dark" class="fas fa-sun hidden dark:inline"></i>
+                    </button>
+                    
+                    <!-- Language Toggle -->
+                    <a href="/en/" class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition duration-300 text-sm font-medium">
+                        English
+                    </a>
+                </div>
+                
+                <!-- Mobile menu button -->
+                <div class="lg:hidden flex items-center space-x-2">
+                    <!-- Theme Toggle Mobile -->
+                    <button id="theme-toggle-mobile" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition duration-300">
+                        <i class="fas fa-moon dark:hidden text-sm"></i>
+                        <i class="fas fa-sun hidden dark:inline text-sm"></i>
+                    </button>
+                    
+                    <button id="mobile-menu-toggle" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition duration-300">
+                        <i id="menu-icon" class="fas fa-bars"></i>
+                        <i id="close-icon" class="fas fa-times hidden"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile Navigation Menu -->
+        <div id="mobile-menu" class="mobile-menu fixed top-0 right-0 h-full w-80 bg-white dark:bg-gray-900 shadow-2xl lg:hidden z-40">
+            <div class="p-6 pt-20">
+                <div class="space-y-6">
+                    <a href="/" class="block text-lg font-medium text-gray-800 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition duration-300">
+                        Inicio
+                    </a>
+                    <a href="/es/experience/" class="block text-lg font-medium text-gray-800 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition duration-300">
+                        Experiencia
+                    </a>
+                    <a href="/es/projects/" class="block text-lg font-medium text-gray-800 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition duration-300">
+                        Proyectos
+                    </a>
+                    
+                    <hr class="border-gray-200 dark:border-gray-700">
+                    
+                    <a href="/en/" class="block w-full text-center px-4 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition duration-300 font-medium">
+                        English
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile menu overlay -->
+        <div id="mobile-menu-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden hidden"></div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="pt-20 min-h-screen">
+        <!-- Hero Section -->
+        <section class="gradient-bg dark:gradient-bg-dark text-white py-16 sm:py-20 lg:py-24 animate-fade-in">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <div class="mb-8 animate-slide-up">
+                    <img src="https://via.placeholder.com/200x200/667eea/ffffff?text=AP" alt="Alfredo E. Pérez Leal" 
+                         class="w-24 h-24 sm:w-32 sm:h-32 lg:w-40 lg:h-40 rounded-full mx-auto mb-6 border-4 border-white shadow-2xl hover:scale-105 transition duration-300">
+                </div>
+                <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 animate-slide-up">Alfredo E. Pérez Leal</h1>
+                <h2 class="text-lg sm:text-xl md:text-2xl mb-4 sm:mb-6 opacity-90 animate-slide-up">Bsc. in Computer Science</h2>
+                <h3 class="text-base sm:text-lg md:text-xl mb-6 sm:mb-8 opacity-80 animate-slide-up">iOS Software Engineer</h3>
+                <p class="text-base sm:text-lg max-w-2xl lg:max-w-3xl mx-auto mb-8 sm:mb-12 opacity-90 leading-relaxed animate-slide-up">Desarrollador iOS apasionado con más de 5 años de experiencia creando aplicaciones móviles innovadoras. Especializado en Swift, SwiftUI y arquitecturas modernas. También experto en desarrollo backend con Vapor Swift y tecnologías web modernas.</p>
+                <div class="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6 animate-slide-up">
+                    <a href="/es/experience/" class="bg-white text-blue-600 px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold hover:bg-gray-100 hover:scale-105 transition duration-300 text-sm sm:text-base">
+                        Ver Experiencia
+                    </a>
+                    <a href="/es/projects/" class="border-2 border-white text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold hover:bg-white hover:text-blue-600 hover:scale-105 transition duration-300 text-sm sm:text-base">
+                        Mis Proyectos
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Skills Section -->
+        <section class="py-12 sm:py-16 lg:py-20 bg-white dark:bg-gray-800 theme-transition">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-center mb-8 sm:mb-12 text-gray-800 dark:text-white animate-slide-up">Habilidades</h2>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
+                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">Swift</div>
+                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">SwiftUI</div>
+                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">UIKit</div>
+                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">iOS Development</div>
+                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">Vapor</div>
+                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">Server-Side Swift</div>
+                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">REST APIs</div>
+                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">GraphQL</div>
+                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">Git</div>
+                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">Xcode</div>
+                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">Docker</div>
+                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">CI/CD</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section class="py-12 sm:py-16 lg:py-20 bg-blue-600 dark:bg-blue-800 text-white theme-transition">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold mb-6 sm:mb-8 animate-slide-up">¿Interesado en trabajar juntos?</h2>
+                <p class="text-base sm:text-xl mb-8 sm:mb-12 opacity-90 max-w-2xl mx-auto leading-relaxed animate-slide-up">Siempre estoy abierto a nuevas oportunidades y colaboraciones.</p>
+                <div class="flex justify-center space-x-4 sm:space-x-6 lg:space-x-8 animate-slide-up">
+                    <a href="https://github.com/alph0x" class="text-xl sm:text-2xl lg:text-3xl hover:text-blue-300 dark:hover:text-blue-200 hover:scale-125 transition duration-300 p-2 rounded-full hover:bg-white hover:bg-opacity-10" target="_blank" rel="noopener noreferrer" title="github">
+                        <i class="fab fa-github"></i>
+                    </a>
+                    <a href="https://linkedin.com/in/alfredo-perez-leal" class="text-xl sm:text-2xl lg:text-3xl hover:text-blue-300 dark:hover:text-blue-200 hover:scale-125 transition duration-300 p-2 rounded-full hover:bg-white hover:bg-opacity-10" target="_blank" rel="noopener noreferrer" title="linkedin">
+                        <i class="fab fa-linkedin"></i>
+                    </a>
+                    <a href="https://twitter.com/alph0x_dev" class="text-xl sm:text-2xl lg:text-3xl hover:text-blue-300 dark:hover:text-blue-200 hover:scale-125 transition duration-300 p-2 rounded-full hover:bg-white hover:bg-opacity-10" target="_blank" rel="noopener noreferrer" title="twitter">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Back to top button -->
+    <button id="back-to-top" class="fixed bottom-8 right-8 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-all duration-300 opacity-0 invisible hover:scale-110 z-40">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 dark:bg-gray-900 text-white py-12 mt-20 theme-transition">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <p class="text-gray-300">&copy; 2025 Alfredo E. Pérez Leal. Hecho con Vapor Swift.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Theme Management
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeToggleMobile = document.getElementById('theme-toggle-mobile');
+        const html = document.documentElement;
+        
+        // Check for saved theme or default to light mode
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.classList.toggle('dark', savedTheme === 'dark');
+        
+        function toggleTheme() {
+            html.classList.toggle('dark');
+            const isDark = html.classList.contains('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        }
+        
+        themeToggle?.addEventListener('click', toggleTheme);
+        themeToggleMobile?.addEventListener('click', toggleTheme);
+        
+        // Mobile Menu Management
+        const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
+        const menuIcon = document.getElementById('menu-icon');
+        const closeIcon = document.getElementById('close-icon');
+        
+        function toggleMobileMenu() {
+            const isOpen = mobileMenu.classList.contains('open');
+            
+            mobileMenu.classList.toggle('open');
+            mobileMenuOverlay.classList.toggle('hidden');
+            menuIcon.classList.toggle('hidden');
+            closeIcon.classList.toggle('hidden');
+            
+            // Prevent body scroll when menu is open
+            document.body.style.overflow = isOpen ? 'auto' : 'hidden';
+        }
+        
+        mobileMenuToggle?.addEventListener('click', toggleMobileMenu);
+        mobileMenuOverlay?.addEventListener('click', toggleMobileMenu);
+        
+        // Close mobile menu on window resize
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 1024) {
+                mobileMenu.classList.remove('open');
+                mobileMenuOverlay.classList.add('hidden');
+                menuIcon.classList.remove('hidden');
+                closeIcon.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+        });
+        
+        // Back to top button
+        const backToTopButton = document.getElementById('back-to-top');
+        
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTopButton.classList.remove('opacity-0', 'invisible');
+                backToTopButton.classList.add('opacity-100', 'visible');
+            } else {
+                backToTopButton.classList.add('opacity-0', 'invisible');
+                backToTopButton.classList.remove('opacity-100', 'visible');
+            }
+        });
+        
+        backToTopButton?.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+        
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+        
+        // Add animation classes on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-slide-up');
+                }
+            });
+        }, observerOptions);
+        
+        // Observe elements for animation
+        document.querySelectorAll('.card-hover, .animate-on-scroll').forEach(el => {
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
