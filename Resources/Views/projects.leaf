@@ -4,7 +4,7 @@
         <section class="bg-white dark:bg-gray-800 py-12 sm:py-16 lg:py-20 theme-transition">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                 <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 text-gray-800 dark:text-white animate-slide-up">#(title)</h1>
-                <p class="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 animate-slide-up">#(translations.projects_subtitle ?? "Proyectos desarrollados por") #(name)</p>
+                <p class="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 animate-slide-up">Proyectos desarrollados por #(name)</p>
             </div>
         </section>
 
@@ -21,7 +21,7 @@
                             
                             #if(count(project.technologies) > 0):
                             <div class="mb-4">
-                                <h4 class="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">#(translations.projects_technologies ?? "Tecnologías:"):</h4>
+                                <h4 class="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Tecnologías:</h4>
                                 <div class="flex flex-wrap gap-1.5 sm:gap-2">
                                     #for(tech in project.technologies):
                                     <span class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium px-2 sm:px-2.5 py-0.5 rounded-full">
@@ -36,7 +36,7 @@
                             <div class="flex justify-between items-center">
                                 <a href="#(project.url)" target="_blank" rel="noopener noreferrer"
                                    class="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium text-sm sm:text-base hover:scale-105 transition duration-300">
-                                    #(translations.projects_view_project ?? "Ver Proyecto")
+                                    Ver Proyecto
                                     <i class="fas fa-external-link-alt ml-2 text-xs"></i>
                                 </a>
                             </div>
@@ -49,8 +49,8 @@
                 <!-- Empty State -->
                 <div class="text-center py-12 sm:py-16 lg:py-20">
                     <i class="fas fa-code text-4xl sm:text-5xl lg:text-6xl text-gray-300 dark:text-gray-600 mb-6"></i>
-                    <h2 class="text-xl sm:text-2xl font-bold text-gray-600 dark:text-gray-400 mb-4">#(translations.projects_empty_title ?? "Proyectos en desarrollo")</h2>
-                    <p class="text-gray-500 dark:text-gray-500 mb-8 sm:mb-12 text-sm sm:text-base max-w-md mx-auto">#(translations.projects_empty_description ?? "Estoy trabajando en varios proyectos emocionantes. ¡Vuelve pronto para ver las actualizaciones!")</p>
+                    <h2 class="text-xl sm:text-2xl font-bold text-gray-600 dark:text-gray-400 mb-4">Proyectos en desarrollo</h2>
+                    <p class="text-gray-500 dark:text-gray-500 mb-8 sm:mb-12 text-sm sm:text-base max-w-md mx-auto">Estoy trabajando en varios proyectos emocionantes. ¡Vuelve pronto para ver las actualizaciones!</p>
                     
                     <!-- Placeholder projects -->
                     <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mt-8 sm:mt-12">
@@ -101,15 +101,24 @@
         <!-- Call to Action -->
         <section class="py-12 sm:py-16 lg:py-20 bg-blue-600 dark:bg-blue-800 text-white theme-transition">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold mb-6 sm:mb-8 animate-slide-up">#(translations.projects_idea_title ?? "¿Tienes una idea de proyecto?")</h2>
-                <p class="text-base sm:text-xl mb-8 sm:mb-12 opacity-90 max-w-2xl mx-auto leading-relaxed animate-slide-up">#(translations.projects_idea_description ?? "Me encanta trabajar en proyectos desafiantes e innovadores.")</p>
+                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold mb-6 sm:mb-8 animate-slide-up">¿Tienes una idea de proyecto?</h2>
+                <p class="text-base sm:text-xl mb-8 sm:mb-12 opacity-90 max-w-2xl mx-auto leading-relaxed animate-slide-up">Me encanta trabajar en proyectos desafiantes e innovadores.</p>
                 <div class="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6 animate-slide-up">
-                    <a href="/#(lang != nil ? lang : "")" class="bg-white text-blue-600 px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold hover:bg-gray-100 hover:scale-105 transition duration-300 text-sm sm:text-base">
-                        #(translations.projects_back_home ?? "Volver al Inicio")
+                    #if(lang):
+                    <a href="/#(lang)" class="bg-white text-blue-600 px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold hover:bg-gray-100 hover:scale-105 transition duration-300 text-sm sm:text-base">
+                        Volver al Inicio
                     </a>
-                    <a href="/#(lang != nil ? lang + "/" : "")experience" class="border-2 border-white text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold hover:bg-white hover:text-blue-600 hover:scale-105 transition duration-300 text-sm sm:text-base">
-                        #(translations.projects_view_experience ?? "Ver Experiencia")
+                    <a href="/#(lang)/experience" class="border-2 border-white text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold hover:bg-white hover:text-blue-600 hover:scale-105 transition duration-300 text-sm sm:text-base">
+                        Ver Experiencia
                     </a>
+                    #else:
+                    <a href="/" class="bg-white text-blue-600 px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold hover:bg-gray-100 hover:scale-105 transition duration-300 text-sm sm:text-base">
+                        Volver al Inicio
+                    </a>
+                    <a href="/experience" class="border-2 border-white text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold hover:bg-white hover:text-blue-600 hover:scale-105 transition duration-300 text-sm sm:text-base">
+                        Ver Experiencia
+                    </a>
+                    #endif
                 </div>
             </div>
         </section>

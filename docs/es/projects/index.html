@@ -3,61 +3,453 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Mis Proyectos - Alfredo E. Pérez Leal</title>
-    <meta name="description" content="Proyectos desarrollados por Alfredo E. Pérez Leal">
+    <title>Mis Proyectos</title>
+    <meta name="description" content="">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.6s ease-out',
+                        'bounce-gentle': 'bounceGentle 2s infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(30px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' }
+                        },
+                        bounceGentle: {
+                            '0%, 20%, 50%, 80%, 100%': { transform: 'translateY(0)' },
+                            '40%': { transform: 'translateY(-10px)' },
+                            '60%': { transform: 'translateY(-5px)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .gradient-bg-dark {
+            background: linear-gradient(135deg, #1e3a8a 0%, #581c87 100%);
+        }
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-hover:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        .dark .card-hover:hover {
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        .theme-transition {
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+        .mobile-menu {
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+        }
+        .mobile-menu.open {
+            transform: translateX(0);
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            @apply bg-gray-100 dark:bg-gray-800;
+        }
+        ::-webkit-scrollbar-thumb {
+            @apply bg-gray-400 dark:bg-gray-600 rounded-full;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            @apply bg-gray-500 dark:bg-gray-500;
+        }
+    </style>
 </head>
-<body class="bg-gray-50 dark:bg-gray-900 min-h-screen">
-    <nav class="bg-white shadow-lg p-4">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <a href="/es/" class="text-xl font-bold text-gray-800">Alfredo Pérez</a>
-            <div class="space-x-4">
-                <a href="/es/" class="text-gray-600 hover:text-blue-600">Inicio</a>
-                <a href="/es/experience/" class="text-gray-600 hover:text-blue-600">Experiencia</a>
-                <a href="/es/projects/" class="text-blue-600 font-semibold">Proyectos</a>
-                <a href="/en/projects/" class="px-3 py-1 bg-blue-600 text-white rounded">English</a>
+<body class="bg-gray-50 dark:bg-gray-900 font-sans theme-transition min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-lg fixed w-full top-0 z-50 theme-transition">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <!-- Logo -->
+                <div class="flex items-center space-x-4">
+                    
+                    <a href="/es" class="text-xl font-bold text-gray-800 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition duration-300">
+                        Alfredo Pérez
+                    </a>
+                    
+                </div>
+                
+                <!-- Desktop Navigation -->
+                <div class="hidden lg:flex items-center space-x-8">
+                    
+                    <a href="/es" class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition duration-300 font-medium">
+                        Inicio
+                    </a>
+                    <a href="/es/experience" class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition duration-300 font-medium">
+                        Experiencia
+                    </a>
+                    <a href="/es/projects" class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition duration-300 font-medium">
+                        Proyectos
+                    </a>
+                    
+                    
+                    <!-- Theme Toggle -->
+                    <button id="theme-toggle" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition duration-300" title="Cambiar tema">
+                        <i id="theme-icon" class="fas fa-moon dark:hidden"></i>
+                        <i id="theme-icon-dark" class="fas fa-sun hidden dark:inline"></i>
+                    </button>
+                    
+                    <!-- Language Toggle -->
+                    
+                    <a href="/en" class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition duration-300 text-sm font-medium">
+                        English
+                    </a>
+                    
+                </div>
+                
+                <!-- Mobile menu button -->
+                <div class="lg:hidden flex items-center space-x-2">
+                    <!-- Theme Toggle Mobile -->
+                    <button id="theme-toggle-mobile" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition duration-300">
+                        <i class="fas fa-moon dark:hidden text-sm"></i>
+                        <i class="fas fa-sun hidden dark:inline text-sm"></i>
+                    </button>
+                    
+                    <button id="mobile-menu-toggle" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition duration-300">
+                        <i id="menu-icon" class="fas fa-bars"></i>
+                        <i id="close-icon" class="fas fa-times hidden"></i>
+                    </button>
+                </div>
             </div>
         </div>
+        
+        <!-- Mobile Navigation Menu -->
+        <div id="mobile-menu" class="mobile-menu fixed top-0 right-0 h-full w-80 bg-white dark:bg-gray-900 shadow-2xl lg:hidden z-40">
+            <div class="p-6 pt-20">
+                <div class="space-y-6">
+                    
+                    <a href="/es" class="block text-lg font-medium text-gray-800 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition duration-300">
+                        Inicio
+                    </a>
+                    <a href="/es/experience" class="block text-lg font-medium text-gray-800 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition duration-300">
+                        Experiencia
+                    </a>
+                    <a href="/es/projects" class="block text-lg font-medium text-gray-800 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition duration-300">
+                        Proyectos
+                    </a>
+                    
+                    
+                    <hr class="border-gray-200 dark:border-gray-700">
+                    
+                    
+                    <a href="/en" class="block w-full text-center px-4 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition duration-300 font-medium">
+                        English
+                    </a>
+                    
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile menu overlay -->
+        <div id="mobile-menu-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden hidden"></div>
     </nav>
 
-    <main class="pt-8">
-        <section class="py-16">
-            <div class="max-w-6xl mx-auto px-4">
-                <h1 class="text-4xl font-bold text-center mb-8 text-gray-800">Mis Proyectos</h1>
-                <p class="text-xl text-center text-gray-600 mb-12">Proyectos desarrollados por Alfredo E. Pérez Leal</p>
+    <!-- Main Content -->
+    <main class="pt-20 min-h-screen">
+        
+        <!-- Header Section -->
+        <section class="bg-white dark:bg-gray-800 py-12 sm:py-16 lg:py-20 theme-transition">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 text-gray-800 dark:text-white animate-slide-up">Mis Proyectos</h1>
+                <p class="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 animate-slide-up">Proyectos desarrollados por Alfredo E. Pérez Leal</p>
+            </div>
+        </section>
+
+        <!-- Projects Grid -->
+        <section class="py-12 sm:py-16 lg:py-20 bg-gray-50 dark:bg-gray-900 theme-transition">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 
-                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <div class="bg-white rounded-lg shadow-lg p-6">
-                        <div class="w-16 h-16 bg-blue-100 rounded-lg mx-auto mb-4 flex items-center justify-center">
-                            <i class="fas fa-mobile-alt text-2xl text-blue-600"></i>
-                        </div>
-                        <h3 class="text-xl font-bold text-gray-800 mb-3">E-Commerce iOS App</h3>
-                        <p class="text-gray-600 mb-4">Aplicación de comercio electrónico completa con carrito de compras, pagos integrados y gestión de usuarios.</p>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Swift</span>
-                            <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">SwiftUI</span>
+                <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+                    
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden card-hover animate-on-scroll theme-transition">
+                        <div class="p-4 sm:p-6">
+                            <h3 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-white mb-3">E-Commerce iOS App</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4 text-sm sm:text-base leading-relaxed">Aplicación de comercio electrónico completa con carrito de compras, pagos integrados y gestión de usuarios.</p>
+                            
+                            
+                            <div class="mb-4">
+                                <h4 class="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Tecnologías:</h4>
+                                <div class="flex flex-wrap gap-1.5 sm:gap-2">
+                                    
+                                    <span class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium px-2 sm:px-2.5 py-0.5 rounded-full">
+                                        Swift
+                                    </span>
+                                    
+                                    <span class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium px-2 sm:px-2.5 py-0.5 rounded-full">
+                                        SwiftUI
+                                    </span>
+                                    
+                                    <span class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium px-2 sm:px-2.5 py-0.5 rounded-full">
+                                        Core Data
+                                    </span>
+                                    
+                                    <span class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium px-2 sm:px-2.5 py-0.5 rounded-full">
+                                        Stripe API
+                                    </span>
+                                    
+                                </div>
+                            </div>
+                            
+                            
+                            
+                            <div class="flex justify-between items-center">
+                                <a href="https://github.com/alph0x/ecommerce-ios" target="_blank" rel="noopener noreferrer"
+                                   class="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium text-sm sm:text-base hover:scale-105 transition duration-300">
+                                    Ver Proyecto
+                                    <i class="fas fa-external-link-alt ml-2 text-xs"></i>
+                                </a>
+                            </div>
+                            
                         </div>
                     </div>
                     
-                    <div class="bg-white rounded-lg shadow-lg p-6">
-                        <div class="w-16 h-16 bg-green-100 rounded-lg mx-auto mb-4 flex items-center justify-center">
-                            <i class="fas fa-server text-2xl text-green-600"></i>
-                        </div>
-                        <h3 class="text-xl font-bold text-gray-800 mb-3">Weather Forecast API</h3>
-                        <p class="text-gray-600 mb-4">API REST construida con Vapor Swift para pronósticos meteorológicos.</p>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Vapor</span>
-                            <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Swift</span>
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden card-hover animate-on-scroll theme-transition">
+                        <div class="p-4 sm:p-6">
+                            <h3 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-white mb-3">Weather Forecast API</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4 text-sm sm:text-base leading-relaxed">API REST construida con Vapor Swift para pronósticos meteorológicos con integración a servicios externos.</p>
+                            
+                            
+                            <div class="mb-4">
+                                <h4 class="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Tecnologías:</h4>
+                                <div class="flex flex-wrap gap-1.5 sm:gap-2">
+                                    
+                                    <span class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium px-2 sm:px-2.5 py-0.5 rounded-full">
+                                        Vapor
+                                    </span>
+                                    
+                                    <span class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium px-2 sm:px-2.5 py-0.5 rounded-full">
+                                        Swift
+                                    </span>
+                                    
+                                    <span class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium px-2 sm:px-2.5 py-0.5 rounded-full">
+                                        PostgreSQL
+                                    </span>
+                                    
+                                    <span class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium px-2 sm:px-2.5 py-0.5 rounded-full">
+                                        Docker
+                                    </span>
+                                    
+                                </div>
+                            </div>
+                            
+                            
+                            
+                            <div class="flex justify-between items-center">
+                                <a href="https://github.com/alph0x/weather-api" target="_blank" rel="noopener noreferrer"
+                                   class="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium text-sm sm:text-base hover:scale-105 transition duration-300">
+                                    Ver Proyecto
+                                    <i class="fas fa-external-link-alt ml-2 text-xs"></i>
+                                </a>
+                            </div>
+                            
                         </div>
                     </div>
+                    
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden card-hover animate-on-scroll theme-transition">
+                        <div class="p-4 sm:p-6">
+                            <h3 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-white mb-3">Task Management Web App</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4 text-sm sm:text-base leading-relaxed">Aplicación web para gestión de tareas con funcionalidades colaborativas y tiempo real.</p>
+                            
+                            
+                            <div class="mb-4">
+                                <h4 class="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Tecnologías:</h4>
+                                <div class="flex flex-wrap gap-1.5 sm:gap-2">
+                                    
+                                    <span class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium px-2 sm:px-2.5 py-0.5 rounded-full">
+                                        React
+                                    </span>
+                                    
+                                    <span class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium px-2 sm:px-2.5 py-0.5 rounded-full">
+                                        Node.js
+                                    </span>
+                                    
+                                    <span class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium px-2 sm:px-2.5 py-0.5 rounded-full">
+                                        Socket.io
+                                    </span>
+                                    
+                                    <span class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium px-2 sm:px-2.5 py-0.5 rounded-full">
+                                        MongoDB
+                                    </span>
+                                    
+                                </div>
+                            </div>
+                            
+                            
+                            
+                            <div class="flex justify-between items-center">
+                                <a href="https://github.com/alph0x/task-manager" target="_blank" rel="noopener noreferrer"
+                                   class="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium text-sm sm:text-base hover:scale-105 transition duration-300">
+                                    Ver Proyecto
+                                    <i class="fas fa-external-link-alt ml-2 text-xs"></i>
+                                </a>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    
+                </div>
+                
+            </div>
+        </section>
+
+        <!-- Call to Action -->
+        <section class="py-12 sm:py-16 lg:py-20 bg-blue-600 dark:bg-blue-800 text-white theme-transition">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold mb-6 sm:mb-8 animate-slide-up">¿Tienes una idea de proyecto?</h2>
+                <p class="text-base sm:text-xl mb-8 sm:mb-12 opacity-90 max-w-2xl mx-auto leading-relaxed animate-slide-up">Me encanta trabajar en proyectos desafiantes e innovadores.</p>
+                <div class="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6 animate-slide-up">
+                    
+                    <a href="/es" class="bg-white text-blue-600 px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold hover:bg-gray-100 hover:scale-105 transition duration-300 text-sm sm:text-base">
+                        Volver al Inicio
+                    </a>
+                    <a href="/es/experience" class="border-2 border-white text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold hover:bg-white hover:text-blue-600 hover:scale-105 transition duration-300 text-sm sm:text-base">
+                        Ver Experiencia
+                    </a>
+                    
                 </div>
             </div>
         </section>
+    
     </main>
 
-    <footer class="bg-gray-800 text-white py-8 text-center">
-        <p>&copy; 2025 Alfredo E. Pérez Leal. Hecho con Vapor Swift.</p>
+    <!-- Back to top button -->
+    <button id="back-to-top" class="fixed bottom-8 right-8 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-all duration-300 opacity-0 invisible hover:scale-110 z-40">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 dark:bg-gray-900 text-white py-12 mt-20 theme-transition">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <p class="text-gray-300">&copy; 2025 Alfredo E. Pérez Leal. 
+                Hecho con Vapor Swift.
+            </p>
+        </div>
     </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Theme Management
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeToggleMobile = document.getElementById('theme-toggle-mobile');
+        const html = document.documentElement;
+        
+        // Check for saved theme or default to light mode
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.classList.toggle('dark', savedTheme === 'dark');
+        
+        function toggleTheme() {
+            html.classList.toggle('dark');
+            const isDark = html.classList.contains('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        }
+        
+        themeToggle?.addEventListener('click', toggleTheme);
+        themeToggleMobile?.addEventListener('click', toggleTheme);
+        
+        // Mobile Menu Management
+        const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
+        const menuIcon = document.getElementById('menu-icon');
+        const closeIcon = document.getElementById('close-icon');
+        
+        function toggleMobileMenu() {
+            const isOpen = mobileMenu.classList.contains('open');
+            
+            mobileMenu.classList.toggle('open');
+            mobileMenuOverlay.classList.toggle('hidden');
+            menuIcon.classList.toggle('hidden');
+            closeIcon.classList.toggle('hidden');
+            
+            // Prevent body scroll when menu is open
+            document.body.style.overflow = isOpen ? 'auto' : 'hidden';
+        }
+        
+        mobileMenuToggle?.addEventListener('click', toggleMobileMenu);
+        mobileMenuOverlay?.addEventListener('click', toggleMobileMenu);
+        
+        // Close mobile menu on window resize
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 1024) {
+                mobileMenu.classList.remove('open');
+                mobileMenuOverlay.classList.add('hidden');
+                menuIcon.classList.remove('hidden');
+                closeIcon.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+        });
+        
+        // Back to top button
+        const backToTopButton = document.getElementById('back-to-top');
+        
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTopButton.classList.remove('opacity-0', 'invisible');
+                backToTopButton.classList.add('opacity-100', 'visible');
+            } else {
+                backToTopButton.classList.add('opacity-0', 'invisible');
+                backToTopButton.classList.remove('opacity-100', 'visible');
+            }
+        });
+        
+        backToTopButton?.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+        
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+        
+        // Add animation classes on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-slide-up');
+                }
+            });
+        }, observerOptions);
+        
+        // Observe elements for animation
+        document.querySelectorAll('.card-hover, .animate-on-scroll').forEach(el => {
+            observer.observe(el);
+        });
+    </script>
 </body>
 </html>
+

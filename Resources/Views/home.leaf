@@ -67,10 +67,8 @@
                         <h4 class="font-semibold text-blue-600 dark:text-blue-400 mb-2 text-sm sm:text-base">#(role.title)</h4>
                         <div class="text-gray-600 dark:text-gray-300 text-xs sm:text-sm">
                             #if(count(role.duties) > 0):
-                                <p>#(role.duties[0])</p>
-                                #if(count(role.duties) > 1):
-                                    <p class="mt-1">+ #(count(role.duties) - 1) más...</p>
-                                #endif
+                                <p>Desarrollo de aplicaciones iOS</p>
+                                <p class="mt-1">+ más responsabilidades...</p>
                             #endif
                         </div>
                         #endif
