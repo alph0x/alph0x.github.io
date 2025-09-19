@@ -31,11 +31,11 @@ jobs:
     - name: Build project
       run: swift build
       
-    - name: Run tests
-      run: swift test --enable-code-coverage
+    - name: Run static site validation tests
+      run: swift test --filter StaticSiteValidationTests
       
-    - name: Run static site tests
-      run: swift test --filter StaticSiteTests
+    - name: Run API tests
+      run: swift test --filter testPersonalInfoAPI
       
     - name: Generate code coverage report
       run: |

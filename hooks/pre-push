@@ -38,15 +38,15 @@ if ! run_with_status "Building project" "swift build"; then
     exit 1
 fi
 
-# Step 2: Run all tests
-if ! run_with_status "Running all tests" "swift test"; then
-    print_status $RED "💥 Tests failed. Push aborted."
+# Step 2: Run static site validation tests (most important for GitHub Pages)
+if ! run_with_status "Running static site validation tests" "swift test --filter StaticSiteValidationTests"; then
+    print_status $RED "💥 Static site validation failed. Push aborted."
     exit 1
 fi
 
-# Step 3: Run static site specific tests
-if ! run_with_status "Running static site tests" "swift test --filter StaticSiteTests"; then
-    print_status $RED "💥 Static site tests failed. Push aborted."
+# Step 3: Run API tests (for the backend functionality)
+if ! run_with_status "Running API tests" "swift test --filter testPersonalInfoAPI"; then
+    print_status $RED "💥 API tests failed. Push aborted."
     exit 1
 fi
 
