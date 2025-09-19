@@ -1,0 +1,43 @@
+#!/bin/bash
+
+# Simplified pre-push hook for GitHub Pages
+echo "🚀 Pre-push validation..."
+
+# Colors
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+NC='\033[0m'
+
+print_status() {
+    echo -e "${1}${2}${NC}"
+}
+
+# Step 1: Build check
+echo "🔨 Building project..."
+if swift build > /dev/null 2>&1; then
+    print_status $GREEN "✅ Build successful"
+else
+    print_status $RED "❌ Build failed. Push aborted."
+    exit 1
+fi
+
+# Step 2: Basic test check
+echo "🧪 Running API tests..."
+if swift test --filter testPersonalInfoAPI > /dev/null 2>&1; then
+    print_status $GREEN "✅ API tests passed"
+else
+    print_status $RED "❌ API tests failed. Push aborted."
+    exit 1
+fi
+
+# Step 3: Check static files exist
+echo "📂 Checking static files..."
+if [ -f "docs/index.html" ] && [ -f "docs/es/index.html" ] && [ -f "docs/en/index.html" ]; then
+    print_status $GREEN "✅ Static files present"
+else
+    print_status $RED "❌ Required static files missing. Push aborted."
+    exit 1
+fi
+
+print_status $GREEN "🎉 All checks passed! Push proceeding..."
+exit 0

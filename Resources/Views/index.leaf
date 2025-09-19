@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="#(lang ?? "es")" class="scroll-smooth">
+<html lang="#if(lang):#(lang)#else:es#endif" class="scroll-smooth">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -86,33 +86,57 @@
             <div class="flex justify-between items-center py-4">
                 <!-- Logo -->
                 <div class="flex items-center space-x-4">
-                    <a href="/#(lang != nil ? lang : "")" class="text-xl font-bold text-gray-800 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition duration-300">
+                    #if(lang):
+                    <a href="/#(lang)" class="text-xl font-bold text-gray-800 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition duration-300">
                         Alfredo Pérez
                     </a>
+                    #else:
+                    <a href="/" class="text-xl font-bold text-gray-800 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition duration-300">
+                        Alfredo Pérez
+                    </a>
+                    #endif
                 </div>
                 
                 <!-- Desktop Navigation -->
                 <div class="hidden lg:flex items-center space-x-8">
-                    <a href="/#(lang != nil ? lang : "")" class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition duration-300 font-medium">
-                        #(translations.nav_home ?? "Inicio")
+                    #if(lang):
+                    <a href="/#(lang)" class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition duration-300 font-medium">
+                        #if(lang == "es"):Inicio#else:Home#endif
                     </a>
-                    <a href="/#(lang != nil ? lang + "/" : "")experience" class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition duration-300 font-medium">
-                        #(translations.nav_experience ?? "Experiencia")
+                    <a href="/#(lang)/experience" class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition duration-300 font-medium">
+                        #if(lang == "es"):Experiencia#else:Experience#endif
                     </a>
-                    <a href="/#(lang != nil ? lang + "/" : "")projects" class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition duration-300 font-medium">
-                        #(translations.nav_projects ?? "Proyectos")
+                    <a href="/#(lang)/projects" class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition duration-300 font-medium">
+                        #if(lang == "es"):Proyectos#else:Projects#endif
                     </a>
+                    #else:
+                    <a href="/" class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition duration-300 font-medium">
+                        Inicio
+                    </a>
+                    <a href="/experience" class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition duration-300 font-medium">
+                        Experiencia
+                    </a>
+                    <a href="/projects" class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition duration-300 font-medium">
+                        Proyectos
+                    </a>
+                    #endif
                     
                     <!-- Theme Toggle -->
-                    <button id="theme-toggle" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition duration-300" title="#(translations.nav_toggle_theme ?? "Cambiar tema")">
+                    <button id="theme-toggle" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition duration-300" title="Cambiar tema">
                         <i id="theme-icon" class="fas fa-moon dark:hidden"></i>
                         <i id="theme-icon-dark" class="fas fa-sun hidden dark:inline"></i>
                     </button>
                     
                     <!-- Language Toggle -->
-                    <a href="#(lang == "es" ? "/en" : "/es")" class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition duration-300 text-sm font-medium">
-                        #(translations.nav_toggle_language ?? "English")
+                    #if(lang == "es"):
+                    <a href="/en" class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition duration-300 text-sm font-medium">
+                        English
                     </a>
+                    #else:
+                    <a href="/es" class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition duration-300 text-sm font-medium">
+                        Español
+                    </a>
+                    #endif
                 </div>
                 
                 <!-- Mobile menu button -->
@@ -135,21 +159,39 @@
         <div id="mobile-menu" class="mobile-menu fixed top-0 right-0 h-full w-80 bg-white dark:bg-gray-900 shadow-2xl lg:hidden z-40">
             <div class="p-6 pt-20">
                 <div class="space-y-6">
-                    <a href="/#(lang != nil ? lang : "")" class="block text-lg font-medium text-gray-800 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition duration-300">
-                        #(translations.nav_home ?? "Inicio")
+                    #if(lang):
+                    <a href="/#(lang)" class="block text-lg font-medium text-gray-800 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition duration-300">
+                        #if(lang == "es"):Inicio#else:Home#endif
                     </a>
-                    <a href="/#(lang != nil ? lang + "/" : "")experience" class="block text-lg font-medium text-gray-800 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition duration-300">
-                        #(translations.nav_experience ?? "Experiencia")
+                    <a href="/#(lang)/experience" class="block text-lg font-medium text-gray-800 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition duration-300">
+                        #if(lang == "es"):Experiencia#else:Experience#endif
                     </a>
-                    <a href="/#(lang != nil ? lang + "/" : "")projects" class="block text-lg font-medium text-gray-800 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition duration-300">
-                        #(translations.nav_projects ?? "Proyectos")
+                    <a href="/#(lang)/projects" class="block text-lg font-medium text-gray-800 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition duration-300">
+                        #if(lang == "es"):Proyectos#else:Projects#endif
                     </a>
+                    #else:
+                    <a href="/" class="block text-lg font-medium text-gray-800 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition duration-300">
+                        Inicio
+                    </a>
+                    <a href="/experience" class="block text-lg font-medium text-gray-800 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition duration-300">
+                        Experiencia
+                    </a>
+                    <a href="/projects" class="block text-lg font-medium text-gray-800 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition duration-300">
+                        Proyectos
+                    </a>
+                    #endif
                     
                     <hr class="border-gray-200 dark:border-gray-700">
                     
-                    <a href="#(lang == "es" ? "/en" : "/es")" class="block w-full text-center px-4 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition duration-300 font-medium">
-                        #(translations.nav_toggle_language ?? "English")
+                    #if(lang == "es"):
+                    <a href="/en" class="block w-full text-center px-4 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition duration-300 font-medium">
+                        English
                     </a>
+                    #else:
+                    <a href="/es" class="block w-full text-center px-4 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition duration-300 font-medium">
+                        Español
+                    </a>
+                    #endif
                 </div>
             </div>
         </div>
@@ -171,7 +213,9 @@
     <!-- Footer -->
     <footer class="bg-gray-800 dark:bg-gray-900 text-white py-12 mt-20 theme-transition">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <p class="text-gray-300">&copy; 2025 Alfredo E. Pérez Leal. #(translations.footer_text ?? "Hecho con Vapor Swift.")</p>
+            <p class="text-gray-300">&copy; 2025 Alfredo E. Pérez Leal. 
+                #if(lang == "es"):Hecho con Vapor Swift.#else:Built with Vapor Swift.#endif
+            </p>
         </div>
     </footer>
 
