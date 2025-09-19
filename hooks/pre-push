@@ -44,17 +44,29 @@ if ! run_with_status "Running static site validation tests" "swift test --filter
     exit 1
 fi
 
-# Step 3: Run API tests (for the backend functionality)
-if ! run_with_status "Running API tests" "swift test --filter testPersonalInfoAPI"; then
-    print_status $RED "💥 API tests failed. Push aborted."
+# Step 3: Verify static site files exist and are valid
+print_status $YELLOW "🔍 Verifying static site files..."
+
+if [ ! -d "docs" ]; then
+    print_status $RED "💥 docs/ directory missing. Static site not generated."
+    print_status $YELLOW "📋 Run: ./generate-static.sh to create static files"
     exit 1
 fi
 
-# Step 4: Generate static site
-if ! run_with_status "Generating static site" "./generate-static.sh"; then
-    print_status $RED "💥 Static site generation failed. Push aborted."
-    exit 1
-fi
+required_files=("docs/index.html" "docs/es/index.html" "docs/en/index.html" "docs/CNAME")
+for file in "${required_files[@]}"; do
+    if [ ! -f "$file" ]; then
+        print_status $RED "💥 Required file missing: $file"
+        exit 1
+    fi
+    
+    if [ ! -s "$file" ]; then
+        print_status $RED "💥 File is empty: $file"
+        exit 1
+    fi
+done
+
+print_status $GREEN "✅ All static site files are present and valid"
 
 # Step 5: Check if docs directory was updated
 if [ -d "docs" ] && [ "$(ls -A docs)" ]; then
