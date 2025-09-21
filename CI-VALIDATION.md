@@ -40,8 +40,14 @@ chmod +x validate-ci-compatibility.sh
 | Archivo | Versión Esperada | Propósito |
 |---------|------------------|-----------|
 | `Package.swift` | `5.9` | Tools version |
-| `.github/workflows/ci.yml` | `5.9.2` | GitHub Actions |
+| `.github/workflows/ci.yml` | `5.9.2` + `macos-13` + `Xcode 15.4` | GitHub Actions |
 | `web.Dockerfile` | `5.9.2` | Docker build |
+
+### Configuración GitHub Actions
+
+**Runner**: `macos-13` (evita macOS 15.5 SDK incompatible)  
+**Xcode**: `15.4` (SDK compatible con Swift 5.9.2)  
+**Swift**: `5.9.2` (versión estable disponible)
 
 ### Compatibilidad de Dependencias
 
@@ -51,8 +57,16 @@ chmod +x validate-ci-compatibility.sh
 ### Patrones de Fallos Conocidos
 
 - ❌ `unknown PinsStorage version 3` → Package.resolved de Swift 6.0
-- ❌ `could not build module 'DarwinFoundation'` → Incompatibilidad Swift/SDK
+- ❌ `could not build module 'DarwinFoundation'` → Incompatibilidad Swift 5.9.2 + macOS 15.5 SDK
+- ❌ `Assertion failed: ProtocolConformance.cpp` → Swift compiler bug con SDK recientes
 - ⚠️ `Application()` deprecated → Warnings pero no falla CI
+
+### Solución SDK Incompatible
+
+**Problema**: Swift 5.9.2 + macOS 15.5 SDK (Xcode 16.4) = Compiler crash  
+**Solución**: 
+- `runs-on: macos-13` (en lugar de `macos-latest`)
+- `sudo xcode-select -s /Applications/Xcode_15.4.app` (SDK compatible)
 
 ## 🚦 Estados de Validación
 

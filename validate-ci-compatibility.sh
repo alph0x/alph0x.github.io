@@ -68,9 +68,17 @@ if [ -f ".github/workflows/ci.yml" ]; then
     
     if [[ "$GHA_SWIFT_VERSION" == "5.9.2" ]]; then
         record_check "PASS" "GitHub Actions uses available Swift version ($GHA_SWIFT_VERSION)"
+        
+        # Check if using compatible macOS runner
+        if grep -q "runs-on: macos-13" .github/workflows/ci.yml; then
+            record_check "PASS" "Using macOS-13 runner (compatible with Swift 5.9.2)"
+        elif grep -q "runs-on: macos-latest" .github/workflows/ci.yml; then
+            record_check "FAIL" "Using macos-latest runner (has macOS 15.5 SDK incompatible with Swift 5.9.2)"
+            print_status $RED "   Change to: runs-on: macos-13"
+        fi
     else
         record_check "FAIL" "GitHub Actions uses potentially unavailable Swift version ($GHA_SWIFT_VERSION)"
-        print_status $RED "   Recommended: 5.9.2 (confirmed available in GitHub Actions)"
+        print_status $RED "   Recommended: 5.9.2 with macos-13 runner"
     fi
 else
     record_check "FAIL" "GitHub Actions workflow file not found"
