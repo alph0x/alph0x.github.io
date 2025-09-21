@@ -101,7 +101,20 @@ done
 
 # Copy additional files
 echo "📋 Copying additional files..."
-# Skip CNAME for now (no custom domain configured)
+# Copy images directory if it exists
+if [ -d "Public/images" ]; then
+    cp -r Public/images $DOCS_DIR/
+    echo "  ✅ Images directory copied"
+else
+    echo "  ⚠️  No images directory found"
+fi
+
+# Copy any other Public files
+if [ -d "Public" ]; then
+    # Copy all files from Public except images (already copied above)
+    find Public -type f ! -path "Public/images/*" -exec cp {} $DOCS_DIR/ \; 2>/dev/null || true
+    echo "  ✅ Public files copied"
+fi
 
 # Create a simple robots.txt
 cat > $DOCS_DIR/robots.txt << EOF

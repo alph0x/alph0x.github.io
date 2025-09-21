@@ -1,11 +1,12 @@
 {
-    "picture_url": "https://via.placeholder.com/200x200/667eea/ffffff?text=AP",
+    "picture_url": "/images/profile.jpg",
+    "background_url": "/images/hero-background.jpg",
     "user_string": "Alfredo E. Pérez Leal",
     "title_string": "B.Sc. in Computer Science",
     "current_role_string": "Senior iOS Software Engineer",
     "trayectory": [
         {
-            "logo": "https://via.placeholder.com/64x64/ff6b6b/ffffff?text=R",
+            "logo": "/images/company-logos/rappi.png",
             "name": "Rappi",
             "dates": {
                 "start": "January 2022",
@@ -27,15 +28,63 @@
             ]
         }
     ],
+    "skills_categories": [
+        {
+            "category": "iOS Development",
+            "items": [
+                {"name": "Swift", "level": 95, "years": 6},
+                {"name": "SwiftUI", "level": 90, "years": 4},
+                {"name": "UIKit", "level": 95, "years": 6},
+                {"name": "Xcode", "level": 95, "years": 6},
+                {"name": "Core Data", "level": 85, "years": 5},
+                {"name": "Combine", "level": 80, "years": 3}
+            ]
+        },
+        {
+            "category": "Architecture & Patterns",
+            "items": [
+                {"name": "MVVM", "level": 95, "years": 5},
+                {"name": "Clean Architecture", "level": 90, "years": 4},
+                {"name": "SOLID Principles", "level": 90, "years": 5},
+                {"name": "TDD", "level": 85, "years": 4},
+                {"name": "Unit Testing", "level": 90, "years": 5}
+            ]
+        },
+        {
+            "category": "Backend & APIs",
+            "items": [
+                {"name": "Vapor", "level": 85, "years": 2},
+                {"name": "REST APIs", "level": 95, "years": 6},
+                {"name": "GraphQL", "level": 80, "years": 3},
+                {"name": "WebSockets", "level": 75, "years": 2}
+            ]
+        },
+        {
+            "category": "DevOps & Tools",
+            "items": [
+                {"name": "Git", "level": 95, "years": 6},
+                {"name": "GitHub Actions", "level": 85, "years": 3},
+                {"name": "CI/CD", "level": 90, "years": 4},
+                {"name": "Docker", "level": 80, "years": 3},
+                {"name": "Fastlane", "level": 85, "years": 4}
+            ]
+        },
+        {
+            "category": "Web Technologies",
+            "items": [
+                {"name": "JavaScript", "level": 80, "years": 4},
+                {"name": "TypeScript", "level": 75, "years": 3},
+                {"name": "React", "level": 75, "years": 3},
+                {"name": "Node.js", "level": 70, "years": 3}
+            ]
+        }
+    ],
     "skills": [
-        "Swift", "SwiftUI", "UIKit", "Objective-C", "iOS Development",
-        "Xcode", "TestFlight", "App Store Connect", "Core Data", "Combine",
-        "Vapor", "Server-Side Swift", "REST APIs", "GraphQL", "WebSockets",
+        "Swift", "SwiftUI", "UIKit", "Xcode", "Core Data", "Combine",
         "MVVM", "Clean Architecture", "SOLID Principles", "TDD", "Unit Testing",
-        "Git", "GitHub Actions", "CI/CD", "Fastlane", "CocoaPods", "Swift Package Manager",
-        "JavaScript", "TypeScript", "React", "Node.js", "Express.js",
-        "PostgreSQL", "MongoDB", "Redis", "Docker", "Kubernetes",
-        "AWS", "Firebase", "Heroku", "Netlify", "Vercel"
+        "Vapor", "REST APIs", "GraphQL", "WebSockets",
+        "Git", "GitHub Actions", "CI/CD", "Docker", "Fastlane",
+        "JavaScript", "TypeScript", "React", "Node.js"
     ],
     "projects": [
         {

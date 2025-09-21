@@ -37,51 +37,102 @@
         }
     </script>
     <style>
-        .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        /* Apple-inspired design system */
+        .apple-bg {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
         }
-        .gradient-bg-dark {
-            background: linear-gradient(135deg, #1e3a8a 0%, #581c87 100%);
+        .apple-bg-dark {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d30 100%);
         }
-        .card-hover {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        .apple-card {
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
-        .card-hover:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        .dark .apple-card {
+            background: rgba(28, 28, 30, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .dark .card-hover:hover {
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        .apple-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 32px 64px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.95);
+        }
+        .dark .apple-card:hover {
+            background: rgba(28, 28, 30, 0.95);
+            box-shadow: 0 32px 64px rgba(0, 0, 0, 0.3);
+        }
+        .apple-button {
+            background: rgba(0, 122, 255, 1);
+            backdrop-filter: blur(20px);
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .apple-button:hover {
+            background: rgba(0, 122, 255, 0.8);
+            transform: scale(1.05);
+        }
+        .apple-text {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            letter-spacing: -0.01em;
+        }
+        .hero-bg {
+            background-image: url('/images/hero-background.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        .hero-overlay {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(2px);
+        }
+        .skill-bar {
+            background: linear-gradient(90deg, #007AFF 0%, #5856D6 100%);
+            border-radius: 4px;
+            height: 8px;
+            transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
         .theme-transition {
-            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
         .mobile-menu {
             transform: translateX(100%);
-            transition: transform 0.3s ease-in-out;
+            transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+        .dark .mobile-menu {
+            background: rgba(28, 28, 30, 0.95);
         }
         .mobile-menu.open {
             transform: translateX(0);
         }
         
-        /* Custom scrollbar */
+        /* Apple-style scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
         }
         ::-webkit-scrollbar-track {
-            @apply bg-gray-100 dark:bg-gray-800;
+            background: transparent;
         }
         ::-webkit-scrollbar-thumb {
-            @apply bg-gray-400 dark:bg-gray-600 rounded-full;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            @apply bg-gray-500 dark:bg-gray-500;
+            background: rgba(0, 0, 0, 0.4);
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .dark ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.4);
         }
     </style>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 font-sans theme-transition min-h-screen">
-    <!-- Navigation -->
-    <nav class="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-lg fixed w-full top-0 z-50 theme-transition">
+    <!-- Apple-style Navigation -->
+    <nav class="bg-white/70 dark:bg-black/70 backdrop-blur-xl border-b border-gray-200/20 dark:border-gray-700/20 fixed w-full top-0 z-50 theme-transition">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center py-4">
                 <!-- Logo -->
