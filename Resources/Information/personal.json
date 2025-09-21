@@ -15,49 +15,55 @@
                 {
                     "title": "Senior iOS Developer",
                     "duties": [
-                        "Desarrollo de aplicaciones iOS nativas usando Swift y SwiftUI",
-                        "Implementación de arquitecturas MVVM y Clean Architecture",
-                        "Integración con APIs REST y GraphQL",
-                        "Optimización de rendimiento y experiencia de usuario",
-                        "Mentoring a desarrolladores junior"
+                        "Desarrollo y mantenimiento de aplicaciones iOS nativas para millones de usuarios",
+                        "Implementación de arquitecturas MVVM y Clean Architecture en proyectos de gran escala",
+                        "Integración con APIs REST y GraphQL para servicios de delivery y fintech",
+                        "Optimización de rendimiento y experiencia de usuario en aplicaciones críticas",
+                        "Mentoring y liderazgo técnico de equipos de desarrolladores junior",
+                        "Implementación de CI/CD pipelines y automatización de testing",
+                        "Colaboración cross-funcional con equipos de producto, diseño y backend"
                     ]
                 }
             ]
         },
         {
             "logo": "https://via.placeholder.com/64x64/4ecdc4/ffffff?text=T",
-            "name": "Tech Company",
+            "name": "Tecnología Innovadora S.A.",
             "dates": {
-                "start": "Junio 2020",
+                "start": "Marzo 2020",
                 "end": "Diciembre 2021"
             },
             "roles": [
                 {
                     "title": "iOS Developer",
                     "duties": [
-                        "Desarrollo de aplicaciones móviles multiplataforma",
-                        "Implementación de funcionalidades de comercio electrónico",
-                        "Integración con servicios de pago y autenticación",
-                        "Pruebas unitarias y de integración"
+                        "Desarrollo de aplicaciones móviles para sector financiero y e-commerce",
+                        "Implementación de funcionalidades de pagos móviles y billeteras digitales",
+                        "Integración con servicios de autenticación biométrica y seguridad",
+                        "Desarrollo de interfaces de usuario complejas con UIKit y SwiftUI",
+                        "Implementación de testing automatizado y QA",
+                        "Colaboración en arquitectura de microservicios"
                     ]
                 }
             ]
         },
         {
-            "logo": "https://via.placeholder.com/64x64/45b7d1/ffffff?text=S",
-            "name": "Startup Inc",
+            "logo": "https://via.placeholder.com/64x64/45b7d1/ffffff?text=D",
+            "name": "Digital Solutions Corp",
             "dates": {
-                "start": "Enero 2019",
-                "end": "Mayo 2020"
+                "start": "Agosto 2018",
+                "end": "Febrero 2020"
             },
             "roles": [
                 {
                     "title": "Full Stack Developer",
                     "duties": [
-                        "Desarrollo de aplicaciones web con React y Node.js",
-                        "Creación de APIs REST con Express.js",
-                        "Implementación de bases de datos MongoDB y PostgreSQL",
-                        "Desarrollo de aplicaciones móviles híbridas"
+                        "Desarrollo de aplicaciones web full-stack con React y Node.js",
+                        "Creación de APIs REST robustas con Express.js y TypeScript",
+                        "Implementación de bases de datos relacionales y NoSQL (PostgreSQL, MongoDB)",
+                        "Desarrollo de aplicaciones móviles híbridas con React Native",
+                        "Implementación de sistemas de autenticación y autorización",
+                        "Deployment y mantenimiento en AWS y servicios cloud"
                     ]
                 }
             ]
@@ -65,33 +71,47 @@
     ],
     "skills": [
         "Swift", "SwiftUI", "UIKit", "Objective-C", "iOS Development",
-        "Vapor", "Server-Side Swift", "REST APIs", "GraphQL",
-        "Git", "Xcode", "TestFlight", "App Store Connect",
-        "MVVM", "Clean Architecture", "TDD", "Unit Testing",
-        "JavaScript", "React", "Node.js", "TypeScript",
-        "Docker", "CI/CD", "AWS", "Firebase"
+        "Xcode", "TestFlight", "App Store Connect", "Core Data", "Combine",
+        "Vapor", "Server-Side Swift", "REST APIs", "GraphQL", "WebSockets",
+        "MVVM", "Clean Architecture", "SOLID Principles", "TDD", "Unit Testing",
+        "Git", "GitHub Actions", "CI/CD", "Fastlane", "CocoaPods", "SPM",
+        "JavaScript", "TypeScript", "React", "Node.js", "Express.js",
+        "PostgreSQL", "MongoDB", "Redis", "Docker", "Kubernetes",
+        "AWS", "Firebase", "Heroku", "Netlify", "Vercel"
     ],
     "projects": [
         {
+            "name": "Personal Website - Vapor Swift",
+            "description": "Esta misma página web personal, construida completamente con Vapor Swift y sistema de generación automática de sitio estático. Incluye localización, modo oscuro/claro, y CI/CD automatizado.",
+            "technologies": ["Vapor", "Swift", "Leaf", "TailwindCSS", "GitHub Actions", "GitHub Pages"],
+            "url": "https://github.com/alph0x/alph0x.github.io"
+        },
+        {
             "name": "E-Commerce iOS App",
-            "description": "Aplicación de comercio electrónico completa con carrito de compras, pagos integrados y gestión de usuarios.",
-            "technologies": ["Swift", "SwiftUI", "Core Data", "Stripe API"],
+            "description": "Aplicación de comercio electrónico completa con carrito de compras, integración de pagos, gestión de usuarios, y sistema de recomendaciones personalizado.",
+            "technologies": ["Swift", "SwiftUI", "Core Data", "Stripe API", "Firebase", "Push Notifications"],
             "url": "https://github.com/alph0x/ecommerce-ios"
         },
         {
             "name": "Weather Forecast API",
-            "description": "API REST construida con Vapor Swift para pronósticos meteorológicos con integración a servicios externos.",
-            "technologies": ["Vapor", "Swift", "PostgreSQL", "Docker"],
+            "description": "API REST construida con Vapor Swift para pronósticos meteorológicos con integración a múltiples servicios externos, caching inteligente y endpoints GraphQL.",
+            "technologies": ["Vapor", "Swift", "PostgreSQL", "Redis", "Docker", "GraphQL"],
             "url": "https://github.com/alph0x/weather-api"
         },
         {
-            "name": "Task Management Web App",
-            "description": "Aplicación web para gestión de tareas con funcionalidades colaborativas y tiempo real.",
-            "technologies": ["React", "Node.js", "Socket.io", "MongoDB"],
-            "url": "https://github.com/alph0x/task-manager"
+            "name": "Task Management Suite",
+            "description": "Suite completa de gestión de tareas con aplicación web, API backend, y aplicación móvil. Incluye colaboración en tiempo real, notificaciones push, y sincronización offline.",
+            "technologies": ["React", "Node.js", "Socket.io", "MongoDB", "Swift", "React Native"],
+            "url": "https://github.com/alph0x/task-manager-suite"
+        },
+        {
+            "name": "Financial Dashboard iOS",
+            "description": "Aplicación iOS para gestión financiera personal con gráficos interactivos, categorización automática de gastos, y integración con múltiples bancos.",
+            "technologies": ["Swift", "SwiftUI", "Charts", "Core ML", "Keychain", "Biometric Auth"],
+            "url": "https://github.com/alph0x/finance-dashboard"
         }
     ],
-    "resume_string": "Desarrollador iOS apasionado con más de 5 años de experiencia creando aplicaciones móviles innovadoras. Especializado en Swift, SwiftUI y arquitecturas modernas. También experto en desarrollo backend con Vapor Swift y tecnologías web modernas.",
+    "resume_string": "Desarrollador iOS Senior con más de 6 años de experiencia creando aplicaciones móviles de alto impacto para millones de usuarios. Especializado en Swift, SwiftUI, y arquitecturas escalables. Experto en desarrollo full-stack con Vapor Swift, React, y tecnologías cloud modernas. Apasionado por la calidad del código, las mejores prácticas, y el mentoring técnico.",
     "social": [
         {
             "platform": "github",
@@ -107,6 +127,11 @@
             "platform": "twitter",
             "url": "https://twitter.com/alph0x_dev",
             "username": "alph0x_dev"
+        },
+        {
+            "platform": "stackoverflow",
+            "url": "https://stackoverflow.com/users/alph0x",
+            "username": "alph0x"
         }
     ]
 }
