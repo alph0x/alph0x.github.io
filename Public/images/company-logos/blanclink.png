@@ -1,1 +1,14 @@
-Blanclink logo
+<svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="blancGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4285f4;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1a73e8;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="120" height="120" fill="url(#blancGrad)" rx="20"/>
+  <rect x="25" y="35" width="70" height="50" fill="white" rx="10" opacity="0.9"/>
+  <circle cx="40" cy="55" r="5" fill="url(#blancGrad)"/>
+  <circle cx="80" cy="55" r="5" fill="url(#blancGrad)"/>
+  <path d="M30 70 L90 70" stroke="url(#blancGrad)" stroke-width="3"/>
+  <text x="60" y="105" text-anchor="middle" fill="white" font-family="SF Pro Display, -apple-system, sans-serif" font-size="10" font-weight="600">BL</text>
+</svg>

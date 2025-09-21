@@ -1,1 +1,13 @@
-Rappi logo placeholder
+<svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="rappiGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff6b35;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f7931e;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="120" height="120" fill="url(#rappiGrad)" rx="20"/>
+  <circle cx="45" cy="45" r="8" fill="white"/>
+  <circle cx="75" cy="45" r="8" fill="white"/>
+  <path d="M35 70 Q60 85 85 70" stroke="white" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <text x="60" y="100" text-anchor="middle" fill="white" font-family="SF Pro Display, -apple-system, sans-serif" font-size="12" font-weight="700">R</text>
+</svg>
