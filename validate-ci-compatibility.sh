@@ -72,6 +72,13 @@ if [ -f ".github/workflows/ci.yml" ]; then
         # Check if using compatible macOS runner
         if grep -q "runs-on: macos-13" .github/workflows/ci.yml; then
             record_check "PASS" "Using macOS-13 runner (compatible with Swift 5.9.2)"
+            
+            # Check if SDK configuration is present
+            if grep -q "Configure compatible SDK" .github/workflows/ci.yml; then
+                record_check "PASS" "SDK compatibility configuration present"
+            else
+                record_check "WARN" "Consider adding SDK compatibility configuration"
+            fi
         elif grep -q "runs-on: macos-latest" .github/workflows/ci.yml; then
             record_check "FAIL" "Using macos-latest runner (has macOS 15.5 SDK incompatible with Swift 5.9.2)"
             print_status $RED "   Change to: runs-on: macos-13"
