@@ -46,7 +46,7 @@ chmod +x validate-ci-compatibility.sh
 ### Configuración GitHub Actions
 
 **Runner**: `macos-13` (evita macOS 15.5 SDK incompatible)  
-**Xcode**: `15.4` (SDK compatible con Swift 5.9.2)  
+**SDK**: Configuración automática de SDK compatible  
 **Swift**: `5.9.2` (versión estable disponible)
 
 ### Compatibilidad de Dependencias
@@ -66,7 +66,8 @@ chmod +x validate-ci-compatibility.sh
 **Problema**: Swift 5.9.2 + macOS 15.5 SDK (Xcode 16.4) = Compiler crash  
 **Solución**: 
 - `runs-on: macos-13` (en lugar de `macos-latest`)
-- `sudo xcode-select -s /Applications/Xcode_15.4.app` (SDK compatible)
+- Configuración automática de SDK compatible
+- Verificación de SDKs disponibles en runtime
 
 ## 🚦 Estados de Validación
 
