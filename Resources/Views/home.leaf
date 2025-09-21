@@ -50,10 +50,7 @@
                             <div class="skill-item">
                                 <div class="flex justify-between items-center mb-3">
                                     <span class="text-base sm:text-lg font-medium text-gray-800 dark:text-gray-200 apple-text">#(skill.name)</span>
-                                    <div class="flex items-center space-x-2">
-                                        <span class="text-sm text-gray-500 dark:text-gray-400 apple-text">#(skill.years)y</span>
-                                        <span class="text-sm font-semibold text-blue-600 dark:text-blue-400">#(skill.level)%</span>
-                                    </div>
+                                    <span class="text-sm font-semibold text-blue-600 dark:text-blue-400">#(skill.level)%</span>
                                 </div>
                                 <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
                                     <div class="skill-bar h-full rounded-full" style="width: #(skill.level)%"></div>

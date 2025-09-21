@@ -59,7 +59,6 @@ struct SkillCategory: Content {
 struct Skill: Content {
     let name: String
     let level: Int
-    let years: Int
 }
 
 struct SocialLink: Content {
