@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Alfredo Perez - Multiplatform Mobile Software Engineer</title>
+    <meta name="description" content="Accomplished Software Developer and Research Professional with over 10 years of extensive experience blending development and research roles. Currently serving as Multiplatform Mobile Software Engineer, specializing in React Native development for payment solutions. Former Lead iOS Software Engineer and Architect with expertise in designing and executing complex features with user-centric approach. Champion of maintainable and readable source code, adhering to best practices and industry standards. Committed to continuous learning and exploring emerging technologies including React Native for multiplatform solutions.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.6s ease-out',
+                        'bounce-gentle': 'bounceGentle 2s infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(30px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' }
+                        },
+                        bounceGentle: {
+                            '0%, 20%, 50%, 80%, 100%': { transform: 'translateY(0)' },
+                            '40%': { transform: 'translateY(-10px)' },
+                            '60%': { transform: 'translateY(-5px)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Apple-inspired design system */
+        .apple-bg {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+        .apple-bg-dark {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d30 100%);
+        }
+        .apple-card {
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .dark .apple-card {
+            background: rgba(28, 28, 30, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .apple-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 32px 64px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.95);
+        }
+        .dark .apple-card:hover {
+            background: rgba(28, 28, 30, 0.95);
+            box-shadow: 0 32px 64px rgba(0, 0, 0, 0.3);
+        }
+        .apple-button {
+            background: rgba(0, 122, 255, 1);
+            backdrop-filter: blur(20px);
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .apple-button:hover {
+            background: rgba(0, 122, 255, 0.8);
+            transform: scale(1.05);
+        }
+        .apple-text {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            letter-spacing: -0.01em;
+        }
+        .hero-bg {
+            background-image: url('/images/hero-background.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        .hero-overlay {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(2px);
+        }
+        .skill-bar {
+            background: linear-gradient(90deg, #007AFF 0%, #5856D6 100%);
+            border-radius: 4px;
+            height: 8px;
+            transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .theme-transition {
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .mobile-menu {
+            transform: translateX(100%);
+            transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+        .dark .mobile-menu {
+            background: rgba(28, 28, 30, 0.95);
+        }
+        .mobile-menu.open {
+            transform: translateX(0);
+        }
+        
+        /* Apple-style scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.4);
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .dark ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 font-sans theme-transition min-h-screen">
+    <!-- Apple-style Navigation -->
+    <nav class="bg-white/70 dark:bg-black/70 backdrop-blur-xl border-b border-gray-200/20 dark:border-gray-700/20 fixed w-full top-0 z-50 theme-transition">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <!-- Logo -->
+                <div class="flex items-center space-x-4">
+                    
+                    <a href="/en" class="text-xl font-bold text-gray-800 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition duration-300">
+                        Alfredo Pérez
+                    </a>
+                    
+                </div>
+                
+                <!-- Desktop Navigation -->
+                <div class="hidden lg:flex items-center space-x-8">
+                    
+                    <a href="/en" class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition duration-300 font-medium">
+                        Home
+                    </a>
+                    <a href="/en/experience" class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition duration-300 font-medium">
+                        Experience
+                    </a>
+                    <a href="/en/projects" class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition duration-300 font-medium">
+                        Projects
+                    </a>
+                    
+                    
+                    <!-- Theme Toggle -->
+                    <button id="theme-toggle" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition duration-300" title="Cambiar tema">
+                        <i id="theme-icon" class="fas fa-moon dark:hidden"></i>
+                        <i id="theme-icon-dark" class="fas fa-sun hidden dark:inline"></i>
+                    </button>
+                    
+                    <!-- Language Toggle -->
+                    
+                    <a href="/es" class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition duration-300 text-sm font-medium">
+                        Español
+                    </a>
+                    
+                </div>
+                
+                <!-- Mobile menu button -->
+                <div class="lg:hidden flex items-center space-x-2">
+                    <!-- Theme Toggle Mobile -->
+                    <button id="theme-toggle-mobile" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition duration-300">
+                        <i class="fas fa-moon dark:hidden text-sm"></i>
+                        <i class="fas fa-sun hidden dark:inline text-sm"></i>
+                    </button>
+                    
+                    <button id="mobile-menu-toggle" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition duration-300">
+                        <i id="menu-icon" class="fas fa-bars"></i>
+                        <i id="close-icon" class="fas fa-times hidden"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile Navigation Menu -->
+        <div id="mobile-menu" class="mobile-menu fixed top-0 right-0 h-full w-80 bg-white dark:bg-gray-900 shadow-2xl lg:hidden z-40">
+            <div class="p-6 pt-20">
+                <div class="space-y-6">
+                    
+                    <a href="/en" class="block text-lg font-medium text-gray-800 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition duration-300">
+                        Home
+                    </a>
+                    <a href="/en/experience" class="block text-lg font-medium text-gray-800 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition duration-300">
+                        Experience
+                    </a>
+                    <a href="/en/projects" class="block text-lg font-medium text-gray-800 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition duration-300">
+                        Projects
+                    </a>
+                    
+                    
+                    <hr class="border-gray-200 dark:border-gray-700">
+                    
+                    
+                    <a href="/es" class="block w-full text-center px-4 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition duration-300 font-medium">
+                        Español
+                    </a>
+                    
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile menu overlay -->
+        <div id="mobile-menu-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden hidden"></div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="pt-20 min-h-screen">
+        
+        <!-- Hero Section with Apple aesthetic -->
+        <section class="hero-bg min-h-screen flex items-center justify-center relative">
+            <div class="hero-overlay absolute inset-0"></div>
+            <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
+                <div class="mb-12 animate-slide-up">
+                    <img src="" alt="" 
+                         class="w-32 h-32 sm:w-40 sm:h-40 lg:w-48 lg:h-48 rounded-full mx-auto mb-8 border-4 border-white/20 shadow-2xl hover:scale-105 transition duration-500 apple-card">
+                </div>
+                <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-thin mb-6 animate-slide-up apple-text tracking-tight"></h1>
+                <h2 class="text-xl sm:text-2xl md:text-3xl mb-4 sm:mb-6 font-light animate-slide-up apple-text"></h2>
+                <h3 class="text-lg sm:text-xl md:text-2xl mb-8 sm:mb-12 font-medium animate-slide-up apple-text text-blue-200"></h3>
+                <p class="text-lg sm:text-xl max-w-3xl lg:max-w-4xl mx-auto mb-12 sm:mb-16 leading-relaxed animate-slide-up apple-text font-light"></p>
+                <div class="flex flex-col sm:flex-row justify-center gap-6 sm:gap-8 animate-slide-up">
+                    
+                    <a href="/en/experience" class="apple-button text-white px-8 sm:px-12 py-4 sm:py-5 rounded-full font-medium text-base sm:text-lg apple-text">
+                        View Experience
+                    </a>
+                    <a href="/en/projects" class="bg-white/20 backdrop-blur-md border border-white/30 text-white px-8 sm:px-12 py-4 sm:py-5 rounded-full font-medium hover:bg-white/30 transition duration-300 text-base sm:text-lg apple-text">
+                        My Projects
+                    </a>
+                    
+                </div>
+            </div>
+        </section>
+
+        <!-- Skills Section with Apple aesthetic -->
+        
+
+        <!-- Recent Experience Preview -->
+        
+        <section class="py-12 sm:py-16 lg:py-20 bg-gray-50 dark:bg-gray-900 theme-transition">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-center mb-8 sm:mb-12 text-gray-800 dark:text-white animate-slide-up">Experiencia Reciente</h2>
+                <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+                    
+                    
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6 card-hover animate-on-scroll theme-transition">
+                        <div class="flex items-center mb-4">
+                            <img src="/images/company-logos/geopagos.png" alt="GeoPagos" class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg mr-3 sm:mr-4 object-cover">
+                            <div class="flex-1 min-w-0">
+                                <h3 class="font-bold text-base sm:text-lg text-gray-800 dark:text-white truncate">GeoPagos</h3>
+                                <p class="text-gray-600 dark:text-gray-400 text-xs sm:text-sm">September 2023 - Present</p>
+                            </div>
+                        </div>
+                        
+                        
+                        <h4 class="font-semibold text-blue-600 dark:text-blue-400 mb-2 text-sm sm:text-base">Multiplatform Mobile Software Engineer</h4>
+                        <div class="text-gray-600 dark:text-gray-300 text-xs sm:text-sm">
+                            
+                                <p>Desarrollo de aplicaciones iOS</p>
+                                <p class="mt-1">+ más responsabilidades...</p>
+                            
+                        </div>
+                        
+                        
+                    </div>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                </div>
+                <div class="text-center mt-8 sm:mt-12">
+                    <a href="/es/experience" class="inline-block bg-blue-600 dark:bg-blue-700 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 hover:scale-105 transition duration-300 text-sm sm:text-base">
+                        Ver Toda la Experiencia
+                    </a>
+                </div>
+            </div>
+        </section>
+        
+
+        <!-- Contact Section -->
+        <section class="py-12 sm:py-16 lg:py-20 bg-blue-600 dark:bg-blue-800 text-white theme-transition">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold mb-6 sm:mb-8 animate-slide-up">¿Interesado en trabajar juntos?</h2>
+                <p class="text-base sm:text-xl mb-8 sm:mb-12 opacity-90 max-w-2xl mx-auto leading-relaxed animate-slide-up">Siempre estoy abierto a nuevas oportunidades y colaboraciones.</p>
+                
+                <div class="flex justify-center space-x-4 sm:space-x-6 lg:space-x-8 animate-slide-up">
+                    
+                    <a href="https://github.com/alph0x" class="text-xl sm:text-2xl lg:text-3xl hover:text-blue-300 dark:hover:text-blue-200 hover:scale-125 transition duration-300 p-2 rounded-full hover:bg-white hover:bg-opacity-10" target="_blank" rel="noopener noreferrer" title="github">
+                        <i class="fab fa-github"></i>
+                    </a>
+                    
+                    <a href="https://linkedin.com/in/alph0x" class="text-xl sm:text-2xl lg:text-3xl hover:text-blue-300 dark:hover:text-blue-200 hover:scale-125 transition duration-300 p-2 rounded-full hover:bg-white hover:bg-opacity-10" target="_blank" rel="noopener noreferrer" title="linkedin">
+                        <i class="fab fa-linkedin"></i>
+                    </a>
+                    
+                    <a href="https://twitter.com/alph0x" class="text-xl sm:text-2xl lg:text-3xl hover:text-blue-300 dark:hover:text-blue-200 hover:scale-125 transition duration-300 p-2 rounded-full hover:bg-white hover:bg-opacity-10" target="_blank" rel="noopener noreferrer" title="twitter">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    
+                    <a href="https://instagram.com/alph0x" class="text-xl sm:text-2xl lg:text-3xl hover:text-blue-300 dark:hover:text-blue-200 hover:scale-125 transition duration-300 p-2 rounded-full hover:bg-white hover:bg-opacity-10" target="_blank" rel="noopener noreferrer" title="instagram">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </section>
+    
+    </main>
+
+    <!-- Back to top button -->
+    <button id="back-to-top" class="fixed bottom-8 right-8 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-all duration-300 opacity-0 invisible hover:scale-110 z-40">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 dark:bg-gray-900 text-white py-12 mt-20 theme-transition">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <p class="text-gray-300">&copy; 2025 Alfredo E. Pérez Leal. 
+                Built with Vapor Swift.
+            </p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Theme Management
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeToggleMobile = document.getElementById('theme-toggle-mobile');
+        const html = document.documentElement;
+        
+        // Check for saved theme or default to light mode
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.classList.toggle('dark', savedTheme === 'dark');
+        
+        function toggleTheme() {
+            html.classList.toggle('dark');
+            const isDark = html.classList.contains('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        }
+        
+        themeToggle?.addEventListener('click', toggleTheme);
+        themeToggleMobile?.addEventListener('click', toggleTheme);
+        
+        // Mobile Menu Management
+        const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
+        const menuIcon = document.getElementById('menu-icon');
+        const closeIcon = document.getElementById('close-icon');
+        
+        function toggleMobileMenu() {
+            const isOpen = mobileMenu.classList.contains('open');
+            
+            mobileMenu.classList.toggle('open');
+            mobileMenuOverlay.classList.toggle('hidden');
+            menuIcon.classList.toggle('hidden');
+            closeIcon.classList.toggle('hidden');
+            
+            // Prevent body scroll when menu is open
+            document.body.style.overflow = isOpen ? 'auto' : 'hidden';
+        }
+        
+        mobileMenuToggle?.addEventListener('click', toggleMobileMenu);
+        mobileMenuOverlay?.addEventListener('click', toggleMobileMenu);
+        
+        // Close mobile menu on window resize
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 1024) {
+                mobileMenu.classList.remove('open');
+                mobileMenuOverlay.classList.add('hidden');
+                menuIcon.classList.remove('hidden');
+                closeIcon.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+        });
+        
+        // Back to top button
+        const backToTopButton = document.getElementById('back-to-top');
+        
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTopButton.classList.remove('opacity-0', 'invisible');
+                backToTopButton.classList.add('opacity-100', 'visible');
+            } else {
+                backToTopButton.classList.add('opacity-0', 'invisible');
+                backToTopButton.classList.remove('opacity-100', 'visible');
+            }
+        });
+        
+        backToTopButton?.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+        
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+        
+        // Add animation classes on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-slide-up');
+                }
+            });
+        }, observerOptions);
+        
+        // Observe elements for animation
+        document.querySelectorAll('.card-hover, .animate-on-scroll').forEach(el => {
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
+
