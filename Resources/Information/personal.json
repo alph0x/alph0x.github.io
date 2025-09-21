@@ -1,28 +1,133 @@
 {
     "picture_url": "/images/profile.jpg",
     "background_url": "/images/hero-background.jpg",
-    "user_string": "Alfredo E. Pérez Leal",
-    "title_string": "B.Sc. in Computer Science",
-    "current_role_string": "Senior iOS Software Engineer",
+    "user_string": "Alfredo Perez",
+    "title_string": "B.Sc. in Computer Engineering",
+    "current_role_string": "Multiplatform Mobile Software Engineer",
     "trayectory": [
         {
-            "logo": "/images/company-logos/rappi.png",
-            "name": "Rappi",
+            "logo": "/images/company-logos/geopagos.png",
+            "name": "GeoPagos",
             "dates": {
-                "start": "January 2022",
+                "start": "September 2023",
                 "end": "Present"
             },
             "roles": [
                 {
-                    "title": "Senior iOS Developer",
+                    "title": "Multiplatform Mobile Software Engineer",
                     "duties": [
-                        "Develop and maintain native iOS applications serving millions of users across Latin America",
-                        "Implement scalable MVVM and Clean Architecture patterns in large-scale projects",
-                        "Integrate with REST APIs and GraphQL services for delivery and fintech solutions",
-                        "Optimize app performance and user experience for mission-critical applications",
-                        "Lead technical mentoring and code reviews for junior developers",
-                        "Implement CI/CD pipelines and automated testing frameworks",
-                        "Collaborate cross-functionally with product, design, and backend teams"
+                        "Develop and optimize React Native-based mobile application for payment solutions",
+                        "Implement complex functionalities leveraging React Native for UI development",
+                        "Ensure seamless integration with backend services via RESTful APIs",
+                        "Optimize application for performance and memory efficiency",
+                        "Implement state management solutions using Redux and Context API",
+                        "Maintain application scalability and security standards",
+                        "Contribute to code quality through code reviews and CI/CD practices"
+                    ]
+                }
+            ]
+        },
+        {
+            "logo": "/images/company-logos/geopagos.png",
+            "name": "GeoPagos",
+            "dates": {
+                "start": "January 2020",
+                "end": "September 2023"
+            },
+            "roles": [
+                {
+                    "title": "Lead iOS Software Engineer & Architect",
+                    "duties": [
+                        "Lead enhancement of existing iOS applications while implementing new features",
+                        "Address technical debt through strategic system improvements",
+                        "Transform system architecture and development paradigm",
+                        "Reorganize shared code into interlinked modules for improved maintainability",
+                        "Optimize code reuse and project flexibility for refactoring",
+                        "Foster adaptable, scalable, and robust software infrastructure"
+                    ]
+                }
+            ]
+        },
+        {
+            "logo": "/images/company-logos/rappi.png",
+            "name": "Rappi",
+            "dates": {
+                "start": "July 2019",
+                "end": "December 2020"
+            },
+            "roles": [
+                {
+                    "title": "iOS Software Engineer",
+                    "duties": [
+                        "Fortified Restaurants Vertical technological capabilities",
+                        "Designed and implemented novel features for restaurant operations",
+                        "Ensured seamless user experience across application ecosystem",
+                        "Balanced user experience with functional requirements",
+                        "Led issue resolution processes and troubleshooting",
+                        "Improved software stability and performance significantly"
+                    ]
+                }
+            ]
+        },
+        {
+            "logo": "/images/company-logos/geopagos.png",
+            "name": "GeoPagos",
+            "dates": {
+                "start": "December 2015",
+                "end": "July 2019"
+            },
+            "roles": [
+                {
+                    "title": "Lead iOS Software Engineer / iOS Software Engineer",
+                    "duties": [
+                        "Developed highly modular, maintainable, and scalable iOS code",
+                        "Integrated third-party hardware including payment card readers",
+                        "Ensured compatibility of external devices with applications",
+                        "Adapted applications to new iOS versions and features",
+                        "Led technical initiatives for application modernization",
+                        "Maintained focus on superior user experiences and business objectives"
+                    ]
+                }
+            ]
+        },
+        {
+            "logo": "/images/company-logos/blanclink.png",
+            "name": "Blanclink",
+            "dates": {
+                "start": "July 2014",
+                "end": "December 2015"
+            },
+            "roles": [
+                {
+                    "title": "iOS Developer",
+                    "duties": [
+                        "Completed and launched Blancride application within tight schedule",
+                        "Implemented messaging platform and voice chat capabilities",
+                        "Developed comprehensive payment system integration",
+                        "Built real-time communication solution connecting drivers and passengers",
+                        "Ported features to Nekso application across diverse software environments",
+                        "Established foundation in iOS development and software architecture"
+                    ]
+                }
+            ]
+        },
+        {
+            "logo": "/images/company-logos/backend.png",
+            "name": "Banking Institution",
+            "dates": {
+                "start": "October 2013",
+                "end": "July 2014"
+            },
+            "roles": [
+                {
+                    "title": "Jr. Backend Developer",
+                    "duties": [
+                        "Enhanced business processes through SOAP web services creation",
+                        "Automated digitalization of paper documents increasing efficiency",
+                        "Designed and implemented workflows in Documentum ECM system",
+                        "Managed scanning workflow on Captiva platform",
+                        "Adhered to strict data security protocols for banking institutions",
+                        "Maintained compliance with industry-specific privacy requirements"
                     ]
                 }
             ]
@@ -30,52 +135,69 @@
     ],
     "skills_categories": [
         {
-            "category": "iOS Development",
+            "category": "Mobile Development",
             "items": [
-                {"name": "Swift", "level": 95, "years": 6},
-                {"name": "SwiftUI", "level": 90, "years": 4},
-                {"name": "UIKit", "level": 95, "years": 6},
-                {"name": "Xcode", "level": 95, "years": 6},
-                {"name": "Core Data", "level": 85, "years": 5},
-                {"name": "Combine", "level": 80, "years": 3}
+                {"name": "React Native", "level": 90},
+                {"name": "Swift", "level": 95},
+                {"name": "iOS Development", "level": 95},
+                {"name": "SwiftUI", "level": 85},
+                {"name": "UIKit", "level": 95},
+                {"name": "Xcode", "level": 95}
+            ]
+        },
+        {
+            "category": "JavaScript & Web",
+            "items": [
+                {"name": "JavaScript", "level": 90},
+                {"name": "TypeScript", "level": 85},
+                {"name": "React", "level": 85},
+                {"name": "Redux", "level": 90},
+                {"name": "Context API", "level": 85},
+                {"name": "Node.js", "level": 75}
             ]
         },
         {
             "category": "Architecture & Patterns",
             "items": [
-                {"name": "MVVM", "level": 95, "years": 5},
-                {"name": "Clean Architecture", "level": 90, "years": 4},
-                {"name": "SOLID Principles", "level": 90, "years": 5},
-                {"name": "TDD", "level": 85, "years": 4},
-                {"name": "Unit Testing", "level": 90, "years": 5}
+                {"name": "Software Architecture", "level": 95},
+                {"name": "MVVM", "level": 95},
+                {"name": "Clean Architecture", "level": 90},
+                {"name": "Design Patterns", "level": 90},
+                {"name": "Modular Programming", "level": 95},
+                {"name": "Code Refactoring", "level": 90}
             ]
         },
         {
-            "category": "Backend & APIs",
+            "category": "Backend & Integration",
             "items": [
-                {"name": "Vapor", "level": 85, "years": 2},
-                {"name": "REST APIs", "level": 95, "years": 6},
-                {"name": "GraphQL", "level": 80, "years": 3},
-                {"name": "WebSockets", "level": 75, "years": 2}
+                {"name": "RESTful APIs", "level": 95},
+                {"name": "SOAP Web Services", "level": 85},
+                {"name": "Payment Integration", "level": 90},
+                {"name": "Hardware Integration", "level": 85},
+                {"name": "Real-time Communication", "level": 85},
+                {"name": "Vapor", "level": 80}
             ]
         },
         {
             "category": "DevOps & Tools",
             "items": [
-                {"name": "Git", "level": 95, "years": 6},
-                {"name": "GitHub Actions", "level": 85, "years": 3},
-                {"name": "CI/CD", "level": 90, "years": 4},
-                {"name": "Docker", "level": 80, "years": 3},
-                {"name": "Fastlane", "level": 85, "years": 4}
+                {"name": "Git", "level": 95},
+                {"name": "CI/CD", "level": 90},
+                {"name": "Code Review", "level": 95},
+                {"name": "Agile Methodologies", "level": 90},
+                {"name": "Performance Optimization", "level": 90},
+                {"name": "Technical Leadership", "level": 85}
             ]
         },
         {
-            "category": "Web Technologies",
+            "category": "Enterprise & Systems",
             "items": [
-                {"name": "JavaScript", "level": 80, "years": 4},
-                {"name": "TypeScript", "level": 75, "years": 3},
-                {"name": "React", "level": 75, "years": 3},
-                {"name": "Node.js", "level": 70, "years": 3}
+                {"name": "Documentum ECM", "level": 80},
+                {"name": "Captiva", "level": 75},
+                {"name": "Banking Systems", "level": 80},
+                {"name": "Payment Processing", "level": 90},
+                {"name": "Security Protocols", "level": 85},
+                {"name": "Compliance", "level": 80}
             ]
         }
     ],
@@ -88,13 +210,37 @@
     ],
     "projects": [
         {
+            "name": "GeoPagos Payment Solutions",
+            "description": "React Native mobile application for payment solutions with complex UI and backend integration.",
+            "technologies": ["React Native", "Redux", "RESTful APIs", "Payment Processing"],
+            "url": null
+        },
+        {
+            "name": "Mipromo & Mipromo Socios",
+            "description": "iOS applications for promotional and partner management systems.",
+            "technologies": ["Swift", "iOS", "UIKit", "Core Data"],
+            "url": null
+        },
+        {
+            "name": "MiPOS & Todo Pago mPOS",
+            "description": "Point of sale applications with payment processing capabilities.",
+            "technologies": ["Swift", "iOS", "Payment Integration", "Hardware Integration"],
+            "url": null
+        },
+        {
+            "name": "Blancride & Nekso",
+            "description": "Ride-sharing applications with messaging, voice chat, payment systems, and real-time communication.",
+            "technologies": ["iOS", "Swift", "Real-time Communication", "Payment Systems", "Voice Chat"],
+            "url": null
+        },
+        {
             "name": "Personal Website - Vapor Swift",
             "description": "This personal website built entirely with Vapor Swift featuring automated static site generation, internationalization, dark/light themes, and full CI/CD pipeline.",
             "technologies": ["Vapor", "Swift", "Leaf", "TailwindCSS", "GitHub Actions", "GitHub Pages"],
             "url": "https://github.com/alph0x/alph0x.github.io"
         }
     ],
-    "resume_string": "Senior iOS Developer with 6+ years of experience building high-impact mobile applications for millions of users. Specialized in Swift, SwiftUI, and scalable architectures. Expert in full-stack development with Vapor Swift, React, and modern cloud technologies. Passionate about code quality, best practices, and technical mentoring.",
+    "resume_string": "Accomplished Software Developer and Research Professional with over 10 years of extensive experience blending development and research roles. Currently serving as Multiplatform Mobile Software Engineer, specializing in React Native development for payment solutions. Former Lead iOS Software Engineer and Architect with expertise in designing and executing complex features with user-centric approach. Champion of maintainable and readable source code, adhering to best practices and industry standards. Committed to continuous learning and exploring emerging technologies including React Native for multiplatform solutions.",
     "social": [
         {
             "platform": "github",
