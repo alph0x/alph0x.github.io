@@ -26,8 +26,8 @@ final class AppTests: XCTestCase {
             
             let personalInfo = try res.content.decode(PersonalInfo.self)
             XCTAssertEqual(personalInfo.userString, "Alfredo E. Pérez Leal")
-            XCTAssertEqual(personalInfo.currentRoleString, "iOS Software Engineer")
-            XCTAssertFalse(personalInfo.skills.isEmpty)
+XCTAssertEqual(personalInfo.currentRoleString, "Senior iOS Software Engineer")
+XCTAssertFalse(personalInfo.skills.isEmpty)
             XCTAssertFalse(personalInfo.trayectory.isEmpty)
         }
     }

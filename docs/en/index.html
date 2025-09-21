@@ -37,51 +37,102 @@
         }
     </script>
     <style>
-        .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        /* Apple-inspired design system */
+        .apple-bg {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
         }
-        .gradient-bg-dark {
-            background: linear-gradient(135deg, #1e3a8a 0%, #581c87 100%);
+        .apple-bg-dark {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d30 100%);
         }
-        .card-hover {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        .apple-card {
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
-        .card-hover:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        .dark .apple-card {
+            background: rgba(28, 28, 30, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .dark .card-hover:hover {
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        .apple-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 32px 64px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.95);
+        }
+        .dark .apple-card:hover {
+            background: rgba(28, 28, 30, 0.95);
+            box-shadow: 0 32px 64px rgba(0, 0, 0, 0.3);
+        }
+        .apple-button {
+            background: rgba(0, 122, 255, 1);
+            backdrop-filter: blur(20px);
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .apple-button:hover {
+            background: rgba(0, 122, 255, 0.8);
+            transform: scale(1.05);
+        }
+        .apple-text {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            letter-spacing: -0.01em;
+        }
+        .hero-bg {
+            background-image: url('/images/hero-background.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        .hero-overlay {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(2px);
+        }
+        .skill-bar {
+            background: linear-gradient(90deg, #007AFF 0%, #5856D6 100%);
+            border-radius: 4px;
+            height: 8px;
+            transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
         .theme-transition {
-            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
         .mobile-menu {
             transform: translateX(100%);
-            transition: transform 0.3s ease-in-out;
+            transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+        .dark .mobile-menu {
+            background: rgba(28, 28, 30, 0.95);
         }
         .mobile-menu.open {
             transform: translateX(0);
         }
         
-        /* Custom scrollbar */
+        /* Apple-style scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
         }
         ::-webkit-scrollbar-track {
-            @apply bg-gray-100 dark:bg-gray-800;
+            background: transparent;
         }
         ::-webkit-scrollbar-thumb {
-            @apply bg-gray-400 dark:bg-gray-600 rounded-full;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            @apply bg-gray-500 dark:bg-gray-500;
+            background: rgba(0, 0, 0, 0.4);
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .dark ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.4);
         }
     </style>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 font-sans theme-transition min-h-screen">
-    <!-- Navigation -->
-    <nav class="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-lg fixed w-full top-0 z-50 theme-transition">
+    <!-- Apple-style Navigation -->
+    <nav class="bg-white/70 dark:bg-black/70 backdrop-blur-xl border-b border-gray-200/20 dark:border-gray-700/20 fixed w-full top-0 z-50 theme-transition">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center py-4">
                 <!-- Logo -->
@@ -171,206 +222,32 @@
     <!-- Main Content -->
     <main class="pt-20 min-h-screen">
         
-        <!-- Hero Section -->
-        <section class="gradient-bg dark:gradient-bg-dark text-white py-16 sm:py-20 lg:py-24 animate-fade-in">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                <div class="mb-8 animate-slide-up">
+        <!-- Hero Section with Apple aesthetic -->
+        <section class="hero-bg min-h-screen flex items-center justify-center relative">
+            <div class="hero-overlay absolute inset-0"></div>
+            <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
+                <div class="mb-12 animate-slide-up">
                     <img src="" alt="" 
-                         class="w-24 h-24 sm:w-32 sm:h-32 lg:w-40 lg:h-40 rounded-full mx-auto mb-6 border-4 border-white shadow-2xl hover:scale-105 transition duration-300">
+                         class="w-32 h-32 sm:w-40 sm:h-40 lg:w-48 lg:h-48 rounded-full mx-auto mb-8 border-4 border-white/20 shadow-2xl hover:scale-105 transition duration-500 apple-card">
                 </div>
-                <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 animate-slide-up"></h1>
-                <h2 class="text-lg sm:text-xl md:text-2xl mb-4 sm:mb-6 opacity-90 animate-slide-up"></h2>
-                <h3 class="text-base sm:text-lg md:text-xl mb-6 sm:mb-8 opacity-80 animate-slide-up"></h3>
-                <p class="text-base sm:text-lg max-w-2xl lg:max-w-3xl mx-auto mb-8 sm:mb-12 opacity-90 leading-relaxed animate-slide-up"></p>
-                <div class="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6 animate-slide-up">
+                <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-thin mb-6 animate-slide-up apple-text tracking-tight"></h1>
+                <h2 class="text-xl sm:text-2xl md:text-3xl mb-4 sm:mb-6 font-light animate-slide-up apple-text"></h2>
+                <h3 class="text-lg sm:text-xl md:text-2xl mb-8 sm:mb-12 font-medium animate-slide-up apple-text text-blue-200"></h3>
+                <p class="text-lg sm:text-xl max-w-3xl lg:max-w-4xl mx-auto mb-12 sm:mb-16 leading-relaxed animate-slide-up apple-text font-light"></p>
+                <div class="flex flex-col sm:flex-row justify-center gap-6 sm:gap-8 animate-slide-up">
                     
-                    <a href="/en/experience" class="bg-white text-blue-600 px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold hover:bg-gray-100 hover:scale-105 transition duration-300 text-sm sm:text-base">
-                    
-                        Ver Experiencia
+                    <a href="/en/experience" class="apple-button text-white px-8 sm:px-12 py-4 sm:py-5 rounded-full font-medium text-base sm:text-lg apple-text">
+                        View Experience
+                    </a>
+                    <a href="/en/projects" class="bg-white/20 backdrop-blur-md border border-white/30 text-white px-8 sm:px-12 py-4 sm:py-5 rounded-full font-medium hover:bg-white/30 transition duration-300 text-base sm:text-lg apple-text">
+                        My Projects
                     </a>
                     
-                    <a href="/en/projects" class="border-2 border-white text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold hover:bg-white hover:text-blue-600 hover:scale-105 transition duration-300 text-sm sm:text-base">
-                    
-                        Mis Proyectos
-                    </a>
                 </div>
             </div>
         </section>
 
-        <!-- Skills Section -->
-        
-        <section class="py-12 sm:py-16 lg:py-20 bg-white dark:bg-gray-800 theme-transition">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-center mb-8 sm:mb-12 text-gray-800 dark:text-white animate-slide-up">Habilidades</h2>
-                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
-                    
-                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">
-                        Swift
-                    </div>
-                    
-                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">
-                        SwiftUI
-                    </div>
-                    
-                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">
-                        UIKit
-                    </div>
-                    
-                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">
-                        Objective-C
-                    </div>
-                    
-                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">
-                        iOS Development
-                    </div>
-                    
-                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">
-                        Xcode
-                    </div>
-                    
-                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">
-                        TestFlight
-                    </div>
-                    
-                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">
-                        App Store Connect
-                    </div>
-                    
-                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">
-                        Core Data
-                    </div>
-                    
-                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">
-                        Combine
-                    </div>
-                    
-                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">
-                        Vapor
-                    </div>
-                    
-                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">
-                        Server-Side Swift
-                    </div>
-                    
-                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">
-                        REST APIs
-                    </div>
-                    
-                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">
-                        GraphQL
-                    </div>
-                    
-                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">
-                        WebSockets
-                    </div>
-                    
-                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">
-                        MVVM
-                    </div>
-                    
-                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">
-                        Clean Architecture
-                    </div>
-                    
-                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">
-                        SOLID Principles
-                    </div>
-                    
-                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">
-                        TDD
-                    </div>
-                    
-                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">
-                        Unit Testing
-                    </div>
-                    
-                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">
-                        Git
-                    </div>
-                    
-                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">
-                        GitHub Actions
-                    </div>
-                    
-                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">
-                        CI/CD
-                    </div>
-                    
-                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">
-                        Fastlane
-                    </div>
-                    
-                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">
-                        CocoaPods
-                    </div>
-                    
-                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">
-                        Swift Package Manager
-                    </div>
-                    
-                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">
-                        JavaScript
-                    </div>
-                    
-                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">
-                        TypeScript
-                    </div>
-                    
-                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">
-                        React
-                    </div>
-                    
-                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">
-                        Node.js
-                    </div>
-                    
-                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">
-                        Express.js
-                    </div>
-                    
-                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">
-                        PostgreSQL
-                    </div>
-                    
-                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">
-                        MongoDB
-                    </div>
-                    
-                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">
-                        Redis
-                    </div>
-                    
-                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">
-                        Docker
-                    </div>
-                    
-                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">
-                        Kubernetes
-                    </div>
-                    
-                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">
-                        AWS
-                    </div>
-                    
-                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">
-                        Firebase
-                    </div>
-                    
-                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">
-                        Heroku
-                    </div>
-                    
-                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">
-                        Netlify
-                    </div>
-                    
-                    <div class="bg-gray-100 dark:bg-gray-700 text-center py-2 sm:py-3 px-3 sm:px-4 rounded-lg font-medium text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200 transition duration-300 card-hover text-xs sm:text-sm">
-                        Vercel
-                    </div>
-                    
-                </div>
-            </div>
-        </section>
+        <!-- Skills Section with Apple aesthetic -->
         
 
         <!-- Recent Experience Preview -->
@@ -383,7 +260,7 @@
                     
                     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6 card-hover animate-on-scroll theme-transition">
                         <div class="flex items-center mb-4">
-                            <img src="https://via.placeholder.com/64x64/ff6b6b/ffffff?text=R" alt="Rappi" class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg mr-3 sm:mr-4 object-cover">
+                            <img src="/images/company-logos/rappi.png" alt="Rappi" class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg mr-3 sm:mr-4 object-cover">
                             <div class="flex-1 min-w-0">
                                 <h3 class="font-bold text-base sm:text-lg text-gray-800 dark:text-white truncate">Rappi</h3>
                                 <p class="text-gray-600 dark:text-gray-400 text-xs sm:text-sm">January 2022 - Present</p>
