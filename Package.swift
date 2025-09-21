@@ -12,8 +12,8 @@ let package = Package(
     ],
     dependencies: [
         // 💧 A server-side Swift web framework.
-        .package(url: "https://github.com/vapor/vapor.git", from: "4.106.0"),
-        .package(url: "https://github.com/vapor/leaf.git", from: "4.4.0"),
+        .package(url: "https://github.com/vapor/vapor.git", from: "4.95.0"),
+        .package(url: "https://github.com/vapor/leaf.git", from: "4.3.0"),
     ],
     targets: [
         .executableTarget(name: "Run", dependencies: [
