@@ -33,37 +33,118 @@
         </section>
 
         <!-- Skills Section with Apple aesthetic -->
-        #if(personalInfo.skillsCategories):
         <section class="py-20 sm:py-24 lg:py-32 apple-bg dark:apple-bg-dark theme-transition">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-16 sm:mb-20">
                     <h2 class="text-3xl sm:text-4xl lg:text-5xl font-thin text-gray-900 dark:text-white mb-4 apple-text tracking-tight">Technical Expertise</h2>
-                    <p class="text-lg sm:text-xl text-gray-600 dark:text-gray-300 apple-text font-light">Skills developed through 6+ years of professional experience</p>
+                    <p class="text-lg sm:text-xl text-gray-600 dark:text-gray-300 apple-text font-light">Skills developed through 10+ years of professional experience</p>
                 </div>
                 
                 <div class="grid lg:grid-cols-2 xl:grid-cols-3 gap-8 lg:gap-12">
-                    #for(skillCategory in personalInfo.skillsCategories):
+                    <!-- Mobile Development -->
                     <div class="apple-card rounded-3xl p-8 sm:p-10">
-                        <h3 class="text-xl sm:text-2xl font-medium text-gray-900 dark:text-white mb-8 apple-text">#(skillCategory.category)</h3>
+                        <h3 class="text-xl sm:text-2xl font-medium text-gray-900 dark:text-white mb-8 apple-text">Mobile Development</h3>
                         <div class="space-y-6">
-                            #for(skill in skillCategory.items):
                             <div class="skill-item">
                                 <div class="flex justify-between items-center mb-3">
-                                    <span class="text-base sm:text-lg font-medium text-gray-800 dark:text-gray-200 apple-text">#(skill.name)</span>
-                                    <span class="text-sm font-semibold text-blue-600 dark:text-blue-400">#(skill.level)%</span>
+                                    <span class="text-base sm:text-lg font-medium text-gray-800 dark:text-gray-200 apple-text">React Native</span>
+                                    <span class="text-sm font-semibold text-blue-600 dark:text-blue-400">90%</span>
                                 </div>
                                 <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
-                                    <div class="skill-bar h-full rounded-full" style="width: #(skill.level)%"></div>
+                                    <div class="skill-bar h-full rounded-full" style="width: 90%"></div>
                                 </div>
                             </div>
-                            #endfor
+                            <div class="skill-item">
+                                <div class="flex justify-between items-center mb-3">
+                                    <span class="text-base sm:text-lg font-medium text-gray-800 dark:text-gray-200 apple-text">Swift</span>
+                                    <span class="text-sm font-semibold text-blue-600 dark:text-blue-400">95%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+                                    <div class="skill-bar h-full rounded-full" style="width: 95%"></div>
+                                </div>
+                            </div>
+                            <div class="skill-item">
+                                <div class="flex justify-between items-center mb-3">
+                                    <span class="text-base sm:text-lg font-medium text-gray-800 dark:text-gray-200 apple-text">iOS Development</span>
+                                    <span class="text-sm font-semibold text-blue-600 dark:text-blue-400">95%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+                                    <div class="skill-bar h-full rounded-full" style="width: 95%"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    #endfor
+
+                    <!-- Architecture & Patterns -->
+                    <div class="apple-card rounded-3xl p-8 sm:p-10">
+                        <h3 class="text-xl sm:text-2xl font-medium text-gray-900 dark:text-white mb-8 apple-text">Architecture & Patterns</h3>
+                        <div class="space-y-6">
+                            <div class="skill-item">
+                                <div class="flex justify-between items-center mb-3">
+                                    <span class="text-base sm:text-lg font-medium text-gray-800 dark:text-gray-200 apple-text">Software Architecture</span>
+                                    <span class="text-sm font-semibold text-blue-600 dark:text-blue-400">95%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+                                    <div class="skill-bar h-full rounded-full" style="width: 95%"></div>
+                                </div>
+                            </div>
+                            <div class="skill-item">
+                                <div class="flex justify-between items-center mb-3">
+                                    <span class="text-base sm:text-lg font-medium text-gray-800 dark:text-gray-200 apple-text">MVVM</span>
+                                    <span class="text-sm font-semibold text-blue-600 dark:text-blue-400">95%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+                                    <div class="skill-bar h-full rounded-full" style="width: 95%"></div>
+                                </div>
+                            </div>
+                            <div class="skill-item">
+                                <div class="flex justify-between items-center mb-3">
+                                    <span class="text-base sm:text-lg font-medium text-gray-800 dark:text-gray-200 apple-text">Clean Architecture</span>
+                                    <span class="text-sm font-semibold text-blue-600 dark:text-blue-400">90%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+                                    <div class="skill-bar h-full rounded-full" style="width: 90%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Backend & Integration -->
+                    <div class="apple-card rounded-3xl p-8 sm:p-10">
+                        <h3 class="text-xl sm:text-2xl font-medium text-gray-900 dark:text-white mb-8 apple-text">Backend & Integration</h3>
+                        <div class="space-y-6">
+                            <div class="skill-item">
+                                <div class="flex justify-between items-center mb-3">
+                                    <span class="text-base sm:text-lg font-medium text-gray-800 dark:text-gray-200 apple-text">RESTful APIs</span>
+                                    <span class="text-sm font-semibold text-blue-600 dark:text-blue-400">95%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+                                    <div class="skill-bar h-full rounded-full" style="width: 95%"></div>
+                                </div>
+                            </div>
+                            <div class="skill-item">
+                                <div class="flex justify-between items-center mb-3">
+                                    <span class="text-base sm:text-lg font-medium text-gray-800 dark:text-gray-200 apple-text">Payment Integration</span>
+                                    <span class="text-sm font-semibold text-blue-600 dark:text-blue-400">90%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+                                    <div class="skill-bar h-full rounded-full" style="width: 90%"></div>
+                                </div>
+                            </div>
+                            <div class="skill-item">
+                                <div class="flex justify-between items-center mb-3">
+                                    <span class="text-base sm:text-lg font-medium text-gray-800 dark:text-gray-200 apple-text">Vapor</span>
+                                    <span class="text-sm font-semibold text-blue-600 dark:text-blue-400">80%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+                                    <div class="skill-bar h-full rounded-full" style="width: 80%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
-        #endif
 
         <!-- Recent Experience Preview -->
         #if(count(personalInfo.trayectory) > 0):
@@ -105,15 +186,14 @@
         </section>
         #endif
 
-        <!-- Contact Section -->
-        <section class="py-12 sm:py-16 lg:py-20 bg-blue-600 dark:bg-blue-800 text-white theme-transition">
+        <!-- Social Links Section -->
+        <section class="py-12 sm:py-16 lg:py-20 bg-gray-50 dark:bg-gray-900 theme-transition">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold mb-6 sm:mb-8 animate-slide-up">¿Interesado en trabajar juntos?</h2>
-                <p class="text-base sm:text-xl mb-8 sm:mb-12 opacity-90 max-w-2xl mx-auto leading-relaxed animate-slide-up">Siempre estoy abierto a nuevas oportunidades y colaboraciones.</p>
+                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold mb-6 sm:mb-8 animate-slide-up text-gray-800 dark:text-white">Connect with Me</h2>
                 #if(count(personalInfo.social) > 0):
                 <div class="flex justify-center space-x-4 sm:space-x-6 lg:space-x-8 animate-slide-up">
                     #for(social in personalInfo.social):
-                    <a href="#(social.url)" class="text-xl sm:text-2xl lg:text-3xl hover:text-blue-300 dark:hover:text-blue-200 hover:scale-125 transition duration-300 p-2 rounded-full hover:bg-white hover:bg-opacity-10" target="_blank" rel="noopener noreferrer" title="#(social.platform)">
+                    <a href="#(social.url)" class="text-xl sm:text-2xl lg:text-3xl text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:scale-125 transition duration-300 p-3 rounded-full hover:bg-white hover:shadow-lg dark:hover:bg-gray-800" target="_blank" rel="noopener noreferrer" title="#(social.platform)">
                         <i class="fab fa-#(social.platform)"></i>
                     </a>
                     #endfor
