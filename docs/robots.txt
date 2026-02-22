@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://alph0x.github.io/sitemap.xml
