@@ -1,13 +1,34 @@
-name: Deploy
+name: CI/CD
 
 on:
   push:
     branches: [master]
+  pull_request:
+    branches: [master]
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Example: Install dependencies (if needed)
+      # - name: Install dependencies
+      #   run: npm install
+
+      # Example: Build static files (if needed)
+      # - name: Build
+      #   run: npm run build
+
       - name: Verify index exists
         run: test -f docs/index.html
+
+      # Example: Deploy to Vercel
+      - name: Deploy to Vercel
+        uses: vercel/vercel-action@v1.11.0
+        with:
+          token: ${{ secrets.VERCEL_TOKEN }}
+          projects: docs
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
