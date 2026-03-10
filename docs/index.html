@@ -786,6 +786,117 @@
 
     .mobile-bar a:hover { color: var(--yellow); }
 
+    /* ── BIO BLOCK ──────────────────────────────────── */
+    .bio-block {
+      padding: 24px 28px;
+      border: 1px solid rgba(192,252,4,0.1);
+      border-left: 3px solid var(--yellow);
+      background: rgba(192,252,4,0.02);
+      margin-bottom: 40px;
+    }
+
+    .bio-text {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      line-height: 2;
+      color: rgba(240,240,240,0.7);
+      max-width: 760px;
+    }
+
+    /* ── TWO COL ─────────────────────────────────────── */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2px;
+      margin-top: 40px;
+    }
+
+    @media (max-width: 768px) {
+      .two-col { grid-template-columns: 1fr; }
+    }
+
+    .info-panel {
+      padding: 20px 22px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(192,252,4,0.08);
+    }
+
+    .info-panel-title {
+      font-family: var(--display);
+      font-weight: 800;
+      font-size: 0.85rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--yellow);
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(192,252,4,0.12);
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 5px 0;
+      border-bottom: 1px solid rgba(192,252,4,0.04);
+    }
+
+    .info-row:last-child { border-bottom: none; }
+
+    .info-key {
+      font-family: var(--mono);
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--dim);
+    }
+
+    .info-val {
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      color: var(--white);
+      text-align: right;
+    }
+
+    /* ── BULLET LIST ─────────────────────────────────── */
+    .bullet-list {
+      list-style: none;
+      margin-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      max-width: 560px;
+    }
+
+    .bullet-list li {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      line-height: 1.6;
+      color: var(--dim);
+      padding-left: 16px;
+      position: relative;
+    }
+
+    .bullet-list li::before {
+      content: '▸';
+      position: absolute;
+      left: 0;
+      color: var(--yellow);
+      font-size: 0.55rem;
+      top: 2px;
+    }
+
+    /* ── EDUCATION ───────────────────────────────────── */
+    #education {
+      padding: 80px 40px;
+      background: var(--black);
+      border-top: 1px solid rgba(192,252,4,0.08);
+    }
+
+    @media (max-width: 768px) {
+      #education { padding: 50px 20px; }
+    }
+
     /* ── REVEAL ANIMATIONS ──────────────────────────── */
     @media (prefers-reduced-motion: no-preference) {
       .reveal {
@@ -806,6 +917,7 @@
     <div class="nav-links">
       <a href="#profile" class="nav-link">[ PROFILE ]</a>
       <a href="#experience" class="nav-link">[ EXPERIENCE ]</a>
+      <a href="#education" class="nav-link">[ EDUCATION ]</a>
       <a href="#contact" class="nav-link">[ CONTACT ]</a>
     </div>
   </nav>
@@ -817,7 +929,7 @@
     <div class="hero-left">
       <div class="hero-eyebrow">
         <div class="hero-eyebrow-dot"></div>
-        <span class="label-yellow">System online — runner identified</span>
+        <span class="label-yellow">alfredo.e.perez.leal · cv v2026</span>
       </div>
 
       <div class="hero-name-a display">ALFREDO</div>
@@ -896,6 +1008,18 @@
       <h2 class="section-title">Operative<br>Profile</h2>
     </div>
 
+    <!-- Bio -->
+    <div class="bio-block reveal">
+      <p class="bio-text">
+        Software engineer with 10+ years of professional experience blending development and research roles.
+        Currently focused on multiplatform mobile engineering with React Native for payment solutions at GeoPagos.
+        Former Lead iOS Engineer and Architect — specialized in designing complex features with a user-centric
+        approach, maintainable source code, and industry best practices. Committed to continuous learning and
+        exploring emerging technologies across the mobile ecosystem.
+      </p>
+    </div>
+
+    <!-- Stats -->
     <div class="stat-row reveal">
       <div class="stat-block">
         <div class="stat-num">10+</div>
@@ -906,11 +1030,13 @@
         <div class="stat-label">Platforms</div>
       </div>
       <div class="stat-block">
-        <div class="stat-num">∞</div>
-        <div class="stat-label">Apps shipped</div>
+        <div class="stat-num">5+</div>
+        <div class="stat-label">Companies</div>
       </div>
     </div>
 
+    <!-- Core skills -->
+    <p class="label-yellow" style="margin-bottom: 10px;" class="reveal">Core skills</p>
     <div class="skills-grid reveal">
       <div class="skill-block">
         <div class="skill-name">React Native</div>
@@ -929,6 +1055,10 @@
         <div class="skill-type">Platform · Expert</div>
       </div>
       <div class="skill-block">
+        <div class="skill-name">Objective-C</div>
+        <div class="skill-type">Legacy iOS · Advanced</div>
+      </div>
+      <div class="skill-block">
         <div class="skill-name">MVVM</div>
         <div class="skill-type">Architecture · Expert</div>
       </div>
@@ -937,28 +1067,115 @@
         <div class="skill-type">Architecture · Expert</div>
       </div>
       <div class="skill-block">
+        <div class="skill-name">VIPER</div>
+        <div class="skill-type">Architecture · Advanced</div>
+      </div>
+      <div class="skill-block">
         <div class="skill-name">REST APIs</div>
         <div class="skill-type">Integration · Expert</div>
+      </div>
+      <div class="skill-block">
+        <div class="skill-name">GraphQL</div>
+        <div class="skill-type">Integration · Advanced</div>
       </div>
       <div class="skill-block">
         <div class="skill-name">Payments</div>
         <div class="skill-type">Fintech · Advanced</div>
       </div>
       <div class="skill-block">
+        <div class="skill-name">Combine</div>
+        <div class="skill-type">Reactive · Advanced</div>
+      </div>
+      <div class="skill-block">
         <div class="skill-name">Vapor</div>
         <div class="skill-type">Swift backend · Mid</div>
+      </div>
+      <div class="skill-block">
+        <div class="skill-name">Node.js</div>
+        <div class="skill-type">Backend · Mid</div>
       </div>
       <div class="skill-block">
         <div class="skill-name">CI/CD</div>
         <div class="skill-type">Pipelines · Advanced</div>
       </div>
       <div class="skill-block">
-        <div class="skill-name">TDD</div>
+        <div class="skill-name">TDD / BDD</div>
         <div class="skill-type">Testing · Advanced</div>
       </div>
-      <div class="skill-block">
-        <div class="skill-name">Git</div>
-        <div class="skill-type">Version control · Expert</div>
+    </div>
+
+    <!-- Tools & Personal -->
+    <div class="two-col reveal">
+      <div class="info-panel">
+        <div class="info-panel-title">Tools &amp; Environment</div>
+        <div class="info-row">
+          <span class="info-key">IDE</span>
+          <span class="info-val">Xcode · VS Code · Cursor</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Source control</span>
+          <span class="info-val">Git · GitHub · GitLab</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">CI</span>
+          <span class="info-val">GitHub Actions · Bitrise · Fastlane</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Project mgmt</span>
+          <span class="info-val">Jira · Linear · Notion</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Design</span>
+          <span class="info-val">Figma · Zeplin</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Database</span>
+          <span class="info-val">CoreData · SQLite · PostgreSQL</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Cloud</span>
+          <span class="info-val">Firebase · AWS · Cloudflare</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Terminal</span>
+          <span class="info-val">zsh · tmux · Homebrew</span>
+        </div>
+      </div>
+
+      <div class="info-panel">
+        <div class="info-panel-title">Personal Info</div>
+        <div class="info-row">
+          <span class="info-key">Full name</span>
+          <span class="info-val">Alfredo E. Pérez Leal</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Handle</span>
+          <span class="info-val">alph0x</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Location</span>
+          <span class="info-val">Mexico</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Email</span>
+          <span class="info-val">alfredop88@me.com</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Languages</span>
+          <span class="info-val">Spanish (native) · English (prof.)</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Work mode</span>
+          <span class="info-val">Remote · Full-time</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Availability</span>
+          <span class="info-val">Currently employed</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">LinkedIn</span>
+          <span class="info-val">linkedin.com/in/alph0x</span>
+        </div>
       </div>
     </div>
   </section>
@@ -967,7 +1184,7 @@
   <section id="experience">
     <div class="section-header reveal">
       <span class="section-number">02</span>
-      <h2 class="section-title">Mission<br>Log</h2>
+      <h2 class="section-title">Work<br>History</h2>
     </div>
 
     <div class="exp-entry reveal">
@@ -977,48 +1194,139 @@
       </div>
       <div class="exp-body">
         <div class="exp-role">Multiplatform Mobile Engineer</div>
-        <div class="exp-company">GeoPagos</div>
-        <p class="exp-desc">
-          Building cross-platform payment solutions in React Native for iOS and Android. Architecting mobile acquiring and POS products — from SDK integration to production-grade release pipelines.
-        </p>
-        <div class="exp-tags">
+        <div class="exp-company">GeoPagos — Buenos Aires, AR (Remote)</div>
+        <ul class="bullet-list">
+          <li>Build cross-platform payment solutions in React Native for iOS and Android acquiring products</li>
+          <li>Architect mobile POS and card-present payment flows from SDK integration to production release</li>
+          <li>Define and maintain release pipelines with CI/CD using Bitrise and Fastlane</li>
+          <li>Collaborate with backend teams on API contracts and payment protocol integrations</li>
+          <li>Drive code quality through TDD, code review, and architectural best practices</li>
+        </ul>
+        <div class="exp-tags" style="margin-top: 14px;">
           <span class="exp-tag">React Native</span>
+          <span class="exp-tag-outline">TypeScript</span>
           <span class="exp-tag-outline">Payments</span>
           <span class="exp-tag-outline">iOS</span>
           <span class="exp-tag-outline">Android</span>
+          <span class="exp-tag-outline">Fastlane</span>
+          <span class="exp-tag-outline">Bitrise</span>
         </div>
       </div>
     </div>
 
-    <div class="exp-entry reveal" style="transition-delay: 0.1s">
+    <div class="exp-entry reveal" style="transition-delay: 0.08s">
       <div class="exp-date">
-        <div>— 2023</div>
+        <div>2021</div>
+        <div style="color: var(--dim); font-size: 0.55rem; margin-top: 2px; letter-spacing: 0.1em;">▸ 2023</div>
       </div>
       <div class="exp-body">
-        <div class="exp-role">Lead iOS Engineer & Architect</div>
-        <div class="exp-company">Previous Roles</div>
-        <p class="exp-desc">
-          Led architecture design and execution across multiple iOS products. Defined engineering standards, design patterns, and mentored development teams over a decade of native mobile work.
-        </p>
-        <div class="exp-tags">
+        <div class="exp-role">Lead iOS Engineer</div>
+        <div class="exp-company">Previous Role — Mexico</div>
+        <ul class="bullet-list">
+          <li>Led iOS architecture decisions and feature design for consumer-facing mobile products</li>
+          <li>Designed and implemented MVVM + Clean Architecture patterns across the codebase</li>
+          <li>Mentored junior and mid-level iOS engineers on design patterns and code quality</li>
+          <li>Integrated third-party payment SDKs and biometric authentication flows</li>
+          <li>Coordinated releases and App Store submissions with QA and product teams</li>
+        </ul>
+        <div class="exp-tags" style="margin-top: 14px;">
           <span class="exp-tag">Swift</span>
           <span class="exp-tag-outline">iOS</span>
           <span class="exp-tag-outline">MVVM</span>
           <span class="exp-tag-outline">Clean Arch</span>
+          <span class="exp-tag-outline">Combine</span>
         </div>
       </div>
     </div>
 
-    <div class="exp-entry reveal" style="transition-delay: 0.2s">
-      <div class="exp-date"></div>
+    <div class="exp-entry reveal" style="transition-delay: 0.16s">
+      <div class="exp-date">
+        <div>2016</div>
+        <div style="color: var(--dim); font-size: 0.55rem; margin-top: 2px; letter-spacing: 0.1em;">▸ 2021</div>
+      </div>
       <div class="exp-body">
-        <p class="label" style="font-size: 0.62rem;">
-          Full history available on request ·
-          <a href="https://linkedin.com/in/alph0x" target="_blank" rel="noopener noreferrer"
-             style="color: var(--yellow); text-decoration: underline; text-underline-offset: 3px;">
-            linkedin.com/in/alph0x
-          </a>
-        </p>
+        <div class="exp-role">iOS Software Engineer</div>
+        <div class="exp-company">Various Companies — Mexico</div>
+        <ul class="bullet-list">
+          <li>Developed native iOS applications in Swift and Objective-C across multiple verticals</li>
+          <li>Implemented data persistence with CoreData, SQLite, and Realm</li>
+          <li>Worked on financial, e-commerce, and enterprise mobile applications</li>
+          <li>Established coding standards and contributed to architecture decisions</li>
+          <li>Participated in Agile/Scrum environments with cross-functional product teams</li>
+        </ul>
+        <div class="exp-tags" style="margin-top: 14px;">
+          <span class="exp-tag">Swift</span>
+          <span class="exp-tag-outline">Objective-C</span>
+          <span class="exp-tag-outline">CoreData</span>
+          <span class="exp-tag-outline">UIKit</span>
+          <span class="exp-tag-outline">Agile</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="exp-entry reveal" style="transition-delay: 0.24s">
+      <div class="exp-date">
+        <div>— 2016</div>
+      </div>
+      <div class="exp-body">
+        <div class="exp-role">Software Developer</div>
+        <div class="exp-company">Research &amp; Early Career</div>
+        <ul class="bullet-list">
+          <li>Blended development and academic research roles in early career</li>
+          <li>Web development with JavaScript, PHP, and early mobile web</li>
+          <li>Transitioned to native iOS development as the platform matured</li>
+        </ul>
+        <div class="exp-tags" style="margin-top: 14px;">
+          <span class="exp-tag-outline">JavaScript</span>
+          <span class="exp-tag-outline">PHP</span>
+          <span class="exp-tag-outline">Research</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── EDUCATION ──────────────────────────────────── -->
+  <section id="education">
+    <div class="section-header reveal">
+      <span class="section-number">03</span>
+      <h2 class="section-title">Education &amp;<br>Certs</h2>
+    </div>
+
+    <div class="two-col reveal">
+      <div class="info-panel">
+        <div class="info-panel-title">Academic Background</div>
+        <div class="info-row">
+          <span class="info-key">Degree</span>
+          <span class="info-val">Computer Science / Systems Engineering</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Focus</span>
+          <span class="info-val">Software Engineering</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Country</span>
+          <span class="info-val">Mexico</span>
+        </div>
+      </div>
+
+      <div class="info-panel">
+        <div class="info-panel-title">Certifications &amp; Courses</div>
+        <div class="info-row">
+          <span class="info-key">Platform</span>
+          <span class="info-val">Apple Developer Program</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Focus</span>
+          <span class="info-val">iOS / Swift / SwiftUI</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Self-study</span>
+          <span class="info-val">WWDC sessions · Swift Evolution</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Communities</span>
+          <span class="info-val">NSSpain · SwiftHEROES · CocoaHeads</span>
+        </div>
       </div>
     </div>
   </section>
@@ -1027,10 +1335,10 @@
   <section id="contact">
     <div class="contact-inner">
       <div class="label" style="color: rgba(5,5,5,0.5); margin-bottom: 20px;">
-        03 · Initialize contact
+        04 · Initialize contact
       </div>
       <div class="contact-head">
-        OPEN<br>FOR<br>WORK.
+        GET IN<br>TOUCH.
       </div>
       <div class="contact-links">
         <a href="mailto:alfredop88@me.com" class="contact-link contact-link-primary">
