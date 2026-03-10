@@ -1,14 +1,633 @@
-<!-- CONTACT FORM -->
-<section id="contact" class="reveal space-y-8">
-  <h2 class="text-[22px] font-semibold tracking-tight text-gray-900 dark:text-white">Contact</h2>
-  <div class="glass rounded-2xl p-7">
-    <form action="https://formspree.io/f/your-form-id" method="POST">
-      <div class="grid sm:grid-cols-2 gap-4">
-        <input type="text" name="name" placeholder="Your name" required class="w-full px-4 py-2 rounded-lg bg-white/50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-[#0071e3]">
-        <input type="email" name="email" placeholder="Your email" required class="w-full px-4 py-2 rounded-lg bg-white/50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-[#0071e3]">
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Alfredo Pérez — Mobile Engineer</title>
+  <meta name="description" content="Multiplatform Mobile Software Engineer with 10+ years building iOS and React Native apps. Expert in Swift, architecture, and payment systems.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            amber: '#d4a017',
+            ink: '#0a0a0a',
+            paper: '#f5f0e8',
+          },
+          fontFamily: {
+            display: ['Syne', 'Arial Black', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+        }
+      }
+    }
+  </script>
+  <style>
+    /* ── BASE ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html { background: #0a0a0a; color: #f5f0e8; }
+
+    body {
+      background: #0a0a0a;
+      color: #f5f0e8;
+      font-family: system-ui, -apple-system, sans-serif;
+      overflow-x: hidden;
+    }
+
+    ::selection { background: #d4a017; color: #0a0a0a; }
+
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-track { background: #0a0a0a; }
+    ::-webkit-scrollbar-thumb { background: rgba(212,160,23,0.6); border-radius: 2px; }
+
+    /* ── GRAIN ────────────────────────────────────────── */
+    .grain {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 100;
+      opacity: 0.04;
+      mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      background-size: 256px 256px;
+    }
+
+    /* ── TYPOGRAPHY ───────────────────────────────────── */
+    .font-display { font-family: 'Syne', 'Arial Black', sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+    /* ── HERO TYPE ────────────────────────────────────── */
+    .hero-name {
+      font-family: 'Syne', 'Arial Black', sans-serif;
+      font-weight: 900;
+      font-size: clamp(13vw, 16vw, 200px);
+      line-height: 0.88;
+      letter-spacing: -0.03em;
+      color: #f5f0e8;
+    }
+
+    /* ── LETTER SPLIT ANIMATION ───────────────────────── */
+    @media (prefers-reduced-motion: no-preference) {
+      .letter {
+        display: inline-block;
+        opacity: 0;
+        transform: translateY(60px);
+        animation: letterUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+    }
+
+    @keyframes letterUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .load-fade {
+      opacity: 0;
+      animation: fadeIn 0.6s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+
+    /* ── PROFILE IMAGE ────────────────────────────────── */
+    .profile-wrap {
+      clip-path: polygon(0 5%, 100% 0, 96% 93%, 4% 100%);
+      transition: clip-path 0.7s cubic-bezier(0.76, 0, 0.24, 1);
+      overflow: hidden;
+    }
+
+    @media (hover: hover) {
+      .profile-wrap:hover {
+        clip-path: polygon(3% 0, 100% 3%, 97% 100%, 0 97%);
+      }
+    }
+
+    .profile-img {
+      filter: blur(14px) saturate(0.2);
+      transition: filter 1s ease 0.4s;
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .profile-img.loaded {
+      filter: blur(0px) saturate(1);
+    }
+
+    /* ── RULE ─────────────────────────────────────────── */
+    .amber-rule {
+      display: block;
+      height: 2px;
+      background: #d4a017;
+      transform-origin: left;
+      transform: scaleX(0);
+      animation: ruleIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes ruleIn {
+      to { transform: scaleX(1); }
+    }
+
+    /* ── MARQUEE ──────────────────────────────────────── */
+    .marquee-track {
+      display: flex;
+      width: max-content;
+      will-change: transform;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .marquee-track {
+        animation: marquee 22s linear infinite;
+      }
+    }
+
+    @keyframes marquee {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
+    /* ── BENTO GRID ───────────────────────────────────── */
+    .bento {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      grid-auto-rows: auto;
+      gap: 16px;
+    }
+
+    .bento-quote  { grid-column: span 7; }
+    .bento-skills { grid-column: span 5; }
+    .bento-status { grid-column: span 5; }
+    .bento-stats  { grid-column: span 7; }
+    .bento-strip  { grid-column: span 12; }
+
+    @media (max-width: 767px) {
+      .bento-quote,
+      .bento-skills,
+      .bento-status,
+      .bento-stats,
+      .bento-strip {
+        grid-column: span 12;
+      }
+    }
+
+    /* ── SKILL PILLS ──────────────────────────────────── */
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 12px;
+      border-radius: 100px;
+      border: 1px solid rgba(212,160,23,0.35);
+      color: #d4a017;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      transition: box-shadow 0.3s ease, border-color 0.3s ease;
+      cursor: default;
+    }
+
+    @media (hover: hover) {
+      .pill:hover {
+        border-color: rgba(212,160,23,0.8);
+        box-shadow: 0 0 14px rgba(212,160,23,0.25);
+      }
+    }
+
+    /* ── TIMELINE ─────────────────────────────────────── */
+    .timeline-line {
+      width: 1px;
+      background: #d4a017;
+      transform-origin: top;
+      transform: scaleY(0);
+      transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .timeline-line.revealed {
+      transform: scaleY(1);
+    }
+
+    /* ── REVEAL ───────────────────────────────────────── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+                  transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .reveal-rotate {
+      opacity: 0;
+      transform: translateY(20px) rotate(1.5deg);
+      transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+                  transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .reveal-rotate.visible {
+      opacity: 1;
+      transform: translateY(0) rotate(0deg);
+    }
+
+    .reveal-wipe {
+      clip-path: inset(0 100% 0 0);
+      transition: clip-path 1s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .reveal-wipe.visible {
+      clip-path: inset(0 0% 0 0);
+    }
+
+    /* ── NAV LINKS ────────────────────────────────────── */
+    .nav-link {
+      position: relative;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(245,240,232,0.55);
+      transition: color 0.3s ease;
+    }
+
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 100%;
+      height: 1px;
+      background: #d4a017;
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @media (hover: hover) {
+      .nav-link:hover { color: #f5f0e8; }
+      .nav-link:hover::after { transform: scaleX(1); }
+    }
+
+    /* ── STATUS DOT ───────────────────────────────────── */
+    .dot-blink {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #22c55e;
+      animation: blink 2s ease infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.2; }
+    }
+
+    /* ── CONTACT TYPE ─────────────────────────────────── */
+    .contact-type {
+      font-family: 'Syne', 'Arial Black', sans-serif;
+      font-weight: 900;
+      font-size: clamp(11vw, 13vw, 160px);
+      line-height: 0.88;
+      letter-spacing: -0.03em;
+      color: #f5f0e8;
+    }
+
+    /* ── SECTION LABEL ────────────────────────────────── */
+    .section-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #d4a017;
+    }
+
+    /* ── QUOTE TEXT ───────────────────────────────────── */
+    .quote-text {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: clamp(1.4rem, 2.5vw, 2.2rem);
+      line-height: 1.2;
+      color: #f5f0e8;
+    }
+
+    /* ── STAT NUMBERS ─────────────────────────────────── */
+    .stat-num {
+      font-family: 'Syne', sans-serif;
+      font-weight: 900;
+      font-size: clamp(2.5rem, 4vw, 3.5rem);
+      color: #d4a017;
+      line-height: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Grain overlay -->
+  <div class="grain" aria-hidden="true"></div>
+
+  <!-- ── NAV ──────────────────────────────────────────── -->
+  <nav class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-12 py-5 load-fade" style="animation-delay:0.1s">
+    <a href="#" class="font-display font-black text-amber text-lg tracking-tight">alph0x</a>
+    <div class="hidden sm:flex items-center gap-8">
+      <a href="#work" class="nav-link">work</a>
+      <a href="#about" class="nav-link">about</a>
+      <a href="#contact" class="nav-link">contact</a>
+    </div>
+  </nav>
+
+  <!-- ── HERO ─────────────────────────────────────────── -->
+  <section class="relative min-h-[100dvh] flex flex-col justify-end px-6 md:px-12 pb-12 md:pb-16 pt-28" id="top">
+
+    <!-- Profile image — desktop: absolute right, mobile: above name -->
+    <div class="profile-wrap absolute right-0 top-0 h-full w-[38%] hidden md:block" aria-label="Alfredo Pérez portrait">
+      <img
+        src="images/profile.jpeg"
+        alt="Alfredo Pérez"
+        class="profile-img w-full h-full object-cover object-center"
+        loading="eager"
+        decoding="async"
+        id="profileImg"
+      >
+    </div>
+
+    <!-- Profile image — mobile: above name, clipped -->
+    <div class="profile-wrap mb-8 md:hidden" style="width: 56%; aspect-ratio: 3/4; overflow:hidden;">
+      <img
+        src="images/profile.jpeg"
+        alt="Alfredo Pérez"
+        class="profile-img w-full h-full object-cover object-top"
+        loading="eager"
+        decoding="async"
+      >
+    </div>
+
+    <!-- Name block -->
+    <div class="relative z-10" style="max-width: 65%;">
+      <p class="section-label mb-6 load-fade" style="animation-delay:0.2s">Mobile Engineer</p>
+
+      <h1 class="hero-name" id="heroName" aria-label="Alfredo Pérez">
+        <span class="block" id="nameLineA"></span>
+        <span class="block" id="nameLineB"></span>
+      </h1>
+
+      <span class="amber-rule block mt-6 mb-6 w-24" style="animation-delay:0.9s"></span>
+
+      <p class="font-mono text-sm md:text-base text-paper/60 load-fade" style="animation-delay:1s">
+        10+ years&nbsp;&nbsp;/&nbsp;&nbsp;React Native · Swift · iOS&nbsp;&nbsp;/&nbsp;&nbsp;Mexico
+      </p>
+    </div>
+
+    <!-- Scroll indicator -->
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 load-fade" style="animation-delay:1.4s" aria-hidden="true">
+      <div class="flex flex-col items-center gap-1 opacity-30">
+        <span class="font-mono text-[10px] tracking-widest uppercase">scroll</span>
+        <span class="text-amber text-lg leading-none">↓</span>
       </div>
-      <textarea name="message" rows="5" placeholder="Your message" required class="mt-4 w-full px-4 py-2 rounded-lg bg-white/50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-[#0071e3]"></textarea>
-      <button type="submit" class="mt-4 px-6 py-2 bg-[#0071e3] text-white rounded-lg hover:bg-[#005bb5] transition-colors">Send</button>
-    </form>
+    </div>
+  </section>
+
+  <!-- ── BENTO SECTION ─────────────────────────────────── -->
+  <section class="px-6 md:px-12 py-20 md:py-28" id="about">
+    <div class="bento">
+
+      <!-- Quote -->
+      <div class="bento-quote reveal-rotate" style="transition-delay:0s">
+        <p class="quote-text">
+          "I build the invisible infrastructure<br>of mobile commerce."
+        </p>
+        <p class="font-mono text-sm text-paper/40 mt-5 leading-relaxed" style="max-width: 520px;">
+          Lead iOS architect turned multiplatform engineer. I specialize in
+          payment-grade mobile systems, clean architecture, and cross-platform
+          experiences that feel native on both ends.
+        </p>
+      </div>
+
+      <!-- Skills -->
+      <div class="bento-skills reveal-rotate" style="transition-delay:0.08s">
+        <div class="h-full rounded-xl p-5 md:p-7" style="background: #111; border-top: 2px solid #d4a017;">
+          <p class="section-label mb-5">Stack</p>
+          <div class="flex flex-wrap gap-2">
+            <span class="pill">React Native</span>
+            <span class="pill">Swift</span>
+            <span class="pill">iOS</span>
+            <span class="pill">SwiftUI</span>
+            <span class="pill">MVVM</span>
+            <span class="pill">Clean Arch</span>
+            <span class="pill">REST APIs</span>
+            <span class="pill">Payment Systems</span>
+            <span class="pill">Vapor</span>
+            <span class="pill">CI/CD</span>
+            <span class="pill">TDD</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Status -->
+      <div class="bento-status reveal-rotate" style="transition-delay:0.12s">
+        <div class="rounded-xl p-5 md:p-7 flex items-center gap-4" style="background: #111;">
+          <div class="dot-blink flex-shrink-0"></div>
+          <div>
+            <p class="text-paper text-sm font-medium">Currently at GeoPagos</p>
+            <p class="font-mono text-xs text-paper/40 mt-0.5">Multiplatform Mobile Engineer · Sept 2023</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="bento-stats reveal-rotate" style="transition-delay:0.06s">
+        <div class="grid grid-cols-3 gap-4 h-full">
+          <div class="rounded-xl p-5 flex flex-col justify-center" style="background: #111;">
+            <span class="stat-num">10+</span>
+            <span class="font-mono text-xs text-paper/40 mt-2 uppercase tracking-wider">Years</span>
+          </div>
+          <div class="rounded-xl p-5 flex flex-col justify-center" style="background: #111;">
+            <span class="stat-num">2</span>
+            <span class="font-mono text-xs text-paper/40 mt-2 uppercase tracking-wider">Platforms</span>
+          </div>
+          <div class="rounded-xl p-5 flex flex-col justify-center" style="background: #111;">
+            <span class="stat-num">∞</span>
+            <span class="font-mono text-xs text-paper/40 mt-2 uppercase tracking-wider">Shipped</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── MARQUEE ───────────────────────────────────────── -->
+  <div class="overflow-hidden border-t border-b py-4" style="border-color: rgba(212,160,23,0.2);" aria-hidden="true">
+    <div class="marquee-track">
+      <span class="font-mono text-amber text-xs tracking-[0.18em] uppercase whitespace-nowrap pr-12">
+        REACT NATIVE&nbsp;&nbsp;—&nbsp;&nbsp;SWIFT&nbsp;&nbsp;—&nbsp;&nbsp;iOS&nbsp;&nbsp;—&nbsp;&nbsp;VAPOR&nbsp;&nbsp;—&nbsp;&nbsp;CLEAN ARCHITECTURE&nbsp;&nbsp;—&nbsp;&nbsp;PAYMENT SYSTEMS&nbsp;&nbsp;—&nbsp;&nbsp;MVVM&nbsp;&nbsp;—&nbsp;&nbsp;SWIFTUI&nbsp;&nbsp;—&nbsp;&nbsp;CI/CD&nbsp;&nbsp;—&nbsp;&nbsp;
+      </span>
+      <span class="font-mono text-amber text-xs tracking-[0.18em] uppercase whitespace-nowrap pr-12" aria-hidden="true">
+        REACT NATIVE&nbsp;&nbsp;—&nbsp;&nbsp;SWIFT&nbsp;&nbsp;—&nbsp;&nbsp;iOS&nbsp;&nbsp;—&nbsp;&nbsp;VAPOR&nbsp;&nbsp;—&nbsp;&nbsp;CLEAN ARCHITECTURE&nbsp;&nbsp;—&nbsp;&nbsp;PAYMENT SYSTEMS&nbsp;&nbsp;—&nbsp;&nbsp;MVVM&nbsp;&nbsp;—&nbsp;&nbsp;SWIFTUI&nbsp;&nbsp;—&nbsp;&nbsp;CI/CD&nbsp;&nbsp;—&nbsp;&nbsp;
+      </span>
+    </div>
   </div>
-</section>
+
+  <!-- ── EXPERIENCE ────────────────────────────────────── -->
+  <section class="px-6 md:px-12 py-20 md:py-28" id="work">
+    <p class="section-label mb-12 reveal">Experience</p>
+
+    <div class="relative flex gap-10 md:gap-16">
+      <!-- Timeline line -->
+      <div class="hidden md:block flex-shrink-0 pt-1">
+        <div class="timeline-line" id="timelineLine" style="height: 100%; min-height: 400px;"></div>
+      </div>
+
+      <!-- Entries -->
+      <div class="flex flex-col gap-14 md:gap-16 w-full">
+
+        <div class="reveal" style="transition-delay:0s">
+          <span class="font-mono text-xs text-paper/30 block mb-2">Sept 2023 — Present</span>
+          <h3 class="font-display font-bold text-2xl md:text-3xl text-paper leading-tight">Multiplatform Mobile Engineer</h3>
+          <p class="text-amber font-medium text-lg mt-1">GeoPagos</p>
+          <p class="font-mono text-sm text-paper/50 mt-3 max-w-xl leading-relaxed">
+            Building cross-platform payment solutions with React Native. Architecting features for acquiring and point-of-sale mobile products across iOS and Android.
+          </p>
+        </div>
+
+        <div class="reveal" style="transition-delay:0.1s">
+          <span class="font-mono text-xs text-paper/30 block mb-2">— 2023</span>
+          <h3 class="font-display font-bold text-2xl md:text-3xl text-paper leading-tight">Lead iOS Engineer & Architect</h3>
+          <p class="text-amber font-medium text-lg mt-1">Previous roles</p>
+          <p class="font-mono text-sm text-paper/50 mt-3 max-w-xl leading-relaxed">
+            Designed and executed complex iOS features across multiple organizations. Led architecture decisions, mentored teams, and established engineering standards.
+          </p>
+        </div>
+
+        <div class="reveal" style="transition-delay:0.2s">
+          <p class="font-mono text-sm text-paper/25 italic">Full timeline available on request — LinkedIn for details.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CONTACT ───────────────────────────────────────── -->
+  <section class="px-6 md:px-12 py-20 md:py-28 border-t" style="border-color: rgba(245,240,232,0.06);" id="contact">
+    <p class="section-label mb-10 reveal">Contact</p>
+
+    <div class="reveal-wipe mb-8">
+      <p class="contact-type">LET'S</p>
+      <p class="contact-type text-amber">BUILD</p>
+      <p class="contact-type">SOMETHING.</p>
+    </div>
+
+    <div class="mt-14 flex flex-col sm:flex-row items-start sm:items-center gap-6 sm:gap-10 reveal" style="transition-delay:0.15s">
+      <a
+        href="mailto:alfredop88@me.com"
+        class="font-mono text-sm md:text-base text-paper/70 hover:text-paper underline underline-offset-4 decoration-amber/50 hover:decoration-amber transition-colors duration-300"
+      >
+        alfredop88@me.com
+      </a>
+
+      <div class="flex items-center gap-6">
+        <a href="https://github.com/alph0x" target="_blank" rel="noopener noreferrer" class="nav-link">GitHub</a>
+        <span class="text-amber/40">·</span>
+        <a href="https://linkedin.com/in/alph0x" target="_blank" rel="noopener noreferrer" class="nav-link">LinkedIn</a>
+        <span class="text-amber/40">·</span>
+        <a href="https://twitter.com/alph0x" target="_blank" rel="noopener noreferrer" class="nav-link">Twitter</a>
+        <span class="text-amber/40">·</span>
+        <a href="https://instagram.com/alph0x" target="_blank" rel="noopener noreferrer" class="nav-link">Instagram</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ────────────────────────────────────────── -->
+  <footer class="px-6 md:px-12 py-6 flex items-center justify-between border-t" style="border-color: rgba(245,240,232,0.06);">
+    <span class="font-mono text-xs text-paper/25">Alfredo Pérez — 2026</span>
+    <span class="font-mono text-xs text-paper/25">Made in Mexico</span>
+  </footer>
+
+  <!-- Mobile bottom nav -->
+  <nav class="sm:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center py-3 px-6"
+       style="background: rgba(10,10,10,0.95); backdrop-filter: blur(16px); border-top: 1px solid rgba(245,240,232,0.08);">
+    <a href="#top" class="font-mono text-xs text-paper/50 hover:text-amber transition-colors flex flex-col items-center gap-1">
+      <span class="text-base">⌂</span>
+      <span>home</span>
+    </a>
+    <a href="#work" class="font-mono text-xs text-paper/50 hover:text-amber transition-colors flex flex-col items-center gap-1">
+      <span class="text-base">◈</span>
+      <span>work</span>
+    </a>
+    <a href="#contact" class="font-mono text-xs text-paper/50 hover:text-amber transition-colors flex flex-col items-center gap-1">
+      <span class="text-base">✦</span>
+      <span>contact</span>
+    </a>
+  </nav>
+
+  <script>
+    // ── HERO NAME LETTER SPLIT ──────────────────────────
+    function splitLetters(el, text, baseDelay) {
+      el.innerHTML = text.split('').map((ch, i) => {
+        const delay = (baseDelay + i * 40) + 'ms';
+        return ch === ' '
+          ? '<span style="display:inline-block;width:0.25em"></span>'
+          : `<span class="letter" style="animation-delay:${delay}">${ch}</span>`;
+      }).join('');
+    }
+
+    splitLetters(document.getElementById('nameLineA'), 'ALFREDO', 300);
+    splitLetters(document.getElementById('nameLineB'), 'PÉREZ', 620);
+
+    // ── PROFILE IMAGE BLUR REVEAL ───────────────────────
+    const imgs = document.querySelectorAll('.profile-img');
+    imgs.forEach(img => {
+      if (img.complete) {
+        img.classList.add('loaded');
+      } else {
+        img.addEventListener('load', () => img.classList.add('loaded'));
+      }
+    });
+
+    // ── INTERSECTION OBSERVER ───────────────────────────
+    const revealEls = document.querySelectorAll('.reveal, .reveal-rotate, .reveal-wipe');
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry, idx) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+    revealEls.forEach(el => observer.observe(el));
+
+    // ── TIMELINE LINE DRAW ──────────────────────────────
+    const line = document.getElementById('timelineLine');
+    if (line) {
+      const lineObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            line.classList.add('revealed');
+            lineObserver.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.1 });
+      lineObserver.observe(line);
+    }
+
+    // ── SMOOTH ANCHOR SCROLL ────────────────────────────
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        const target = document.querySelector(a.getAttribute('href'));
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+  </script>
+</body>
+</html>
