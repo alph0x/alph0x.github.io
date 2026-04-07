@@ -3,9 +3,6 @@
 ## Overview
 This document provides an overview of the technologies used in the project.
 
-## Programming Languages
-- Python (version not specified)
-
 ## Build Tools
 - GitHub Actions (for CI/CD)
 
@@ -18,6 +15,16 @@ This document provides an overview of the technologies used in the project.
 ## Documentation
 - HTML for static content
 - Markdown for documentation files
+
+## Frontend Technologies
+- HTML5
+- CSS3
+  - Custom properties (variables)
+  - Flexbox and Grid layouts
+  - Animations
+  - Responsive design
+- JavaScript
+  - Simple scroll reveal effect using Intersection Observer API
 
 ## Additional Notes
 - The project uses a `.gitignore` file to manage ignored files.
