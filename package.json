@@ -1,0 +1,14 @@
+{
+  "name": "alph0x-portfolio",
+  "version": "1.0.0",
+  "description": "3D FPS Portfolio - Night City Apartment",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "happy-dom": "^15.0.0",
+    "vitest": "^2.0.0"
+  }
+}
