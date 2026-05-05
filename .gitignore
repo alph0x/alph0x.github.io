@@ -1,2 +1,28 @@
+# macOS
 .DS_Store
+
+# Aider (AI coding assistant)
 .aider*
+
+# Node / npm
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Claude Code local state
+.claude/
+
+# Test coverage
+coverage/
+
+# Build artifacts (if ever added)
+dist/
+build/
+
+# Environment variables
+.env
+.env.local
+
+# AI context files (local conversation state)
+CONTEXT.md

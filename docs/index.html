@@ -3,1678 +3,619 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ALFREDO PÉREZ — MOBILE ENGINEER</title>
-  <meta name="description" content="Multiplatform Mobile Software Engineer. 10+ years. React Native, Swift, iOS. Mexico.">
+  <title>ALPH0X // NETRUNNER</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,800;0,900;1,700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Press+Start+2P&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <meta name="theme-color" content="#08080c">
   <style>
-    /* ── RESET & BASE ───────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
+    body { font-family: 'Share Tech Mono', monospace; user-select: none; }
+    canvas { display: block; image-rendering: pixelated; position: fixed; inset: 0; width: 100%; height: 100%; }
 
-    :root {
-      --black:  #050505;
-      --yellow: #c0fc04;
-      --pink:   #ea027e;
-      --orange: #ff5500;
-      --blue:   #3601fb;
-      --cyan:   #00e5ff;
-      --red:    #ff1a1a;
-      --white:  #f0f0f0;
-      --dim:    rgba(240,240,240,0.38);
-      --display: 'Barlow Condensed', 'Arial Narrow', sans-serif;
-      --mono:    'Space Mono', monospace;
+    /* ── CRT OVERLAY ─────────────────────────────────── */
+    #crt-overlay {
+      position: fixed; inset: 0; pointer-events: none; z-index: 1000;
+      background: repeating-linear-gradient(0deg, transparent 0px, transparent 3px, rgba(0,0,0,0.03) 3px, rgba(0,0,0,0.03) 6px);
+      box-shadow: inset 0 0 60px rgba(0,0,0,0.1);
+    }
+    #crt-overlay::after {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(circle at center, transparent 60%, rgba(0,0,0,0.06) 100%);
     }
 
-    html { background: var(--black); scroll-behavior: smooth; }
-
-    body {
-      background: var(--black);
-      color: var(--white);
-      font-family: var(--mono);
-      overflow-x: hidden;
+    /* ── CROSSHAIR ───────────────────────────────────── */
+    #crosshair {
+      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      z-index: 200; pointer-events: none; color: rgba(0,240,255,0.7);
+      font-size: 24px; font-family: monospace; line-height: 1;
+      text-shadow: 0 0 8px rgba(0,240,255,0.5);
     }
 
-    ::selection { background: var(--yellow); color: var(--black); }
-
-    ::-webkit-scrollbar { width: 3px; }
-    ::-webkit-scrollbar-track { background: var(--black); }
-    ::-webkit-scrollbar-thumb { background: var(--yellow); }
-
-    a { color: inherit; text-decoration: none; }
-
-    /* ── TYPOGRAPHY HELPERS ─────────────────────────── */
-    .display {
-      font-family: var(--display);
-      font-weight: 900;
-      line-height: 0.88;
-      letter-spacing: -0.01em;
-      text-transform: uppercase;
-    }
-    .mono { font-family: var(--mono); }
-    .label {
-      font-family: var(--mono);
-      font-size: 0.65rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--dim);
-    }
-    .label-yellow {
-      font-family: var(--mono);
-      font-size: 0.65rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--yellow);
-    }
-
-    /* ── SCANLINES ──────────────────────────────────── */
-    .scanlines::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: repeating-linear-gradient(
-        0deg,
-        transparent 0px,
-        transparent 2px,
-        rgba(0,0,0,0.12) 2px,
-        rgba(0,0,0,0.12) 4px
-      );
-      pointer-events: none;
-      z-index: 1;
-    }
-
-    /* ── GRID BG ────────────────────────────────────── */
-    .grid-bg {
-      background-image:
-        linear-gradient(rgba(192,252,4,0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(192,252,4,0.04) 1px, transparent 1px);
-      background-size: 52px 52px;
-    }
-
-    /* ── NAV ────────────────────────────────────────── */
-    nav {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 90;
-      display: flex;
-      align-items: stretch;
-      height: 48px;
-      background: var(--black);
-      border-bottom: 1px solid rgba(192,252,4,0.2);
-    }
-
-    .nav-logo {
-      display: flex;
-      align-items: center;
-      padding: 0 20px;
-      background: var(--yellow);
-      color: var(--black);
-      font-family: var(--display);
-      font-weight: 900;
-      font-size: 1.1rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 100%, 0 100%);
-      padding-right: 28px;
-    }
-
-    .nav-links {
-      display: flex;
-      align-items: center;
-      gap: 0;
-      margin-left: auto;
-    }
-
-    .nav-link {
-      display: flex;
-      align-items: center;
-      height: 100%;
-      padding: 0 18px;
-      font-family: var(--mono);
-      font-size: 0.65rem;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: var(--dim);
-      border-left: 1px solid rgba(192,252,4,0.1);
-      transition: color 0.2s, background 0.2s;
-    }
-
-    .nav-link:hover {
-      color: var(--yellow);
-      background: rgba(192,252,4,0.06);
-    }
-
-    /* ── HERO ───────────────────────────────────────── */
-    #hero {
-      position: relative;
-      min-height: 100dvh;
-      display: grid;
-      grid-template-columns: 1fr auto;
-      align-items: end;
-      padding: 100px 40px 60px;
-      overflow: hidden;
-    }
-
-    .hero-bg {
-      position: absolute;
-      inset: 0;
-      background: var(--black);
-      background-image:
-        linear-gradient(rgba(192,252,4,0.035) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(192,252,4,0.035) 1px, transparent 1px);
-      background-size: 52px 52px;
-    }
-
-    /* Diagonal accent lines */
-    .hero-bg::after {
-      content: '';
-      position: absolute;
-      top: 0; right: 0;
-      width: 40%;
-      height: 100%;
-      background: linear-gradient(135deg, transparent 60%, rgba(192,252,4,0.03) 100%);
-      border-left: 1px solid rgba(192,252,4,0.08);
-    }
-
-    .hero-left {
-      position: relative;
-      z-index: 2;
-      max-width: 820px;
-    }
-
-    .hero-eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 24px;
-    }
-
-    .hero-eyebrow-dot {
-      width: 6px; height: 6px;
-      background: var(--yellow);
-      animation: blink 1.8s ease infinite;
-    }
-
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.1; }
-    }
-
-    .hero-name-a {
-      font-family: var(--display);
-      font-weight: 900;
-      font-size: clamp(15vw, 18vw, 230px);
-      line-height: 0.85;
-      letter-spacing: -0.02em;
-      text-transform: uppercase;
-      color: var(--white);
-    }
-
-    .hero-name-b {
-      font-family: var(--display);
-      font-weight: 900;
-      font-size: clamp(15vw, 18vw, 230px);
-      line-height: 0.85;
-      letter-spacing: -0.02em;
-      text-transform: uppercase;
-      color: var(--yellow);
-      -webkit-text-stroke: 0px;
-    }
-
-    .hero-rule {
-      height: 2px;
-      background: var(--yellow);
-      margin: 20px 0;
-      transform-origin: left;
-      animation: scaleX 0.8s cubic-bezier(0.16,1,0.3,1) 0.3s both;
-    }
-
-    @keyframes scaleX {
-      from { transform: scaleX(0); }
-      to   { transform: scaleX(1); }
-    }
-
-    .hero-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0;
-    }
-
-    .hero-meta-item {
-      padding: 6px 14px;
-      font-family: var(--mono);
-      font-size: 0.7rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--black);
-      background: var(--white);
-    }
-
-    .hero-meta-item:nth-child(even) {
-      background: var(--dim);
-      color: var(--black);
-    }
-
-    .hero-meta-sep {
-      display: flex;
-      align-items: center;
-      padding: 0 6px;
-      font-size: 0.6rem;
-      color: rgba(192,252,4,0.4);
-    }
-
-    /* ── RUNNER ID ──────────────────────────────────── */
-    .runner-id {
-      position: relative;
-      z-index: 2;
-      width: 220px;
-      flex-shrink: 0;
-      align-self: end;
-      margin-left: 40px;
-      border: 1px solid rgba(192,252,4,0.25);
-      clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
-      overflow: hidden;
-    }
-
-    .runner-id-header {
-      padding: 6px 10px;
-      background: var(--yellow);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .runner-id-header span {
-      font-family: var(--mono);
-      font-size: 0.6rem;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: var(--black);
-      font-weight: 700;
-    }
-
-    .runner-photo-wrap {
-      position: relative;
-      height: 220px;
-      overflow: hidden;
-      background: #111;
-    }
-
-    .runner-photo-wrap::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: rgba(192,252,4,0.18);
-      mix-blend-mode: screen;
+    /* ── HUD ─────────────────────────────────────────── */
+    #hud {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 150;
+      height: 72px; background: rgba(8,8,12,0.92); border-top: 2px solid #2a2a3a;
+      display: flex; align-items: center; padding: 0 20px; gap: 20px;
+      font-family: 'Press Start 2P', monospace; font-size: 10px;
       pointer-events: none;
     }
+    .hud-block { display: flex; flex-direction: column; gap: 4px; min-width: 80px; }
+    .hud-label { color: #4a4a60; font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; }
+    .hud-value { font-size: 14px; letter-spacing: 0.04em; }
+    .hud-green { color: #00ff88; text-shadow: 0 0 8px rgba(0,255,136,0.5); }
+    .hud-yellow { color: #fcee0a; text-shadow: 0 0 8px rgba(252,238,10,0.5); }
+    .hud-cyan { color: #00f0ff; text-shadow: 0 0 8px rgba(0,240,255,0.5); }
+    .hud-pink { color: #ff003c; text-shadow: 0 0 8px rgba(255,0,60,0.5); }
+    .hud-bar { width: 100px; height: 10px; background: #1a1a28; border: 1px solid #3a3a50; position: relative; }
+    .hud-bar-inner { height: 100%; background: repeating-linear-gradient(90deg, var(--c) 0px, var(--c) 4px, transparent 4px, transparent 6px); }
 
-    /* scanlines on photo */
-    .runner-photo-wrap::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: repeating-linear-gradient(
-        0deg,
-        transparent 0px,
-        transparent 2px,
-        rgba(0,0,0,0.15) 2px,
-        rgba(0,0,0,0.15) 4px
-      );
-      z-index: 2;
-      pointer-events: none;
+    /* ── PROMPT ──────────────────────────────────────── */
+    #prompt {
+      position: fixed; top: 62%; left: 50%; transform: translate(-50%, -50%);
+      z-index: 200; pointer-events: none; color: #fcee0a;
+      font-family: 'Press Start 2P', monospace; font-size: 10px;
+      text-shadow: 0 0 12px rgba(252,238,10,0.6); opacity: 0; transition: opacity 0.2s;
+      background: rgba(0,0,0,0.6); padding: 8px 16px; border: 1px solid #fcee0a;
+    }
+    #prompt.active { opacity: 1; }
+
+    /* ── AMMO COUNTER ────────────────────────────────── */
+    #ammo-counter {
+      position: fixed; bottom: 80px; right: 24px; z-index: 150;
+      font-family: 'Press Start 2P', monospace; font-size: 14px;
+      color: #fcee0a; text-shadow: 0 0 8px rgba(252,238,10,0.5);
+      pointer-events: none; text-align: right;
+    }
+    #ammo-counter .ammo-num { font-size: 28px; }
+
+    /* ── LOADING SCREEN ──────────────────────────────── */
+    #loading {
+      position: fixed; inset: 0; z-index: 5000; background: #08080c;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 24px; color: #fcee0a; font-family: 'Press Start 2P', monospace; font-size: 12px;
+    }
+    #loading-bar { width: 300px; height: 6px; background: #1a1a28; border: 1px solid #3a3a50; }
+    #loading-bar-fill { width: 0%; height: 100%; background: #fcee0a; transition: width 0.3s; }
+
+    /* ── START SCREEN ────────────────────────────────── */
+    #start-screen {
+      position: fixed; inset: 0; z-index: 4000; background: #08080c;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 40px; cursor: default;
+    }
+    #start-screen h1 {
+      font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: clamp(40px, 8vw, 100px);
+      color: #e8e8f0; text-transform: uppercase; letter-spacing: -0.02em;
+      text-shadow: 3px 3px 0 #ff003c, 6px 6px 0 rgba(255,0,60,0.3), 0 0 40px rgba(252,238,10,0.15);
+      text-align: center; line-height: 0.9;
+    }
+    #start-screen h1 span { display: block; color: #fcee0a; }
+    #start-screen .subtitle {
+      font-family: 'Share Tech Mono', monospace; font-size: 14px; color: #6a6a80;
+      letter-spacing: 0.2em; text-transform: uppercase;
+    }
+    #start-btn {
+      font-family: 'Press Start 2P', monospace; font-size: 12px; color: #08080c;
+      background: #fcee0a; border: none; padding: 16px 40px; cursor: pointer;
+      box-shadow: 0 0 20px rgba(252,238,10,0.3); text-transform: uppercase;
+      transition: transform 0.1s, box-shadow 0.2s;
+    }
+    #start-btn:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(252,238,10,0.5); }
+    #start-screen .controls-hint {
+      font-family: 'Share Tech Mono', monospace; font-size: 12px; color: #4a4a60;
+      display: flex; gap: 24px; margin-top: 10px;
     }
 
-    .runner-photo-wrap img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: top;
-      filter: grayscale(1) contrast(1.15) brightness(0.9);
-      display: block;
-    }
-
-    .runner-id-data {
-      padding: 10px;
-      background: rgba(5,5,5,0.95);
-      border-top: 1px solid rgba(192,252,4,0.15);
-    }
-
-    .runner-id-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      padding: 3px 0;
-      border-bottom: 1px solid rgba(192,252,4,0.06);
-    }
-
-    .runner-id-row:last-child { border-bottom: none; }
-
-    .runner-id-key {
-      font-family: var(--mono);
-      font-size: 0.55rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--dim);
-    }
-
-    .runner-id-val {
-      font-family: var(--mono);
-      font-size: 0.6rem;
-      color: var(--yellow);
-      letter-spacing: 0.06em;
-    }
-
-    /* ── YELLOW STRIP ───────────────────────────────── */
-    .yellow-strip {
-      background: var(--yellow);
-      color: var(--black);
-      padding: 14px 40px;
-      overflow: hidden;
-    }
-
-    .yellow-strip-inner {
-      display: flex;
-      align-items: center;
-      gap: 32px;
-      flex-wrap: wrap;
-    }
-
-    .strip-item {
-      font-family: var(--display);
-      font-weight: 800;
-      font-size: 1.1rem;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      color: var(--black);
-      white-space: nowrap;
-    }
-
-    .strip-sep {
-      color: rgba(5,5,5,0.3);
-      font-size: 1.4rem;
-      font-weight: 900;
-      line-height: 1;
-    }
-
-    /* ── PROFILE SECTION ────────────────────────────── */
-    #profile {
-      padding: 80px 40px;
-      background: var(--black);
-    }
-
-    .section-header {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 48px;
-    }
-
-    .section-number {
-      font-family: var(--display);
-      font-weight: 900;
-      font-size: 5rem;
-      line-height: 1;
-      color: rgba(192,252,4,0.12);
-      letter-spacing: -0.02em;
-    }
-
-    .section-title {
-      font-family: var(--display);
-      font-weight: 900;
-      font-size: 2.8rem;
-      line-height: 1;
-      text-transform: uppercase;
-      letter-spacing: 0.02em;
-    }
-
-    /* Skills grid */
-    .skills-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 2px;
-    }
-
-    .skill-block {
-      padding: 14px 18px;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(192,252,4,0.08);
-      transition: background 0.15s, border-color 0.15s;
-      cursor: default;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .skill-block::before {
-      content: '';
-      position: absolute;
-      left: 0; top: 0; bottom: 0;
-      width: 2px;
-      background: var(--yellow);
-      transform: scaleY(0);
-      transform-origin: bottom;
-      transition: transform 0.25s cubic-bezier(0.16,1,0.3,1);
-    }
-
-    .skill-block:hover {
-      background: rgba(192,252,4,0.06);
-      border-color: rgba(192,252,4,0.3);
-    }
-
-    .skill-block:hover::before {
-      transform: scaleY(1);
-    }
-
-    .skill-name {
-      font-family: var(--display);
-      font-weight: 700;
-      font-size: 1.05rem;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      color: var(--white);
-    }
-
-    .skill-type {
-      font-family: var(--mono);
-      font-size: 0.55rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--dim);
-      margin-top: 3px;
-    }
-
-    /* Stat row */
-    .stat-row {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 2px;
-      margin-bottom: 40px;
-    }
-
-    .stat-block {
-      padding: 24px 20px;
-      background: rgba(192,252,4,0.04);
-      border: 1px solid rgba(192,252,4,0.12);
-      position: relative;
-    }
-
-    .stat-block-accent {
-      background: var(--yellow);
-      border-color: var(--yellow);
-    }
-
-    .stat-num {
-      font-family: var(--display);
-      font-weight: 900;
-      font-size: 3.5rem;
-      line-height: 1;
-      color: var(--yellow);
-      letter-spacing: -0.02em;
-    }
-
-    .stat-block-accent .stat-num {
-      color: var(--black);
-    }
-
-    .stat-label {
-      font-family: var(--mono);
-      font-size: 0.6rem;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: var(--dim);
-      margin-top: 6px;
-    }
-
-    .stat-block-accent .stat-label {
-      color: rgba(5,5,5,0.6);
-    }
-
-    /* ── EXPERIENCE ─────────────────────────────────── */
-    #experience {
-      padding: 80px 40px;
-      background: #0c0c0c;
-      border-top: 1px solid rgba(192,252,4,0.08);
-    }
-
-    .exp-entry {
-      display: grid;
-      grid-template-columns: 180px 1fr;
-      gap: 0;
-      border-top: 1px solid rgba(192,252,4,0.1);
-      padding: 32px 0;
-      position: relative;
-    }
-
-    .exp-entry:last-child {
-      border-bottom: 1px solid rgba(192,252,4,0.1);
-    }
-
-    .exp-date {
-      font-family: var(--mono);
-      font-size: 0.65rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--dim);
-      padding-right: 24px;
-      padding-top: 4px;
-    }
-
-    .exp-date-current {
-      color: var(--yellow);
-    }
-
-    .exp-body {}
-
-    .exp-role {
-      font-family: var(--display);
-      font-weight: 800;
-      font-size: 1.8rem;
-      text-transform: uppercase;
-      letter-spacing: 0.02em;
-      color: var(--white);
-      line-height: 1;
-      margin-bottom: 4px;
-    }
-
-    .exp-company {
-      font-family: var(--display);
-      font-weight: 700;
-      font-size: 1.1rem;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--yellow);
-      margin-bottom: 12px;
-    }
-
-    .exp-desc {
-      font-family: var(--mono);
-      font-size: 0.72rem;
-      line-height: 1.8;
-      color: var(--dim);
-      max-width: 560px;
-    }
-
-    .exp-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
-      margin-top: 14px;
-    }
-
-    .exp-tag {
-      padding: 3px 10px;
-      font-family: var(--mono);
-      font-size: 0.58rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--black);
-      background: var(--yellow);
-    }
-
-    .exp-tag-outline {
-      background: transparent;
-      color: var(--yellow);
-      border: 1px solid rgba(192,252,4,0.35);
-    }
-
-    /* ── CONTACT ────────────────────────────────────── */
-    #contact {
-      padding: 80px 40px;
-      background: var(--pink);
-      position: relative;
-      overflow: hidden;
-    }
-
-    #contact::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: repeating-linear-gradient(
-        0deg,
-        transparent 0px,
-        transparent 2px,
-        rgba(0,0,0,0.06) 2px,
-        rgba(0,0,0,0.06) 4px
-      );
-      pointer-events: none;
-    }
-
-    .contact-inner {
-      position: relative;
-      z-index: 1;
-    }
-
-    .contact-head {
-      font-family: var(--display);
-      font-weight: 900;
-      font-size: clamp(10vw, 12vw, 150px);
-      line-height: 0.88;
-      letter-spacing: -0.02em;
-      text-transform: uppercase;
-      color: var(--black);
-      margin-bottom: 40px;
-    }
-
-    .contact-links {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 2px;
-    }
-
-    .contact-link {
-      display: inline-flex;
-      align-items: center;
-      padding: 12px 22px;
-      font-family: var(--mono);
-      font-size: 0.7rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--black);
-      background: rgba(0,0,0,0.12);
-      border: 1px solid rgba(0,0,0,0.2);
-      transition: background 0.2s, color 0.2s;
-    }
-
-    .contact-link:hover {
-      background: var(--black);
-      color: var(--yellow);
-    }
-
-    .contact-link-primary {
-      background: var(--black);
-      color: var(--yellow);
-    }
-
-    .contact-link-primary:hover {
-      background: var(--yellow);
-      color: var(--black);
-    }
-
-    /* ── FOOTER ─────────────────────────────────────── */
-    footer {
-      padding: 20px 40px;
-      background: var(--black);
-      border-top: 1px solid rgba(192,252,4,0.1);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    footer span {
-      font-family: var(--mono);
-      font-size: 0.6rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--dim);
-    }
-
-    /* ── MOBILE ─────────────────────────────────────── */
-    @media (max-width: 768px) {
-      nav { height: 44px; }
-      .nav-links { display: none; }
-
-      #hero {
-        grid-template-columns: 1fr;
-        padding: 72px 20px 40px;
-        gap: 32px;
-      }
-
-      .runner-id {
-        width: 100%;
-        max-width: 280px;
-        margin-left: 0;
-      }
-
-      .runner-photo-wrap { height: 200px; }
-
-      .hero-name-a,
-      .hero-name-b {
-        font-size: clamp(18vw, 22vw, 100px);
-      }
-
-      .yellow-strip { padding: 12px 20px; }
-      .strip-item { font-size: 0.9rem; }
-
-      #profile, #experience { padding: 50px 20px; }
-      #contact { padding: 50px 20px; }
-      footer { padding: 16px 20px; flex-direction: column; gap: 6px; text-align: center; }
-
-      .exp-entry {
-        grid-template-columns: 1fr;
-        gap: 6px;
-      }
-
-      .stat-row { grid-template-columns: 1fr 1fr; }
-
-      .section-number { font-size: 3rem; }
-      .section-title { font-size: 2rem; }
-
-      .contact-head { font-size: clamp(12vw, 16vw, 80px); }
-
-      /* Mobile bottom bar */
-      .mobile-bar {
-        display: flex !important;
-      }
-    }
-
-    @media (min-width: 769px) {
-      .mobile-bar { display: none; }
-    }
-
-    .mobile-bar {
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      z-index: 90;
-      background: rgba(5,5,5,0.96);
-      border-top: 1px solid rgba(192,252,4,0.15);
-      display: none;
-      justify-content: space-around;
-      align-items: center;
-      height: 52px;
-    }
-
-    .mobile-bar a {
-      font-family: var(--mono);
-      font-size: 0.6rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--dim);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 3px;
-      transition: color 0.2s;
-    }
-
-    .mobile-bar a:hover { color: var(--yellow); }
-
-    /* ── BIO BLOCK ──────────────────────────────────── */
-    .bio-block {
-      padding: 24px 28px;
-      border: 1px solid rgba(192,252,4,0.1);
-      border-left: 3px solid var(--yellow);
-      background: rgba(192,252,4,0.02);
-      margin-bottom: 40px;
-    }
-
-    .bio-text {
-      font-family: var(--mono);
-      font-size: 0.78rem;
-      line-height: 2;
-      color: rgba(240,240,240,0.7);
-      max-width: 760px;
-    }
-
-    /* ── TWO COL ─────────────────────────────────────── */
-    .two-col {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 2px;
-      margin-top: 40px;
-    }
-
-    @media (max-width: 768px) {
-      .two-col { grid-template-columns: 1fr; }
-    }
-
+    /* ── INFO PANELS (Terminal overlay) ──────────────── */
     .info-panel {
-      padding: 20px 22px;
-      background: rgba(255,255,255,0.02);
-      border: 1px solid rgba(192,252,4,0.08);
+      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.9);
+      z-index: 3000; width: 90%; max-width: 900px; max-height: 85vh; overflow-y: auto;
+      background: rgba(8,8,12,0.97); border: 2px solid #2a2a3a;
+      box-shadow: 0 0 40px rgba(0,0,0,0.9), inset 0 0 60px rgba(0,0,0,0.5);
+      padding: 40px; opacity: 0; pointer-events: none; transition: all 0.3s;
+    }
+    .info-panel.active { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
+    .info-panel::-webkit-scrollbar { width: 4px; }
+    .info-panel::-webkit-scrollbar-thumb { background: #fcee0a; }
+
+    .panel-header {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 32px;
+      padding-bottom: 16px; border-bottom: 2px solid #1a1a28;
+    }
+    .panel-header .panel-icon {
+      width: 40px; height: 40px; border: 2px solid var(--accent); display: flex;
+      align-items: center; justify-content: center; font-size: 18px;
+      color: var(--accent); text-shadow: 0 0 10px var(--accent-glow);
+    }
+    .panel-header h2 {
+      font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 28px;
+      text-transform: uppercase; color: #e8e8f0; letter-spacing: 0.04em;
+    }
+    .panel-close {
+      margin-left: auto; font-family: 'Press Start 2P', monospace; font-size: 10px;
+      color: #ff003c; background: none; border: 2px solid #ff003c; padding: 8px 16px;
+      cursor: pointer; transition: all 0.2s; text-transform: uppercase;
+    }
+    .panel-close:hover { background: #ff003c; color: #e8e8f0; }
+
+    .panel-body { font-family: 'Share Tech Mono', monospace; font-size: 14px; line-height: 1.8; color: #e8e8f0; }
+    .panel-body .section-label {
+      font-family: 'Press Start 2P', monospace; font-size: 9px; color: #4a4a60;
+      letter-spacing: 0.12em; text-transform: uppercase; margin: 24px 0 12px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .panel-body .section-label::after { content: ''; flex: 1; height: 1px; background: #1a1a28; }
+    .panel-body .bio-text { max-width: 700px; }
+    .panel-body .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+    .panel-body .stat-block { background: #11111a; border: 2px solid #1a1a28; padding: 16px; position: relative; }
+    .panel-body .stat-block::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--accent); box-shadow: 0 0 10px var(--accent-glow); }
+    .panel-body .stat-num { font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 28px; color: var(--accent); text-shadow: 0 0 10px var(--accent-glow); }
+    .panel-body .stat-label { font-family: 'Press Start 2P', monospace; font-size: 8px; color: #4a4a60; margin-top: 6px; }
+    .panel-body .skills-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 3px; }
+    .panel-body .skill-chip { padding: 12px 14px; background: #11111a; border: 2px solid #1a1a28; position: relative; transition: all 0.15s; }
+    .panel-body .skill-chip:hover { border-color: var(--accent); box-shadow: 0 0 12px var(--accent-glow); }
+    .panel-body .skill-chip::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--accent); transform: scaleY(0); transform-origin: bottom; transition: transform 0.25s; }
+    .panel-body .skill-chip:hover::before { transform: scaleY(1); }
+    .panel-body .skill-name { font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 13px; text-transform: uppercase; color: #e8e8f0; }
+    .panel-body .skill-type { font-family: 'Press Start 2P', monospace; font-size: 7px; color: #4a4a60; margin-top: 4px; }
+    .panel-body .mission-entry { border-top: 2px solid #1a1a28; padding: 24px 0; }
+    .panel-body .mission-role { font-family: 'Orbitron', sans-serif; font-weight: 800; font-size: 18px; text-transform: uppercase; color: #e8e8f0; margin-bottom: 4px; }
+    .panel-body .mission-corp { font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 14px; text-transform: uppercase; color: #ff003c; margin-bottom: 10px; text-shadow: 0 0 10px rgba(255,0,60,0.3); }
+    .panel-body .mission-desc { color: #e8e8f0; font-size: 13px; line-height: 1.7; max-width: 600px; }
+    .panel-body .mission-desc li { list-style: none; padding-left: 16px; position: relative; margin-bottom: 4px; }
+    .panel-body .mission-desc li::before { content: '>'; position: absolute; left: 0; color: #ff003c; font-family: 'Press Start 2P'; font-size: 8px; }
+    .panel-body .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+    .panel-body .tag { font-family: 'Press Start 2P', monospace; font-size: 7px; letter-spacing: 0.06em; text-transform: uppercase; padding: 5px 10px; border: 2px solid transparent; }
+    .tag-cyber-fill { background: #fcee0a; color: #08080c; border-color: #fcee0a; }
+    .tag-pink-fill { background: #ff003c; color: #e8e8f0; border-color: #ff003c; }
+    .tag-cyan-fill { background: #00f0ff; color: #08080c; border-color: #00f0ff; }
+    .tag-orange-fill { background: #ff6b00; color: #08080c; border-color: #ff6b00; }
+    .tag-green-fill { background: #00ff88; color: #08080c; border-color: #00ff88; }
+    .tag-dim-out { border-color: #3a3a50; color: #6a6a80; background: transparent; }
+    .panel-body .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; }
+    @media (max-width: 768px) { .panel-body .two-col { grid-template-columns: 1fr; } .panel-body .stat-row { grid-template-columns: 1fr; } }
+    .panel-body .info-block { padding: 18px 20px; background: #11111a; border: 2px solid #1a1a28; }
+    .panel-body .info-title { font-family: 'Orbitron', sans-serif; font-weight: 800; font-size: 12px; text-transform: uppercase; color: #fcee0a; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #1a1a28; text-shadow: 0 0 10px rgba(252,238,10,0.3); }
+    .panel-body .info-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #1a1a28; font-size: 12px; }
+    .panel-body .info-row:last-child { border-bottom: none; }
+    .panel-body .info-key { font-family: 'Press Start 2P', monospace; font-size: 7px; color: #4a4a60; text-transform: uppercase; }
+    .panel-body .info-val { color: #e8e8f0; text-align: right; }
+    .panel-body .contact-links { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 16px; }
+    .panel-body .contact-link { display: inline-flex; padding: 12px 20px; font-family: 'Press Start 2P', monospace; font-size: 8px; letter-spacing: 0.06em; text-transform: uppercase; color: #08080c; background: rgba(0,0,0,0.15); border: 2px solid rgba(0,0,0,0.25); transition: all 0.2s; text-decoration: none; }
+    .panel-body .contact-link:hover { background: #08080c; color: #fcee0a; border-color: #08080c; box-shadow: 0 0 20px rgba(252,238,10,0.3); }
+    .panel-body .contact-link-primary { background: #08080c; color: #fcee0a; border-color: #08080c; }
+    .panel-body .contact-link-primary:hover { background: #fcee0a; color: #08080c; border-color: #fcee0a; }
+
+    /* ── WEAPON OVERLAY (HTML fallback) ──────────────── */
+    #weapon-hud {
+      position: fixed; bottom: 80px; right: 40px; z-index: 120;
+      width: 200px; height: 150px; pointer-events: none;
     }
 
-    .info-panel-title {
-      font-family: var(--display);
-      font-weight: 800;
-      font-size: 0.85rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--yellow);
-      margin-bottom: 14px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid rgba(192,252,4,0.12);
-    }
-
-    .info-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      padding: 5px 0;
-      border-bottom: 1px solid rgba(192,252,4,0.04);
-    }
-
-    .info-row:last-child { border-bottom: none; }
-
-    .info-key {
-      font-family: var(--mono);
-      font-size: 0.6rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--dim);
-    }
-
-    .info-val {
-      font-family: var(--mono);
-      font-size: 0.62rem;
-      color: var(--white);
-      text-align: right;
-    }
-
-    /* ── BULLET LIST ─────────────────────────────────── */
-    .bullet-list {
-      list-style: none;
-      margin-top: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-      max-width: 560px;
-    }
-
-    .bullet-list li {
-      font-family: var(--mono);
-      font-size: 0.68rem;
-      line-height: 1.6;
-      color: var(--dim);
-      padding-left: 16px;
-      position: relative;
-    }
-
-    .bullet-list li::before {
-      content: '▸';
-      position: absolute;
-      left: 0;
-      color: var(--yellow);
-      font-size: 0.55rem;
-      top: 2px;
-    }
-
-    /* ── EDUCATION ───────────────────────────────────── */
-    #education {
-      padding: 80px 40px;
-      background: var(--black);
-      border-top: 1px solid rgba(192,252,4,0.08);
-    }
-
-    @media (max-width: 768px) {
-      #education { padding: 50px 20px; }
-    }
-
-    /* ── TAG SYSTEM (multi-color) ───────────────────── */
-    /* base tag — overrides exp-tag/exp-tag-outline */
-    .t {
-      display: inline-flex;
-      align-items: center;
-      padding: 5px 11px;
-      font-family: var(--display);
-      font-weight: 700;
-      font-size: 0.78rem;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      line-height: 1;
-    }
-    /* filled */
-    .t-y  { background: var(--yellow); color: #000; }
-    .t-p  { background: var(--pink);   color: #fff; }
-    .t-o  { background: var(--orange); color: #000; }
-    .t-b  { background: var(--blue);   color: #fff; }
-    .t-c  { background: var(--cyan);   color: #000; }
-    .t-r  { background: var(--red);    color: #fff; }
-    .t-w  { background: var(--white);  color: #000; }
-    /* outline */
-    .t-yo { border: 1.5px solid var(--yellow); color: var(--yellow); background: transparent; }
-    .t-po { border: 1.5px solid var(--pink);   color: var(--pink);   background: transparent; }
-    .t-oo { border: 1.5px solid var(--orange); color: var(--orange); background: transparent; }
-    .t-bo { border: 1.5px solid var(--blue);   color: var(--blue);   background: transparent; }
-    .t-co { border: 1.5px solid var(--cyan);   color: var(--cyan);   background: transparent; }
-    .t-ro { border: 1.5px solid var(--red);    color: var(--red);    background: transparent; }
-    .t-wo { border: 1.5px solid rgba(240,240,240,0.3); color: var(--dim); background: transparent; }
-
-    /* ── STRIPE PATTERNS ─────────────────────────────── */
-    .stripe-y {
-      background-image: repeating-linear-gradient(
-        -45deg,
-        transparent 0px, transparent 5px,
-        rgba(192,252,4,0.07) 5px, rgba(192,252,4,0.07) 10px
-      );
-    }
-    .stripe-b {
-      background-image: repeating-linear-gradient(
-        -45deg,
-        transparent 0px, transparent 5px,
-        rgba(54,1,251,0.1) 5px, rgba(54,1,251,0.1) 10px
-      );
-    }
-
-    /* ── COLOR SPECTRUM BAR ──────────────────────────── */
-    .spectrum-bar {
-      height: 3px;
-      display: flex;
-      gap: 0;
-    }
-    .spectrum-bar span {
-      flex: 1;
-      height: 100%;
-    }
-
-    /* ── GEO SHAPES ──────────────────────────────────── */
-    .geo-diamond {
-      width: 52px; height: 52px;
-      border: 2px solid var(--yellow);
-      transform: rotate(45deg);
-      flex-shrink: 0;
-      display: inline-block;
-    }
-    .geo-diamond-sm {
-      width: 10px; height: 10px;
-      border: 1.5px solid currentColor;
-      transform: rotate(45deg);
-      display: inline-block;
-      vertical-align: middle;
-    }
-    .geo-cross {
-      position: relative;
-      width: 20px; height: 20px;
-      flex-shrink: 0;
-    }
-    .geo-cross::before,
-    .geo-cross::after {
-      content: '';
-      position: absolute;
-      background: var(--yellow);
-    }
-    .geo-cross::before { width: 100%; height: 1px; top: 50%; left: 0; }
-    .geo-cross::after  { height: 100%; width: 1px; left: 50%; top: 0; }
-
-    /* ── BRACKET CORNERS ─────────────────────────────── */
-    .bracketed {
-      position: relative;
-      padding: 14px;
-    }
-    .bracketed::before,
-    .bracketed::after {
-      content: '';
-      position: absolute;
-      width: 14px; height: 14px;
-      pointer-events: none;
-    }
-    .bracketed::before { top: 0; left: 0; border-top: 2px solid var(--yellow); border-left: 2px solid var(--yellow); }
-    .bracketed::after  { bottom: 0; right: 0; border-bottom: 2px solid var(--yellow); border-right: 2px solid var(--yellow); }
-
-    /* ── HUD SECTION LABEL ───────────────────────────── */
-    .hud-label {
-      font-family: var(--mono);
-      font-size: 0.6rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--yellow);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 8px;
-    }
-    .hud-label::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: rgba(192,252,4,0.2);
-    }
-
-    /* ── HERO VECTOR DECOR ───────────────────────────── */
-    .hero-vector {
-      position: absolute;
-      pointer-events: none;
-      z-index: 1;
-    }
-
-    /* ── STAT BLOCK COLOR ACCENTS ────────────────────── */
-    .stat-block-y { border-top: 3px solid var(--yellow) !important; }
-    .stat-block-p { border-top: 3px solid var(--pink) !important; }
-    .stat-block-b { border-top: 3px solid var(--blue) !important; }
-
-    /* ── SECTION DIVIDER ─────────────────────────────── */
-    .sec-divider {
-      display: flex;
-      align-items: stretch;
-      height: 6px;
-      gap: 0;
-    }
-    .sec-divider span { flex: 1; }
-
-    /* ── SKILL BLOCK COLORS ──────────────────────────── */
-    .skill-block-p::before { background: var(--pink) !important; }
-    .skill-block-b::before { background: var(--blue) !important; }
-    .skill-block-o::before { background: var(--orange) !important; }
-    .skill-block-c::before { background: var(--cyan) !important; }
-
-    /* ── REVEAL ANIMATIONS ──────────────────────────── */
-    @media (prefers-reduced-motion: no-preference) {
-      .reveal {
-        opacity: 0;
-        transform: translateY(20px);
-        transition: opacity 0.6s cubic-bezier(0.16,1,0.3,1),
-                    transform 0.6s cubic-bezier(0.16,1,0.3,1);
-      }
-      .reveal.on { opacity: 1; transform: none; }
+    /* ── MOBILE RESUME (static fallback) ─────────────── */
+    #mobile-resume { display: none; }
+    @media (max-width: 768px), (hover: none) and (pointer: coarse) {
+      #game-container, #loading, #start-screen, #hud, #crosshair, #prompt, #ammo-counter, .info-panel { display: none !important; }
+      #mobile-resume { display: block !important; background: #08080c; color: #e8e8f0; font-family: 'Share Tech Mono', monospace; padding: 20px; }
+      #mobile-resume .m-header { text-align: center; margin-bottom: 30px; }
+      #mobile-resume .m-header h1 { font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 2.2rem; text-transform: uppercase; line-height: 0.9; text-shadow: 2px 2px 0 #ff003c; }
+      #mobile-resume .m-header h1 span { color: #fcee0a; }
+      #mobile-resume .m-avatar { width: 120px; height: 120px; object-fit: cover; border: 2px solid #ff003c; margin: 0 auto 16px; display: block; filter: grayscale(0.3) contrast(1.1); }
+      #mobile-resume .m-section { margin-bottom: 28px; }
+      #mobile-resume .m-label { font-family: 'Press Start 2P', monospace; font-size: 8px; color: #4a4a60; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 8px; border-bottom: 1px solid #1a1a28; padding-bottom: 4px; }
+      #mobile-resume .m-title { font-family: 'Orbitron', sans-serif; font-weight: 800; font-size: 1.1rem; text-transform: uppercase; color: #fcee0a; margin-bottom: 2px; }
+      #mobile-resume .m-corp { font-family: 'Orbitron', sans-serif; font-size: 0.85rem; color: #ff003c; text-transform: uppercase; margin-bottom: 6px; }
+      #mobile-resume .m-text { font-size: 13px; line-height: 1.7; color: #e8e8f0; }
+      #mobile-resume .m-skills { display: flex; flex-wrap: wrap; gap: 4px; }
+      #mobile-resume .m-skill { font-family: 'Press Start 2P', monospace; font-size: 7px; text-transform: uppercase; padding: 5px 8px; background: #11111a; border: 1px solid #2a2a3a; color: #fcee0a; }
+      #mobile-resume .m-contact a { display: block; color: #fcee0a; text-decoration: none; margin-bottom: 6px; font-size: 13px; }
+      #mobile-resume .m-footer { text-align: center; font-size: 11px; color: #4a4a60; margin-top: 30px; padding-top: 20px; border-top: 1px solid #1a1a28; }
     }
   </style>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
 </head>
 <body>
 
-  <!-- ── NAV ──────────────────────────────────────── -->
-  <nav>
-    <a href="#hero" class="nav-logo">ALPH0X</a>
-    <div class="nav-links">
-      <a href="#profile" class="nav-link">[ PROFILE ]</a>
-      <a href="#experience" class="nav-link">[ EXPERIENCE ]</a>
-      <a href="#education" class="nav-link">[ EDUCATION ]</a>
-      <a href="#contact" class="nav-link">[ CONTACT ]</a>
-    </div>
-  </nav>
+  <!-- CRT Overlay -->
+  <div id="crt-overlay"></div>
 
-  <!-- ── HERO ─────────────────────────────────────── -->
-  <section id="hero">
-    <div class="hero-bg"></div>
+  <!-- Crosshair -->
+  <div id="crosshair">+</div>
 
-    <!-- Geometric decorations -->
-    <div class="hero-vector" style="top: 80px; right: 420px;">
-      <svg width="90" height="90" viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg" opacity="0.35">
-        <rect x="44" y="2" width="60" height="60" transform="rotate(45 44 2)" stroke="#c0fc04" stroke-width="1.5" fill="none"/>
-        <rect x="44" y="16" width="36" height="36" transform="rotate(45 44 16)" stroke="#c0fc04" stroke-width="0.75" fill="none"/>
-        <circle cx="44" cy="44" r="4" fill="#c0fc04"/>
-      </svg>
-    </div>
-    <div class="hero-vector" style="top: 60px; right: 300px;">
-      <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" opacity="0.2">
-        <line x1="0" y1="20" x2="40" y2="20" stroke="#ea027e" stroke-width="1"/>
-        <line x1="20" y1="0" x2="20" y2="40" stroke="#ea027e" stroke-width="1"/>
-        <circle cx="20" cy="20" r="10" stroke="#ea027e" stroke-width="1" fill="none"/>
-        <circle cx="20" cy="20" r="2" fill="#ea027e"/>
-      </svg>
-    </div>
-    <div class="hero-vector" style="bottom: 120px; right: 440px;">
-      <svg width="120" height="30" viewBox="0 0 120 30" fill="none" xmlns="http://www.w3.org/2000/svg" opacity="0.25">
-        <polyline points="0,15 15,0 30,15 45,0 60,15 75,0 90,15 105,0 120,15" stroke="#00e5ff" stroke-width="1.5" fill="none"/>
-      </svg>
-    </div>
-    <div class="hero-vector" style="top: 180px; left: 40px; display: none;" class="d-md-block">
-      <svg width="24" height="80" viewBox="0 0 24 80" fill="none" xmlns="http://www.w3.org/2000/svg" opacity="0.3">
-        <line x1="12" y1="0" x2="12" y2="80" stroke="#ff5500" stroke-width="1" stroke-dasharray="4 4"/>
-        <rect x="6" y="35" width="12" height="12" transform="rotate(45 12 41)" stroke="#ff5500" stroke-width="1" fill="none"/>
-      </svg>
-    </div>
+  <!-- Prompt -->
+  <div id="prompt">[CLICK TO INTERACT]</div>
 
-    <div class="hero-left">
-      <div class="hero-eyebrow">
-        <div class="hero-eyebrow-dot"></div>
-        <span class="label-yellow">alfredo.e.perez.leal · buenos aires, ar</span>
+  <!-- Ammo -->
+  <div id="ammo-counter">
+    <div>AMMO</div>
+    <div class="ammo-num" id="ammo-num">50</div>
+  </div>
+
+  <!-- HUD -->
+  <div id="hud">
+    <div class="hud-block">
+      <span class="hud-label">Bio-Sync</span>
+      <span class="hud-value hud-green">12+</span>
+      <div class="hud-bar"><div class="hud-bar-inner" style="--c: #00ff88; width: 100%;"></div></div>
+    </div>
+    <div class="hud-block">
+      <span class="hud-label">Buffer</span>
+      <span class="hud-value hud-yellow">100%</span>
+      <div class="hud-bar"><div class="hud-bar-inner" style="--c: #fcee0a; width: 100%;"></div></div>
+    </div>
+    <div class="hud-block">
+      <span class="hud-label">RAM</span>
+      <span class="hud-value hud-cyan">MAX</span>
+      <div class="hud-bar"><div class="hud-bar-inner" style="--c: #00f0ff; width: 100%;"></div></div>
+    </div>
+    <div style="margin-left: auto; display: flex; gap: 16px; align-items: center;">
+      <div class="hud-block" style="text-align: right; min-width: auto;">
+        <span class="hud-label">Location</span>
+        <span class="hud-value hud-pink" id="location-hud">HUB</span>
       </div>
-
-      <div class="hero-name-a display">ALFREDO</div>
-      <div class="hero-name-b display">PÉREZ</div>
-
-      <div class="hero-rule"></div>
-
-      <div class="hero-meta">
-        <span class="hero-meta-item">Lead iOS Engineer & Architect</span>
-        <span class="hero-meta-sep">▸</span>
-        <span class="hero-meta-item">12+ Years</span>
-        <span class="hero-meta-sep">▸</span>
-        <span class="hero-meta-item">iOS · React Native</span>
-        <span class="hero-meta-sep">▸</span>
-        <span class="hero-meta-item">Buenos Aires, AR</span>
+      <div class="hud-block" style="text-align: right; min-width: auto;">
+        <span class="hud-label">Status</span>
+        <span class="hud-value hud-green">ONLINE</span>
       </div>
-    </div>
-
-    <!-- Runner ID Card -->
-    <div class="runner-id">
-      <div class="runner-id-header">
-        <span>Runner ID</span>
-        <span>◈ ACTIVE</span>
-      </div>
-      <div class="runner-photo-wrap">
-        <img src="images/profile.jpeg" alt="Alfredo Pérez" loading="eager" decoding="async">
-      </div>
-      <div class="runner-id-data">
-        <div class="runner-id-row">
-          <span class="runner-id-key">Handle</span>
-          <span class="runner-id-val">alph0x</span>
-        </div>
-        <div class="runner-id-row">
-          <span class="runner-id-key">Class</span>
-          <span class="runner-id-val">Architect</span>
-        </div>
-        <div class="runner-id-row">
-          <span class="runner-id-key">Platform</span>
-          <span class="runner-id-val">iOS / RN</span>
-        </div>
-        <div class="runner-id-row">
-          <span class="runner-id-key">XP</span>
-          <span class="runner-id-val">12+ YRS</span>
-        </div>
-        <div class="runner-id-row">
-          <span class="runner-id-key">Status</span>
-          <span class="runner-id-val" style="color: #22c55e;">■ ONLINE</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── YELLOW STRIP ──────────────────────────────── -->
-  <div class="yellow-strip">
-    <div class="yellow-strip-inner">
-      <span class="strip-item">React Native</span>
-      <span class="strip-sep">×</span>
-      <span class="strip-item">Swift</span>
-      <span class="strip-sep">×</span>
-      <span class="strip-item">Clean Architecture</span>
-      <span class="strip-sep">×</span>
-      <span class="strip-item">Payment Systems</span>
-      <span class="strip-sep">×</span>
-      <span class="strip-item">iOS</span>
-      <span class="strip-sep">×</span>
-      <span class="strip-item">SwiftUI</span>
-      <span class="strip-sep">×</span>
-      <span class="strip-item">Vapor</span>
     </div>
   </div>
 
-  <!-- spectrum bar -->
-  <div class="sec-divider" aria-hidden="true">
-    <span style="background: var(--yellow);"></span>
-    <span style="background: var(--pink);"></span>
-    <span style="background: var(--orange);"></span>
-    <span style="background: var(--blue);"></span>
-    <span style="background: var(--cyan);"></span>
-    <span style="background: var(--red);"></span>
-    <span style="background: var(--yellow);"></span>
-    <span style="background: var(--pink);"></span>
-    <span style="background: var(--orange);"></span>
-    <span style="background: var(--blue);"></span>
-    <span style="background: var(--cyan);"></span>
-    <span style="background: var(--red);"></span>
+  <!-- Loading -->
+  <div id="loading">
+    <div>INITIALIZING NEURAL LINK...</div>
+    <div id="loading-bar"><div id="loading-bar-fill"></div></div>
   </div>
 
-  <!-- ── PROFILE / SKILLS ──────────────────────────── -->
-  <section id="profile">
-    <div class="hud-label reveal">[ SYS.01 ] — OPERATIVE_PROFILE.dat</div>
-    <div class="section-header reveal">
-      <span class="section-number">01</span>
-      <h2 class="section-title">Operative<br>Profile</h2>
-      <div style="margin-left: auto; display: flex; flex-direction: column; gap: 6px; align-self: flex-end;">
-        <div style="width: 40px; height: 2px; background: var(--yellow);"></div>
-        <div style="width: 28px; height: 2px; background: var(--pink);"></div>
-        <div style="width: 16px; height: 2px; background: var(--blue);"></div>
-      </div>
+  <!-- Start Screen -->
+  <div id="start-screen" style="display: none;">
+    <div>
+      <h1>ALFREDO<span>PÉREZ</span></h1>
+      <div class="subtitle">Lead iOS Engineer & Architect // 12+ Years</div>
     </div>
+    <div class="controls-hint">
+      <span>[WASD] MOVE</span>
+      <span>[MOUSE] LOOK</span>
+      <span>[CLICK] SHOOT</span>
+      <span>[E] INTERACT</span>
+    </div>
+    <button id="start-btn">JACK IN</button>
+  </div>
 
-    <!-- Bio -->
-    <div class="bio-block reveal">
+  <!-- ── INFO PANELS ────────────────────────────────── -->
+
+  <!-- Profile Panel -->
+  <div class="info-panel" id="panel-profile" style="--accent: #fcee0a; --accent-glow: rgba(252,238,10,0.3);">
+    <div class="panel-header">
+      <div class="panel-icon">◈</div>
+      <h2>Operative Profile</h2>
+      <button class="panel-close" onclick="closePanels()">[ CLOSE ]</button>
+    </div>
+    <div class="panel-body">
+      <div class="section-label">[ SYS.01 ] — bio.dat</div>
       <p class="bio-text">
         12+ years building iOS products — from fintech startups to one of Latin America's largest delivery platforms.
         iOS Lead &amp; Software Architect at GeoPagos since 2019; now expanding into React Native to ship cross-platform
         payment systems at scale. I write code that lasts: clean architecture, clear contracts, zero tolerance for
         tech debt. Grounded in Software Craftsmanship — I care as much about how a system is built as what it does.
       </p>
-    </div>
-
-    <!-- Stats -->
-    <div class="stat-row reveal">
-      <div class="stat-block stat-block-y">
-        <div class="stat-num">12+</div>
-        <div class="stat-label">Years active</div>
-      </div>
-      <div class="stat-block stat-block-p">
-        <div class="stat-num">2</div>
-        <div class="stat-label">Platforms</div>
-      </div>
-      <div class="stat-block stat-block-b">
-        <div class="stat-num">4</div>
-        <div class="stat-label">Companies</div>
-      </div>
-    </div>
-
-    <!-- Core skills -->
-    <div class="hud-label reveal" style="margin-bottom: 10px;">[ SKILLS ] — core_stack.log</div>
-    <div class="skills-grid reveal">
-      <div class="skill-block">
-        <div class="skill-name">React Native</div>
-        <div class="skill-type" style="color: var(--yellow);">Mobile · Expert</div>
-      </div>
-      <div class="skill-block">
-        <div class="skill-name">Swift</div>
-        <div class="skill-type" style="color: var(--yellow);">Mobile · Expert</div>
-      </div>
-      <div class="skill-block">
-        <div class="skill-name">iOS</div>
-        <div class="skill-type" style="color: var(--yellow);">Platform · Expert</div>
-      </div>
-      <div class="skill-block">
-        <div class="skill-name">SwiftUI</div>
-        <div class="skill-type" style="color: var(--yellow);">UI · Advanced</div>
-      </div>
-      <div class="skill-block">
-        <div class="skill-name">Objective-C</div>
-        <div class="skill-type" style="color: var(--cyan);">Language · Advanced</div>
-      </div>
-      <div class="skill-block skill-block-p">
-        <div class="skill-name">Clean Arch</div>
-        <div class="skill-type" style="color: var(--pink);">Architecture · Expert</div>
-      </div>
-      <div class="skill-block skill-block-p">
-        <div class="skill-name">MVVM</div>
-        <div class="skill-type" style="color: var(--pink);">Architecture · Expert</div>
-      </div>
-      <div class="skill-block skill-block-p">
-        <div class="skill-name">VIPER</div>
-        <div class="skill-type" style="color: var(--pink);">Architecture · Advanced</div>
-      </div>
-      <div class="skill-block skill-block-b">
-        <div class="skill-name">REST APIs</div>
-        <div class="skill-type" style="color: var(--blue);">Integration · Expert</div>
-      </div>
-      <div class="skill-block skill-block-b">
-        <div class="skill-name">Redux</div>
-        <div class="skill-type" style="color: var(--blue);">State mgmt · Advanced</div>
-      </div>
-      <div class="skill-block skill-block-o">
-        <div class="skill-name">Payments</div>
-        <div class="skill-type" style="color: var(--orange);">Fintech · Advanced</div>
-      </div>
-      <div class="skill-block skill-block-o">
-        <div class="skill-name">Combine</div>
-        <div class="skill-type" style="color: var(--orange);">Reactive · Advanced</div>
-      </div>
-      <div class="skill-block skill-block-c">
-        <div class="skill-name">CI/CD</div>
-        <div class="skill-type" style="color: var(--cyan);">Infra · Advanced</div>
-      </div>
-      <div class="skill-block skill-block-c">
-        <div class="skill-name">TDD / BDD</div>
-        <div class="skill-type" style="color: var(--cyan);">Testing · Advanced</div>
-      </div>
-      <div class="skill-block skill-block-c">
-        <div class="skill-name">Vapor</div>
-        <div class="skill-type" style="color: var(--cyan);">Backend · Mid</div>
-      </div>
-    </div>
-
-    <!-- Tools & Personal -->
-    <div class="two-col reveal">
-      <div class="info-panel">
-        <div class="info-panel-title">Tools &amp; Environment</div>
-        <div class="info-row">
-          <span class="info-key">IDE</span>
-          <span class="info-val">Xcode · VS Code · Cursor</span>
+      <div class="section-label">[ STATS ]</div>
+      <div class="stat-row">
+        <div class="stat-block" style="--accent: #00ff88; --accent-glow: rgba(0,255,136,0.3);">
+          <div class="stat-num">12+</div><div class="stat-label">Years Active</div>
         </div>
-        <div class="info-row">
-          <span class="info-key">Source control</span>
-          <span class="info-val">Git · GitHub · GitLab</span>
+        <div class="stat-block" style="--accent: #fcee0a; --accent-glow: rgba(252,238,10,0.3);">
+          <div class="stat-num">100%</div><div class="stat-label">Availability</div>
         </div>
-        <div class="info-row">
-          <span class="info-key">CI</span>
-          <span class="info-val">GitHub Actions · Bitrise · Fastlane</span>
-        </div>
-        <div class="info-row">
-          <span class="info-key">Project mgmt</span>
-          <span class="info-val">Jira · Linear · Notion</span>
-        </div>
-        <div class="info-row">
-          <span class="info-key">Design</span>
-          <span class="info-val">Figma · Zeplin</span>
-        </div>
-        <div class="info-row">
-          <span class="info-key">Database</span>
-          <span class="info-val">CoreData · SQLite · PostgreSQL</span>
-        </div>
-        <div class="info-row">
-          <span class="info-key">Cloud</span>
-          <span class="info-val">Firebase · AWS</span>
-        </div>
-        <div class="info-row">
-          <span class="info-key">Terminal</span>
-          <span class="info-val">zsh · Homebrew</span>
+        <div class="stat-block" style="--accent: #00f0ff; --accent-glow: rgba(0,240,255,0.3);">
+          <div class="stat-num">MAX</div><div class="stat-label">Chrome Level</div>
         </div>
       </div>
-
-      <div class="info-panel">
-        <div class="info-panel-title">Personal Info</div>
-        <div class="info-row">
-          <span class="info-key">Full name</span>
-          <span class="info-val">Alfredo Pérez</span>
+      <div class="section-label">[ PERSONAL INFO ]</div>
+      <div class="two-col">
+        <div class="info-block">
+          <div class="info-title">Identity</div>
+          <div class="info-row"><span class="info-key">Full Name</span><span class="info-val">Alfredo Pérez</span></div>
+          <div class="info-row"><span class="info-key">Handle</span><span class="info-val">alph0x</span></div>
+          <div class="info-row"><span class="info-key">Location</span><span class="info-val">Buenos Aires, Argentina</span></div>
+          <div class="info-row"><span class="info-key">Email</span><span class="info-val">alfredop88@me.com</span></div>
+          <div class="info-row"><span class="info-key">Phone</span><span class="info-val">+54 9 11 2348 7209</span></div>
+          <div class="info-row"><span class="info-key">Work Mode</span><span class="info-val">Remote · Full-time</span></div>
         </div>
-        <div class="info-row">
-          <span class="info-key">Handle</span>
-          <span class="info-val">alph0x</span>
-        </div>
-        <div class="info-row">
-          <span class="info-key">Location</span>
-          <span class="info-val">Buenos Aires, Argentina</span>
-        </div>
-        <div class="info-row">
-          <span class="info-key">Email</span>
-          <span class="info-val">alfredop88@me.com</span>
-        </div>
-        <div class="info-row">
-          <span class="info-key">Phone</span>
-          <span class="info-val">+54 9 11 2348 7209</span>
-        </div>
-        <div class="info-row">
-          <span class="info-key">Languages</span>
-          <span class="info-val">Spanish (native) · English (prof.)</span>
-        </div>
-        <div class="info-row">
-          <span class="info-key">Work mode</span>
-          <span class="info-val">Remote · Full-time</span>
-        </div>
-        <div class="info-row">
-          <span class="info-key">LinkedIn</span>
-          <span class="info-val">linkedin.com/in/alph0x</span>
+        <div class="info-block">
+          <div class="info-title">Environment</div>
+          <div class="info-row"><span class="info-key">IDE</span><span class="info-val">Xcode · VS Code · Cursor</span></div>
+          <div class="info-row"><span class="info-key">Source Control</span><span class="info-val">Git · GitHub · GitLab</span></div>
+          <div class="info-row"><span class="info-key">CI</span><span class="info-val">GitHub Actions · Bitrise · Fastlane</span></div>
+          <div class="info-row"><span class="info-key">Project Mgmt</span><span class="info-val">Jira · Linear · Notion</span></div>
+          <div class="info-row"><span class="info-key">Design</span><span class="info-val">Figma · Zeplin</span></div>
+          <div class="info-row"><span class="info-key">Cloud</span><span class="info-val">Firebase · AWS</span></div>
         </div>
       </div>
     </div>
-  </section>
+  </div>
 
-  <!-- ── EXPERIENCE ────────────────────────────────── -->
-  <section id="experience">
-    <div class="hud-label reveal">[ SYS.02 ] — WORK_HISTORY.log</div>
-    <div class="section-header reveal">
-      <span class="section-number">02</span>
-      <h2 class="section-title">Work<br>History</h2>
-      <div style="margin-left: auto; display: flex; flex-direction: column; gap: 6px; align-self: flex-end;">
-        <div style="width: 40px; height: 2px; background: var(--pink);"></div>
-        <div style="width: 28px; height: 2px; background: var(--orange);"></div>
-        <div style="width: 16px; height: 2px; background: var(--cyan);"></div>
+  <!-- Skills Panel -->
+  <div class="info-panel" id="panel-skills" style="--accent: #00f0ff; --accent-glow: rgba(0,240,255,0.3);">
+    <div class="panel-header">
+      <div class="panel-icon">◈</div>
+      <h2>Implants &amp; Soft</h2>
+      <button class="panel-close" onclick="closePanels()">[ CLOSE ]</button>
+    </div>
+    <div class="panel-body">
+      <div class="section-label">[ CORE IMPLANTS ]</div>
+      <div class="skills-grid">
+        <div class="skill-chip" style="--accent: #fcee0a; --accent-glow: rgba(252,238,10,0.2);"><div class="skill-name">React Native</div><div class="skill-type">Mobile · Expert</div></div>
+        <div class="skill-chip" style="--accent: #fcee0a; --accent-glow: rgba(252,238,10,0.2);"><div class="skill-name">Swift</div><div class="skill-type">Language · Expert</div></div>
+        <div class="skill-chip" style="--accent: #fcee0a; --accent-glow: rgba(252,238,10,0.2);"><div class="skill-name">iOS</div><div class="skill-type">Platform · Expert</div></div>
+        <div class="skill-chip" style="--accent: #fcee0a; --accent-glow: rgba(252,238,10,0.2);"><div class="skill-name">SwiftUI</div><div class="skill-type">UI · Advanced</div></div>
+        <div class="skill-chip" style="--accent: #00f0ff; --accent-glow: rgba(0,240,255,0.2);"><div class="skill-name">Objective-C</div><div class="skill-type">Language · Advanced</div></div>
+        <div class="skill-chip" style="--accent: #ff003c; --accent-glow: rgba(255,0,60,0.2);"><div class="skill-name">Clean Arch</div><div class="skill-type">Architecture · Expert</div></div>
+        <div class="skill-chip" style="--accent: #ff003c; --accent-glow: rgba(255,0,60,0.2);"><div class="skill-name">MVVM</div><div class="skill-type">Architecture · Expert</div></div>
+        <div class="skill-chip" style="--accent: #ff003c; --accent-glow: rgba(255,0,60,0.2);"><div class="skill-name">VIPER</div><div class="skill-type">Architecture · Advanced</div></div>
+        <div class="skill-chip" style="--accent: #00f0ff; --accent-glow: rgba(0,240,255,0.2);"><div class="skill-name">REST APIs</div><div class="skill-type">Integration · Expert</div></div>
+        <div class="skill-chip" style="--accent: #00f0ff; --accent-glow: rgba(0,240,255,0.2);"><div class="skill-name">Redux</div><div class="skill-type">State mgmt · Advanced</div></div>
+        <div class="skill-chip" style="--accent: #ff6b00; --accent-glow: rgba(255,107,0,0.2);"><div class="skill-name">Payments</div><div class="skill-type">Fintech · Advanced</div></div>
+        <div class="skill-chip" style="--accent: #ff6b00; --accent-glow: rgba(255,107,0,0.2);"><div class="skill-name">Combine</div><div class="skill-type">Reactive · Advanced</div></div>
+        <div class="skill-chip" style="--accent: #00ff88; --accent-glow: rgba(0,255,136,0.2);"><div class="skill-name">CI/CD</div><div class="skill-type">Infra · Advanced</div></div>
+        <div class="skill-chip" style="--accent: #00ff88; --accent-glow: rgba(0,255,136,0.2);"><div class="skill-name">TDD / BDD</div><div class="skill-type">Testing · Advanced</div></div>
+        <div class="skill-chip" style="--accent: #00ff88; --accent-glow: rgba(0,255,136,0.2);"><div class="skill-name">Vapor</div><div class="skill-type">Backend · Mid</div></div>
       </div>
     </div>
+  </div>
 
-    <!-- GeoPagos block -->
-    <div class="exp-entry reveal">
-      <div class="exp-date">
-        <div class="exp-date-current">SEP 2023</div>
-        <div style="color: rgba(192,252,4,0.4); font-size: 0.55rem; margin-top: 2px; letter-spacing: 0.1em;">▸ PRESENT</div>
-      </div>
-      <div class="exp-body">
-        <div class="exp-role">Multiplatform Mobile Software Engineer</div>
-        <div class="exp-company">GeoPagos — Buenos Aires, AR</div>
-        <ul class="bullet-list">
+  <!-- Experience Panel -->
+  <div class="info-panel" id="panel-experience" style="--accent: #ff003c; --accent-glow: rgba(255,0,60,0.3);">
+    <div class="panel-header">
+      <div class="panel-icon">◈</div>
+      <h2>Mission Log</h2>
+      <button class="panel-close" onclick="closePanels()">[ CLOSE ]</button>
+    </div>
+    <div class="panel-body">
+      <div class="section-label">[ SYS.02 ] — work_history.log</div>
+
+      <div class="mission-entry">
+        <div style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #fcee0a; margin-bottom: 4px;">SEP 2023 ▸ PRESENT</div>
+        <div class="mission-role">Multiplatform Mobile Software Engineer</div>
+        <div class="mission-corp">GeoPagos — Buenos Aires, AR</div>
+        <ul class="mission-desc">
           <li>Building the React Native engine behind GeoPagos' cross-platform acquiring and POS payment products</li>
           <li>Full ownership of the feature lifecycle: architecture decisions, implementation, performance tuning, and release</li>
           <li>State management with Redux and Context API across a high-throughput, payment-grade mobile app</li>
           <li>RESTful API integration with backend services; maintained CI/CD pipelines on Bitrise and Fastlane</li>
         </ul>
-        <div class="exp-tags" style="margin-top: 14px;">
-          <span class="t t-y">React Native</span>
-          <span class="t t-co">TypeScript</span>
-          <span class="t t-bo">Redux</span>
-          <span class="t t-wo">REST APIs</span>
-          <span class="t t-oo">CI/CD</span>
-          <span class="t t-p">Payments</span>
+        <div class="tags">
+          <span class="tag tag-cyber-fill">React Native</span><span class="tag tag-dim-out">TypeScript</span><span class="tag tag-cyan-fill">Redux</span>
+          <span class="tag tag-dim-out">REST APIs</span><span class="tag tag-orange-fill">CI/CD</span><span class="tag tag-pink-fill">Payments</span>
         </div>
       </div>
-    </div>
 
-    <div class="exp-entry reveal" style="transition-delay: 0.06s">
-      <div class="exp-date">
-        <div class="exp-date-current">APR 2021</div>
-        <div style="color: rgba(192,252,4,0.4); font-size: 0.55rem; margin-top: 2px; letter-spacing: 0.1em;">▸ PRESENT</div>
-      </div>
-      <div class="exp-body">
-        <div class="exp-role">Lead iOS Software Engineer & Architect</div>
-        <div class="exp-company">GeoPagos — Buenos Aires, AR</div>
-        <ul class="bullet-list">
+      <div class="mission-entry">
+        <div style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #fcee0a; margin-bottom: 4px;">APR 2021 ▸ PRESENT</div>
+        <div class="mission-role">Lead iOS Software Engineer &amp; Architect</div>
+        <div class="mission-corp">GeoPagos — Buenos Aires, AR</div>
+        <ul class="mission-desc">
           <li>Drove the architectural transformation of GeoPagos' iOS codebase — from monolith to modular, independently deployable units</li>
           <li>Reduced technical debt systematically: prioritized, sequenced, and executed improvements across the full codebase</li>
           <li>Broke shared code into interlinked modules — improved code reuse, testability, and team autonomy</li>
           <li>Set engineering standards and architectural patterns adopted across the iOS team</li>
         </ul>
-        <div class="exp-tags" style="margin-top: 14px;">
-          <span class="t t-y">Swift</span>
-          <span class="t t-p">Architecture</span>
-          <span class="t t-po">Modular Design</span>
-          <span class="t t-ro">Tech Debt</span>
-          <span class="t t-o">Team Lead</span>
+        <div class="tags">
+          <span class="tag tag-cyber-fill">Swift</span><span class="tag tag-pink-fill">Architecture</span><span class="tag tag-dim-out">Modular Design</span>
+          <span class="tag tag-dim-out">Tech Debt</span><span class="tag tag-orange-fill">Team Lead</span>
         </div>
       </div>
-    </div>
 
-    <div class="exp-entry reveal" style="transition-delay: 0.12s">
-      <div class="exp-date">
-        <div>JUL 2019</div>
-        <div style="color: var(--dim); font-size: 0.55rem; margin-top: 2px; letter-spacing: 0.1em;">▸ DEC 2020</div>
-      </div>
-      <div class="exp-body">
-        <div class="exp-role">iOS Software Engineer</div>
-        <div class="exp-company">Rappi — Buenos Aires, AR</div>
-        <ul class="bullet-list">
+      <div class="mission-entry">
+        <div style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #4a4a60; margin-bottom: 4px;">JUL 2019 ▸ DEC 2020</div>
+        <div class="mission-role">iOS Software Engineer</div>
+        <div class="mission-corp">Rappi — Buenos Aires, AR</div>
+        <ul class="mission-desc">
           <li>iOS engineer on the Restaurants Vertical — one of Rappi's highest-traffic product areas in LATAM</li>
           <li>Designed and shipped new features end-to-end, from scoping to App Store release</li>
           <li>Owned stability and performance improvements — systematically reduced crashes and functional gaps</li>
           <li>Operated in a high-velocity Agile environment with tight iteration cycles and cross-functional teams</li>
         </ul>
-        <div class="exp-tags" style="margin-top: 14px;">
-          <span class="t t-y">Swift</span>
-          <span class="t t-yo">iOS</span>
-          <span class="t t-wo">UIKit</span>
-          <span class="t t-wo">Restaurants</span>
-          <span class="t t-oo">Performance</span>
+        <div class="tags">
+          <span class="tag tag-cyber-fill">Swift</span><span class="tag tag-dim-out">iOS</span><span class="tag tag-dim-out">UIKit</span>
+          <span class="tag tag-dim-out">Restaurants</span><span class="tag tag-orange-fill">Performance</span>
         </div>
       </div>
-    </div>
 
-    <div class="exp-entry reveal" style="transition-delay: 0.15s">
-      <div class="exp-date">
-        <div>JAN 2019</div>
-        <div style="color: var(--dim); font-size: 0.55rem; margin-top: 2px; letter-spacing: 0.1em;">▸ JUL 2019</div>
-      </div>
-      <div class="exp-body">
-        <div class="exp-role">Lead iOS Software Engineer</div>
-        <div class="exp-company">GeoPagos — Buenos Aires, AR</div>
-        <ul class="bullet-list">
+      <div class="mission-entry">
+        <div style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #4a4a60; margin-bottom: 4px;">JAN 2019 ▸ JUL 2019</div>
+        <div class="mission-role">Lead iOS Software Engineer</div>
+        <div class="mission-corp">GeoPagos — Buenos Aires, AR</div>
+        <ul class="mission-desc">
           <li>Promoted to Lead — took ownership of code quality, architecture standards, and team technical direction</li>
           <li>Integrated third-party payment card reader hardware into the iOS SDK — device compatibility and payment flow</li>
           <li>Maintained compatibility across iOS versions: led migration and testing for each major release</li>
         </ul>
-        <div class="exp-tags" style="margin-top: 14px;">
-          <span class="t t-y">Swift</span>
-          <span class="t t-yo">iOS</span>
-          <span class="t t-co">Hardware SDK</span>
-          <span class="t t-p">Payments</span>
+        <div class="tags">
+          <span class="tag tag-cyber-fill">Swift</span><span class="tag tag-dim-out">iOS</span><span class="tag tag-cyan-fill">Hardware SDK</span><span class="tag tag-pink-fill">Payments</span>
         </div>
       </div>
-    </div>
 
-    <div class="exp-entry reveal" style="transition-delay: 0.18s">
-      <div class="exp-date">
-        <div>DEC 2015</div>
-        <div style="color: var(--dim); font-size: 0.55rem; margin-top: 2px; letter-spacing: 0.1em;">▸ DEC 2018</div>
-      </div>
-      <div class="exp-body">
-        <div class="exp-role">iOS Software Engineer</div>
-        <div class="exp-company">GeoPagos — Buenos Aires, AR</div>
-        <ul class="bullet-list">
+      <div class="mission-entry">
+        <div style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #4a4a60; margin-bottom: 4px;">DEC 2015 ▸ DEC 2018</div>
+        <div class="mission-role">iOS Software Engineer</div>
+        <div class="mission-corp">GeoPagos — Buenos Aires, AR</div>
+        <ul class="mission-desc">
           <li>Core iOS engineer during GeoPagos' growth from early-stage startup to scaled fintech product</li>
           <li>Built payment flows from scratch: card-present transactions, receipt generation, transaction history</li>
           <li>Grew the iOS codebase from 0 to production — maintaining quality standards as the team and product scaled</li>
         </ul>
-        <div class="exp-tags" style="margin-top: 14px;">
-          <span class="t t-y">Swift</span>
-          <span class="t t-bo">Objective-C</span>
-          <span class="t t-yo">iOS</span>
-          <span class="t t-p">Fintech</span>
+        <div class="tags">
+          <span class="tag tag-cyber-fill">Swift</span><span class="tag tag-cyan-fill">Objective-C</span><span class="tag tag-dim-out">iOS</span><span class="tag tag-pink-fill">Fintech</span>
         </div>
       </div>
-    </div>
 
-    <div class="exp-entry reveal" style="transition-delay: 0.21s">
-      <div class="exp-date">
-        <div>JUL 2014</div>
-        <div style="color: var(--dim); font-size: 0.55rem; margin-top: 2px; letter-spacing: 0.1em;">▸ DEC 2015</div>
-      </div>
-      <div class="exp-body">
-        <div class="exp-role">iOS Developer</div>
-        <div class="exp-company">Blanclink — Maracaibo, Venezuela</div>
-        <ul class="bullet-list">
+      <div class="mission-entry">
+        <div style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #4a4a60; margin-bottom: 4px;">JUL 2014 ▸ DEC 2015</div>
+        <div class="mission-role">iOS Developer</div>
+        <div class="mission-corp">Blanclink — Maracaibo, Venezuela</div>
+        <ul class="mission-desc">
           <li>Shipped Blancride — a ride-hailing app for Venezuela — from feature implementation to App Store launch</li>
           <li>Built real-time driver/passenger matching, in-app messaging, voice chat, and in-app payments</li>
           <li>Ported core features to the Nekso platform, demonstrating cross-project code portability</li>
         </ul>
-        <div class="exp-tags" style="margin-top: 14px;">
-          <span class="t t-b">Objective-C</span>
-          <span class="t t-yo">iOS</span>
-          <span class="t t-co">Real-time</span>
-          <span class="t t-p">Payments</span>
-          <span class="t t-oo">Chat</span>
+        <div class="tags">
+          <span class="tag tag-cyan-fill">Objective-C</span><span class="tag tag-dim-out">iOS</span><span class="tag tag-cyan-fill">Real-time</span>
+          <span class="tag tag-pink-fill">Payments</span><span class="tag tag-orange-fill">Chat</span>
         </div>
       </div>
-    </div>
 
-    <div class="exp-entry reveal" style="transition-delay: 0.24s">
-      <div class="exp-date">
-        <div>OCT 2013</div>
-        <div style="color: var(--dim); font-size: 0.55rem; margin-top: 2px; letter-spacing: 0.1em;">▸ JUL 2014</div>
-      </div>
-      <div class="exp-body">
-        <div class="exp-role">Jr. Consultant in Configuration</div>
-        <div class="exp-company">Megagroup, CA — Maracaibo, Venezuela</div>
-        <ul class="bullet-list">
+      <div class="mission-entry">
+        <div style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #4a4a60; margin-bottom: 4px;">OCT 2013 ▸ JUL 2014</div>
+        <div class="mission-role">Jr. Consultant in Configuration</div>
+        <div class="mission-corp">Megagroup, CA — Maracaibo, Venezuela</div>
+        <ul class="mission-desc">
           <li>Built SOAP web services to automate document digitalization pipelines for banking clients</li>
           <li>Designed ECM workflows in Documentum and Captiva under strict data security and compliance requirements</li>
         </ul>
-        <div class="exp-tags" style="margin-top: 14px;">
-          <span class="t t-wo">SOAP</span>
-          <span class="t t-wo">Documentum</span>
-          <span class="t t-wo">Captiva</span>
-          <span class="t t-po">Banking</span>
-          <span class="exp-tag-outline">Backend</span>
+        <div class="tags">
+          <span class="tag tag-dim-out">SOAP</span><span class="tag tag-dim-out">Documentum</span><span class="tag tag-dim-out">Captiva</span>
+          <span class="tag tag-pink-fill">Banking</span><span class="tag tag-dim-out">Backend</span>
+        </div>
+      </div>
+
+      <div class="section-label">[ EDUCATION ]</div>
+      <div class="two-col">
+        <div class="info-block">
+          <div class="info-title">Universidad Rafael Belloso Chacín</div>
+          <div class="info-row"><span class="info-key">Degree</span><span class="info-val">B.Sc. Computer Engineering</span></div>
+          <div class="info-row"><span class="info-key">Period</span><span class="info-val">2007 – 2013</span></div>
+          <div class="info-row"><span class="info-key">Location</span><span class="info-val">Maracaibo, Venezuela</span></div>
+        </div>
+        <div class="info-block">
+          <div class="info-title">Continuous Learning</div>
+          <div class="info-row"><span class="info-key">Program</span><span class="info-val">Apple Developer Program</span></div>
+          <div class="info-row"><span class="info-key">Self-study</span><span class="info-val">WWDC sessions · Swift Evolution</span></div>
+          <div class="info-row"><span class="info-key">Focus</span><span class="info-val">iOS · Swift · SwiftUI · React Native</span></div>
+          <div class="info-row"><span class="info-key">Communities</span><span class="info-val">NSSpain · SwiftHEROES · CocoaHeads</span></div>
         </div>
       </div>
     </div>
-  </section>
-
-  <!-- spectrum bar -->
-  <div class="sec-divider" aria-hidden="true">
-    <span style="background: var(--blue);"></span>
-    <span style="background: var(--cyan);"></span>
-    <span style="background: var(--pink);"></span>
-    <span style="background: var(--yellow);"></span>
-    <span style="background: var(--orange);"></span>
-    <span style="background: var(--red);"></span>
-    <span style="background: var(--blue);"></span>
-    <span style="background: var(--cyan);"></span>
-    <span style="background: var(--pink);"></span>
-    <span style="background: var(--yellow);"></span>
-    <span style="background: var(--orange);"></span>
-    <span style="background: var(--red);"></span>
   </div>
 
-  <!-- ── EDUCATION ──────────────────────────────────── -->
-  <section id="education">
-    <div class="hud-label reveal">[ SYS.03 ] — EDUCATION.log</div>
-    <div class="section-header reveal">
-      <span class="section-number">03</span>
-      <h2 class="section-title">Education &amp;<br>Certs</h2>
-      <div style="margin-left: auto; display: flex; flex-direction: column; gap: 6px; align-self: flex-end;">
-        <div style="width: 40px; height: 2px; background: var(--blue);"></div>
-        <div style="width: 28px; height: 2px; background: var(--cyan);"></div>
-        <div style="width: 16px; height: 2px; background: var(--yellow);"></div>
+  <!-- ════════════════════════════════════════════════════
+       MOBILE RESUME — Static fallback
+       ════════════════════════════════════════════════════ -->
+  <div id="mobile-resume">
+    <div class="m-header">
+      <img src="images/profile.jpeg" alt="Alfredo Pérez" class="m-avatar" loading="lazy">
+      <h1>ALFREDO<span>PÉREZ</span></h1>
+      <p style="color:#6a6a80; font-size:12px; margin-top:8px;">Lead iOS Engineer & Architect // 12+ Years</p>
+    </div>
+
+    <div class="m-section">
+      <div class="m-label">[ PROFILE ]</div>
+      <p class="m-text">12+ years building iOS products — from fintech startups to one of Latin America's largest delivery platforms. iOS Lead & Software Architect at GeoPagos since 2019; now expanding into React Native to ship cross-platform payment systems at scale.</p>
+    </div>
+
+    <div class="m-section">
+      <div class="m-label">[ SKILLS ]</div>
+      <div class="m-skills">
+        <span class="m-skill">React Native</span><span class="m-skill">Swift</span><span class="m-skill">iOS</span>
+        <span class="m-skill">SwiftUI</span><span class="m-skill">Objective-C</span><span class="m-skill">Clean Arch</span>
+        <span class="m-skill">MVVM</span><span class="m-skill">VIPER</span><span class="m-skill">REST APIs</span>
+        <span class="m-skill">Redux</span><span class="m-skill">Payments</span><span class="m-skill">Combine</span>
+        <span class="m-skill">CI/CD</span><span class="m-skill">TDD/BDD</span><span class="m-skill">Vapor</span>
       </div>
     </div>
 
-    <div class="two-col reveal">
-      <div class="info-panel">
-        <div class="info-panel-title">Universidad Rafael Belloso Chacín</div>
-        <div class="info-row">
-          <span class="info-key">Degree</span>
-          <span class="info-val">B.Sc. Computer Engineering</span>
-        </div>
-        <div class="info-row">
-          <span class="info-key">Period</span>
-          <span class="info-val">2007 – 2013</span>
-        </div>
-        <div class="info-row">
-          <span class="info-key">Location</span>
-          <span class="info-val">Maracaibo, Venezuela</span>
-        </div>
+    <div class="m-section">
+      <div class="m-label">[ EXPERIENCE ]</div>
+      <div style="margin-bottom:16px;">
+        <div class="m-title">Multiplatform Mobile Engineer</div>
+        <div class="m-corp">GeoPagos — 2023-Present</div>
+        <p class="m-text">React Native engine for cross-platform POS payment products.</p>
       </div>
-
-      <div class="info-panel">
-        <div class="info-panel-title">Continuous Learning</div>
-        <div class="info-row">
-          <span class="info-key">Program</span>
-          <span class="info-val">Apple Developer Program</span>
-        </div>
-        <div class="info-row">
-          <span class="info-key">Self-study</span>
-          <span class="info-val">WWDC sessions · Swift Evolution</span>
-        </div>
-        <div class="info-row">
-          <span class="info-key">Focus areas</span>
-          <span class="info-val">iOS · Swift · SwiftUI · React Native</span>
-        </div>
-        <div class="info-row">
-          <span class="info-key">Communities</span>
-          <span class="info-val">NSSpain · SwiftHEROES · CocoaHeads</span>
-        </div>
+      <div style="margin-bottom:16px;">
+        <div class="m-title">Lead iOS Engineer & Architect</div>
+        <div class="m-corp">GeoPagos — 2021-Present</div>
+        <p class="m-text">Architectural transformation from monolith to modular. Set engineering standards.</p>
+      </div>
+      <div style="margin-bottom:16px;">
+        <div class="m-title">iOS Software Engineer</div>
+        <div class="m-corp">Rappi — 2019-2020</div>
+        <p class="m-text">Restaurants Vertical — highest-traffic product area in LATAM.</p>
+      </div>
+      <div style="margin-bottom:16px;">
+        <div class="m-title">iOS Software Engineer</div>
+        <div class="m-corp">GeoPagos — 2015-2019</div>
+        <p class="m-text">Core engineer from startup to scaled fintech. Built payment flows from scratch.</p>
       </div>
     </div>
-  </section>
 
-  <!-- ── CONTACT ───────────────────────────────────── -->
-  <section id="contact">
-    <div class="contact-inner">
-      <div style="font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(5,5,5,0.55); margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
-        [ SYS.04 ] — CONTACT.init
-        <span style="flex:1; height:1px; background: rgba(5,5,5,0.2); display:inline-block;"></span>
+    <div class="m-section">
+      <div class="m-label">[ EDUCATION ]</div>
+      <p class="m-text">B.Sc. Computer Engineering — Universidad Rafael Belloso Chacín (2007-2013)</p>
+      <p class="m-text" style="margin-top:4px;">Apple Developer Program · WWDC · Swift Evolution</p>
+    </div>
+
+    <div class="m-section">
+      <div class="m-label">[ CONTACT ]</div>
+      <div class="m-contact">
+        <a href="mailto:alfredop88@me.com">✦ alfredop88@me.com</a>
+        <a href="https://github.com/alph0x" target="_blank">GitHub</a>
+        <a href="https://linkedin.com/in/alph0x" target="_blank">LinkedIn</a>
+        <a href="https://twitter.com/alph0x" target="_blank">Twitter</a>
       </div>
-      <div class="contact-head">
-        GET IN<br>TOUCH.
-      </div>
+    </div>
+
+    <div class="m-footer">
+      © 2026 Alfredo E. Pérez Leal<br>Buenos Aires, Argentina
+    </div>
+  </div>
+
+  <!-- Contact Panel -->
+  <div class="info-panel" id="panel-contact" style="--accent: #fcee0a; --accent-glow: rgba(252,238,10,0.3);">
+    <div class="panel-header">
+      <div class="panel-icon">◈</div>
+      <h2>Establish Uplink</h2>
+      <button class="panel-close" onclick="closePanels()">[ CLOSE ]</button>
+    </div>
+    <div class="panel-body">
+      <div class="section-label">[ SYS.04 ] — contact.init</div>
+      <p class="bio-text" style="margin-bottom: 24px;">
+        Ready to jack in? I'm available for remote full-time positions, freelance contracts, and consulting.
+        Let's build something that lasts.
+      </p>
       <div class="contact-links">
-        <a href="mailto:alfredop88@me.com" class="contact-link contact-link-primary">
-          ✦ alfredop88@me.com
-        </a>
-        <a href="https://github.com/alph0x" target="_blank" rel="noopener noreferrer" class="contact-link">
-          GitHub
-        </a>
-        <a href="https://linkedin.com/in/alph0x" target="_blank" rel="noopener noreferrer" class="contact-link">
-          LinkedIn
-        </a>
-        <a href="https://twitter.com/alph0x" target="_blank" rel="noopener noreferrer" class="contact-link">
-          Twitter
-        </a>
-        <a href="https://instagram.com/alph0x" target="_blank" rel="noopener noreferrer" class="contact-link">
-          Instagram
-        </a>
+        <a href="mailto:alfredop88@me.com" class="contact-link contact-link-primary">✦ alfredop88@me.com</a>
+        <a href="https://github.com/alph0x" target="_blank" rel="noopener noreferrer" class="contact-link">GitHub</a>
+        <a href="https://linkedin.com/in/alph0x" target="_blank" rel="noopener noreferrer" class="contact-link">LinkedIn</a>
+        <a href="https://twitter.com/alph0x" target="_blank" rel="noopener noreferrer" class="contact-link">Twitter</a>
+        <a href="https://instagram.com/alph0x" target="_blank" rel="noopener noreferrer" class="contact-link">Instagram</a>
+      </div>
+      <div class="section-label">[ IDENTITY ]</div>
+      <div class="two-col" style="max-width: 600px;">
+        <div class="info-block">
+          <div class="info-row"><span class="info-key">Full Name</span><span class="info-val">Alfredo Pérez</span></div>
+          <div class="info-row"><span class="info-key">Handle</span><span class="info-val">alph0x</span></div>
+          <div class="info-row"><span class="info-key">Location</span><span class="info-val">Buenos Aires, Argentina</span></div>
+        </div>
+        <div class="info-block">
+          <div class="info-row"><span class="info-key">Phone</span><span class="info-val">+54 9 11 2348 7209</span></div>
+          <div class="info-row"><span class="info-key">Languages</span><span class="info-val">Spanish (native) · English (prof.)</span></div>
+          <div class="info-row"><span class="info-key">Work Mode</span><span class="info-val">Remote · Full-time</span></div>
+        </div>
       </div>
     </div>
-  </section>
+  </div>
 
-  <!-- ── FOOTER ────────────────────────────────────── -->
-  <footer>
-    <span>© 2026 Alfredo E. Pérez Leal</span>
-    <span>Buenos Aires, Argentina</span>
-  </footer>
-
-  <!-- Mobile bottom bar -->
-  <nav class="mobile-bar">
-    <a href="#hero">⌂<span>Home</span></a>
-    <a href="#experience">◈<span>Work</span></a>
-    <a href="#contact">✦<span>Contact</span></a>
-  </nav>
-
-  <script>
-    // Scroll reveal
-    const revEls = document.querySelectorAll('.reveal');
-    const obs = new IntersectionObserver((entries) => {
-      entries.forEach(e => {
-        if (e.isIntersecting) {
-          e.target.classList.add('on');
-          obs.unobserve(e.target);
-        }
-      });
-    }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
-    revEls.forEach(el => obs.observe(el));
+  <script type="module">
+    import { initGame } from './js/app.js';
+    initGame();
   </script>
 </body>
 </html>
