@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Room Layout Editor</title>
+  <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}</script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0c0a09; color: #e7e5e4; display: flex; height: 100vh; overflow: hidden; }
+
+    /* Sidebar */
+    #sidebar { width: 320px; flex-shrink: 0; border-right: 1px solid #292524; display: flex; flex-direction: column; overflow-y: auto; }
+    #sidebar header { padding: 16px; border-bottom: 1px solid #292524; background: #1c1917; }
+    #sidebar header h1 { font-size: 14px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: #a8a29e; }
+    #sidebar .panel { padding: 16px; border-bottom: 1px solid #292524; flex-shrink: 0; }
+    #sidebar .panel h2 { font-size: 12px; font-weight: 600; text-transform: uppercase; color: #78716c; margin-bottom: 12px; }
+
+    .row { display: flex; gap: 8px; margin-bottom: 10px; align-items: center; }
+    .row label { font-size: 12px; color: #a8a29e; width: 80px; flex-shrink: 0; }
+    .row input[type="number"] { width: 60px; background: #1c1917; border: 1px solid #44403c; color: #e7e5e4; padding: 6px 8px; border-radius: 4px; font-size: 12px; }
+    .row input[type="range"] { flex: 1; accent-color: #7c3aed; }
+    .row input[type="color"] { width: 40px; height: 28px; border: none; background: none; cursor: pointer; }
+
+    .palette { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    .palette button {
+      background: #1c1917; border: 1px solid #44403c; color: #d6d3d1;
+      padding: 8px 4px; border-radius: 4px; font-size: 11px; cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      transition: all 0.15s;
+    }
+    .palette button:hover { border-color: #7c3aed; background: #231f1e; }
+    .palette button.active { border-color: #7c3aed; background: #2e1065; color: #fff; }
+    .palette button .icon { font-size: 18px; }
+    .palette-category h3 { margin: 10px 0 6px; font-size: 11px; text-transform: uppercase; color: #78716c; letter-spacing: 0.5px; }
+
+    .spawn-row { display: flex; gap: 8px; margin-bottom: 8px; }
+    .spawn-row button {
+      flex: 1; background: #1c1917; border: 1px solid #44403c; color: #d6d3d1;
+      padding: 8px; border-radius: 4px; font-size: 11px; cursor: pointer;
+    }
+    .spawn-row button.active { border-color: #10b981; background: #064e3b; color: #fff; }
+
+    .tool-row { display: flex; gap: 8px; margin-bottom: 12px; }
+    .tool-row button {
+      flex: 1; background: #1c1917; border: 1px solid #44403c; color: #d6d3d1;
+      padding: 8px; border-radius: 4px; font-size: 11px; cursor: pointer;
+    }
+    .tool-row button:hover { border-color: #7c3aed; }
+    .tool-row button.danger { border-color: #7f1d1d; color: #fca5a5; }
+    .tool-row button.danger:hover { background: #450a0a; }
+    .tool-row button.active { border-color: #7c3aed; background: #2e1065; color: #fff; }
+
+    .export-area { width: 100%; background: #1c1917; border: 1px solid #44403c; color: #d6d3d1; padding: 10px; border-radius: 4px; font-family: monospace; font-size: 11px; resize: none; min-height: 160px; margin-top: 8px; }
+
+    /* Canvas area */
+    #canvas-wrap { flex: 1; position: relative; background: #0c0a09; }
+    #canvas-wrap canvas { display: block; width: 100%; height: 100%; }
+
+    /* Overlay HUD */
+    #hud {
+      position: absolute; top: 12px; left: 12px; pointer-events: none;
+      background: rgba(12,10,9,0.85); border: 1px solid #292524; border-radius: 6px;
+      padding: 10px 14px; font-size: 12px; color: #a8a29e; line-height: 1.6;
+    }
+    #hud kbd {
+      background: #292524; border-radius: 3px; padding: 1px 5px; font-family: monospace; font-size: 11px; color: #e7e5e4;
+    }
+
+    .selection-info {
+      position: absolute; bottom: 12px; left: 12px;
+      background: rgba(12,10,9,0.9); border: 1px solid #292524; border-radius: 6px;
+      padding: 10px 14px; font-size: 12px; color: #e7e5e4; display: none;
+    }
+    .selection-info.visible { display: block; }
+
+    /* Preview viewport */
+    #preview-wrap {
+      position: absolute; top: 12px; right: 12px; width: 160px; height: 160px;
+      background: rgba(12,10,9,0.9); border: 1px solid #292524; border-radius: 6px;
+      overflow: hidden; z-index: 10; display: none;
+    }
+    #preview-wrap .preview-label {
+      position: absolute; top: 6px; left: 0; right: 0; text-align: center;
+      font-size: 10px; font-weight: 600; text-transform: uppercase; color: #a8a29e;
+      pointer-events: none; z-index: 2;
+    }
+    #preview-wrap canvas { width: 100%; height: 100%; display: block; }
+  </style>
+</head>
+<body>
+  <div id="sidebar">
+    <header><h1>Room Layout Editor</h1></header>
+
+    <div class="panel">
+      <h2>Room Shape</h2>
+      <div class="tool-row">
+        <button id="toolOutline" title="Click edges to add vertices, drag vertices to move">✎ Edit Outline</button>
+        <button id="btnResetRect">↺ Reset</button>
+        <button id="btnViewMode">↻ 3D View</button>
+      </div>
+      <div class="row" style="margin-bottom:6px;">
+        <label>Dimensions</label>
+        <span id="roomDimensions" style="font-size:12px; color:#d6d3d1;">4.50 × 3.50 m</span>
+      </div>
+      <div class="row" style="margin-bottom:6px;">
+        <label>Axis-aligned</label>
+        <span id="roomAxisAligned" style="font-size:12px; color:#10b981;">4 / 4 walls</span>
+      </div>
+      <div style="font-size:11px; color:#78716c; margin-bottom:8px;">
+        In outline mode: drag purple dots to move corners, drag cyan squares to move walls. Click a line to add a vertex.
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Materials</h2>
+      <div class="row">
+        <label>Floor</label>
+        <input type="color" id="colorFloor" value="#1c1917">
+        <input type="text" id="colorFloorText" value="#1c1917" style="width:80px; background:#1c1917; border:1px solid #44403c; color:#e7e5e4; padding:4px 6px; border-radius:4px; font-size:11px;">
+      </div>
+      <div class="row">
+        <label>Wall</label>
+        <input type="color" id="colorWall" value="#44403c">
+        <input type="text" id="colorWallText" value="#44403c" style="width:80px; background:#1c1917; border:1px solid #44403c; color:#e7e5e4; padding:4px 6px; border-radius:4px; font-size:11px;">
+      </div>
+      <div class="row">
+        <label>Ceiling</label>
+        <input type="color" id="colorCeiling" value="#1c1917">
+        <input type="text" id="colorCeilingText" value="#1c1917" style="width:80px; background:#1c1917; border:1px solid #44403c; color:#e7e5e4; padding:4px 6px; border-radius:4px; font-size:11px;">
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Spawn Points</h2>
+      <div class="spawn-row">
+        <button id="toolPlayer" title="Click on grid to set player spawn">👤 Player</button>
+        <button id="toolLulu" title="Click on grid to set Lulú spawn">🐕 Lulú</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Furniture Palette</h2>
+      <div id="palette"></div>
+    </div>
+
+    <div class="panel" id="placedPanel">
+      <h2>Placed Items</h2>
+      <div id="placedList" style="font-size:12px; color:#a8a29e;">None</div>
+    </div>
+
+    <div class="panel">
+      <h2>Selected</h2>
+      <div class="row">
+        <label>Position X</label>
+        <input type="number" id="selX" value="0" step="0.01" style="width:70px;">
+      </div>
+      <div class="row">
+        <label>Position Z</label>
+        <input type="number" id="selZ" value="0" step="0.01" style="width:70px;">
+      </div>
+      <div class="row">
+        <label>Height Y</label>
+        <input type="number" id="selY" value="0" step="0.01" min="0" max="2.8">
+        <input type="range" id="selYRange" value="0" step="0.01" min="0" max="2.8">
+      </div>
+      <div class="row">
+        <label>Rotation</label>
+        <input type="number" id="selRot" value="0" step="1" style="width:60px;">
+        <span style="font-size:11px;color:#78716c;">°</span>
+      </div>
+      <div class="tool-row">
+        <button id="btnRotate">↻ +45°</button>
+        <button id="btnUndo">↩ Undo</button>
+        <button id="btnDelete" class="danger">🗑 Delete</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Export Layout</h2>
+      <button id="btnExport" style="width:100%; margin-bottom:8px; background:#1c1917; border:1px solid #44403c; color:#d6d3d1; padding:8px; border-radius:4px; font-size:11px; cursor:pointer;">Generate Seed</button>
+      <textarea class="export-area" id="exportOutput" readonly placeholder="Click Generate to see output..."></textarea>
+    </div>
+  </div>
+
+  <div id="canvas-wrap">
+    <div id="error-display" style="display:none; position:absolute; bottom:12px; right:180px; background:#7f1d1d; border:1px solid #450a0a; color:#fff; padding:10px 14px; border-radius:6px; font-size:12px; max-width:400px; z-index:100; font-family:monospace;"></div>
+    <div id="preview-wrap">
+      <div class="preview-label">Preview</div>
+    </div>
+    <div id="hud">
+      <strong>Controls</strong><br>
+      <kbd>LMB</kbd> place / select &nbsp; <kbd>Drag</kbd> move<br>
+      <kbd>R</kbd> rotate selected &nbsp; <kbd>Del</kbd> remove<br>
+      <kbd>Scroll</kbd> zoom &nbsp; <kbd>Right-drag</kbd> pan<br>
+      <kbd>Shift+LMB</kbd> add vertex (outline mode)
+    </div>
+    <div class="selection-info" id="selectionInfo"></div>
+  </div>
+
+  <script>
+    window.addEventListener('error', (e) => {
+      const el = document.getElementById('error-display');
+      if (!el) return;
+      el.style.display = 'block';
+      el.textContent = 'Script error: ' + e.message + ' @' + e.lineno + ':' + e.colno;
+    });
+    window.addEventListener('unhandledrejection', (e) => {
+      const el = document.getElementById('error-display');
+      if (!el) return;
+      el.style.display = 'block';
+      el.textContent = 'Unhandled rejection: ' + e.reason;
+    });
+  </script>
+  <script type="module" src="./js/editor.js"></script>
+</body>
+</html>

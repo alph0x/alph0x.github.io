@@ -1,0 +1,127 @@
+/**
+ * @fileoverview Pure utility functions for the Room Layout Editor.
+ * Extracted to enable unit testing without DOM / Three.js scene side effects.
+ */
+
+import * as THREE from 'three';
+
+export function snap(v, gridSize = 0.05) {
+  return Math.round(v / gridSize) * gridSize;
+}
+
+export function hexToInt(hex) {
+  return parseInt(hex.replace('#', ''), 16);
+}
+
+export function extractMeshFromResult(result) {
+  if (result && result.mesh) return result.mesh;
+  if (Array.isArray(result) && result[0]) return result[0];
+  if (result instanceof THREE.Mesh || result instanceof THREE.Group) return result;
+  return null;
+}
+
+export function buildPolygonShape(outline) {
+  const shape = new THREE.Shape();
+  shape.moveTo(outline[0][0], outline[0][1]);
+  for (let i = 1; i < outline.length; i++) {
+    shape.lineTo(outline[i][0], outline[i][1]);
+  }
+  shape.closePath();
+  return shape;
+}
+
+export function getClosestEdgePoint(point, outline) {
+  let best = null;
+  let bestDist = Infinity;
+  for (let i = 0; i < outline.length; i++) {
+    const p1 = new THREE.Vector3(outline[i][0], 0, outline[i][1]);
+    const p2 = new THREE.Vector3(outline[(i + 1) % outline.length][0], 0, outline[(i + 1) % outline.length][1]);
+    const closest = new THREE.Vector3();
+    const dir = new THREE.Vector3().subVectors(p2, p1);
+    const len = dir.length();
+    if (len < 0.001) continue;
+    dir.normalize();
+    const t = Math.max(0, Math.min(len, new THREE.Vector3().subVectors(point, p1).dot(dir)));
+    closest.copy(p1).add(dir.clone().multiplyScalar(t));
+    const d = point.distanceTo(closest);
+    if (d < bestDist) {
+      bestDist = d;
+      best = { index: i, point: [closest.x, closest.z] };
+    }
+  }
+  return best && bestDist < 0.5 ? best : null;
+}
+
+export function fitMeshToPreview(mesh, targetSize = 1.2) {
+  const box = new THREE.Box3().setFromObject(mesh);
+  const center = new THREE.Vector3();
+  box.getCenter(center);
+  const size = new THREE.Vector3();
+  box.getSize(size);
+
+  const maxDim = Math.max(size.x, size.y, size.z);
+  const scale = maxDim > 0 ? targetSize / maxDim : 1;
+  mesh.scale.setScalar(scale);
+  mesh.position.sub(center.clone().multiplyScalar(scale));
+  mesh.position.y += (size.y * scale) / 2;
+}
+
+export function normalizeRotation(rad) {
+  const twoPi = Math.PI * 2;
+  return ((rad % twoPi) + twoPi) % twoPi;
+}
+
+// ── Polygon validation ──────────────────────────────────────────
+
+function orientation(p, q, r) {
+  const val = (q[1] - p[1]) * (r[0] - q[0]) - (q[0] - p[0]) * (r[1] - q[1]);
+  if (Math.abs(val) < 1e-9) return 0;
+  return val > 0 ? 1 : 2;
+}
+
+function onSegment(p, q, r) {
+  return (
+    q[0] <= Math.max(p[0], r[0]) + 1e-9 &&
+    q[0] >= Math.min(p[0], r[0]) - 1e-9 &&
+    q[1] <= Math.max(p[1], r[1]) + 1e-9 &&
+    q[1] >= Math.min(p[1], r[1]) - 1e-9
+  );
+}
+
+function segmentsIntersect(p1, p2, p3, p4) {
+  const o1 = orientation(p1, p2, p3);
+  const o2 = orientation(p1, p2, p4);
+  const o3 = orientation(p3, p4, p1);
+  const o4 = orientation(p3, p4, p2);
+
+  if (o1 !== o2 && o3 !== o4) return true;
+
+  if (o1 === 0 && onSegment(p1, p3, p2)) return true;
+  if (o2 === 0 && onSegment(p1, p4, p2)) return true;
+  if (o3 === 0 && onSegment(p3, p1, p4)) return true;
+  if (o4 === 0 && onSegment(p3, p2, p4)) return true;
+
+  return false;
+}
+
+export function isSelfIntersecting(outline) {
+  const n = outline.length;
+  if (n < 4) return false;
+  for (let i = 0; i < n; i++) {
+    const p1 = outline[i];
+    const p2 = outline[(i + 1) % n];
+    for (let j = i + 1; j < n; j++) {
+      const p3 = outline[j];
+      const p4 = outline[(j + 1) % n];
+
+      // Skip adjacent edges (share a vertex)
+      if ((i + 1) % n === j) continue;
+      if ((j + 1) % n === i) continue;
+
+      if (segmentsIntersect(p1, p2, p3, p4)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}

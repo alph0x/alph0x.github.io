@@ -4,6 +4,7 @@ export default defineConfig({
   test: {
     environment: 'happy-dom',
     globals: true,
-    include: ['tests/**/*.test.js']
+    include: ['tests/**/*.test.js'],
+    setupFiles: ['tests/setup-canvas-mock.js'],
   }
 });

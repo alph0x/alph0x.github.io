@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>3D Model Viewer — Furniture Debug</title>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #0c0a09; color: #e7e5e4; font-family: 'Segoe UI', system-ui, sans-serif; }
+    #app { display: flex; width: 100%; height: 100%; }
+
+    /* Sidebar */
+    #sidebar {
+      width: 260px; min-width: 260px; background: #111114; border-right: 1px solid #292524;
+      display: flex; flex-direction: column;
+    }
+    #sidebar h2 {
+      padding: 16px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.1em;
+      color: #78716c; border-bottom: 1px solid #292524;
+    }
+    #search {
+      padding: 10px 16px; background: #1c1917; border: none; border-bottom: 1px solid #292524;
+      color: #e7e5e4; font-size: 13px; outline: none; width: 100%;
+    }
+    #search::placeholder { color: #57534e; }
+    #list { flex: 1; overflow-y: auto; }
+    .item {
+      padding: 10px 16px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #1c1917;
+      display: flex; align-items: center; gap: 8px; transition: background 0.1s;
+    }
+    .item:hover { background: #1c1917; }
+    .item.active { background: #292524; color: #f59e0b; }
+    .item .dot { width: 6px; height: 6px; border-radius: 50%; background: #44403c; flex-shrink: 0; }
+    .item.active .dot { background: #f59e0b; }
+
+    /* Info panel */
+    #info {
+      padding: 12px 16px; border-top: 1px solid #292524; font-size: 11px; color: #78716c; line-height: 1.6;
+    }
+    #info span.val { color: #e7e5e4; }
+
+    /* Viewer */
+    #viewer { flex: 1; position: relative; background: #0c0a09; }
+    #viewer canvas { display: block; width: 100%; height: 100%; }
+    #overlay {
+      position: absolute; top: 12px; left: 12px; z-index: 10;
+      background: rgba(12,10,9,0.85); border: 1px solid #292524; padding: 10px 14px;
+      font-size: 12px; color: #78716c; pointer-events: none;
+    }
+    #overlay strong { color: #f59e0b; font-weight: 600; }
+
+    /* Scrollbar */
+    #list::-webkit-scrollbar { width: 4px; }
+    #list::-webkit-scrollbar-thumb { background: #44403c; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div id="sidebar">
+      <h2>Furniture Models</h2>
+      <input id="search" type="text" placeholder="Filter models…" autocomplete="off">
+      <div id="list"></div>
+      <div id="info">
+        <div>Model: <span class="val" id="info-name">—</span></div>
+        <div>Width: <span class="val" id="info-w">—</span></div>
+        <div>Height: <span class="val" id="info-h">—</span></div>
+        <div>Depth: <span class="val" id="info-d">—</span></div>
+        <div>Vertices: <span class="val" id="info-v">—</span></div>
+      </div>
+    </div>
+    <div id="viewer">
+      <div id="overlay">Click a model in the sidebar to preview.<br>Drag to rotate • Scroll to zoom • Right-drag to pan</div>
+    </div>
+  </div>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    // ── Setup renderer ────────────────────────────────────────────
+    const viewer = document.getElementById('viewer');
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(viewer.clientWidth, viewer.clientHeight);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.0;
+    viewer.appendChild(renderer.domElement);
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x15151a);
+    scene.fog = new THREE.Fog(0x15151a, 8, 20);
+
+    const camera = new THREE.PerspectiveCamera(45, viewer.clientWidth / viewer.clientHeight, 0.01, 100);
+    camera.position.set(2.5, 2, 2.5);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.target.set(0, 0.5, 0);
+
+    // ── Lights ────────────────────────────────────────────────────
+    scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+    const hemi = new THREE.HemisphereLight(0xeeeeee, 0x222222, 0.5);
+    scene.add(hemi);
+
+    const keyLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    keyLight.position.set(3, 5, 3);
+    keyLight.castShadow = true;
+    keyLight.shadow.mapSize.set(1024, 1024);
+    scene.add(keyLight);
+
+    const fillLight = new THREE.DirectionalLight(0x6688aa, 0.4);
+    fillLight.position.set(-3, 2, -3);
+    scene.add(fillLight);
+
+    const rimLight = new THREE.PointLight(0xf59e0b, 0.5, 8);
+    rimLight.position.set(-2, 2, 2);
+    scene.add(rimLight);
+
+    // ── Ground grid ───────────────────────────────────────────────
+    const grid = new THREE.GridHelper(6, 30, 0x44403c, 0x1c1917);
+    scene.add(grid);
+
+    const ground = new THREE.Mesh(
+      new THREE.PlaneGeometry(20, 20),
+      new THREE.MeshStandardMaterial({ color: 0x15151a, roughness: 0.9 })
+    );
+    ground.rotation.x = -Math.PI / 2;
+    ground.position.y = -0.001;
+    ground.receiveShadow = true;
+    scene.add(ground);
+
+    // ── Load furniture registry ───────────────────────────────────
+    const { FurnitureRegistry } = await import('./js/furniture/index.js');
+
+    let currentMesh = null;
+    let currentBox = null;
+
+    function clearScene() {
+      if (currentMesh) {
+        scene.remove(currentMesh);
+        currentMesh.traverse((c) => {
+          if (c.geometry) c.geometry.dispose();
+          if (c.material) {
+            if (Array.isArray(c.material)) c.material.forEach((m) => m.dispose());
+            else c.material.dispose();
+          }
+        });
+        currentMesh = null;
+      }
+      if (currentBox) {
+        scene.remove(currentBox);
+        currentBox.geometry.dispose();
+        currentBox.material.dispose();
+        currentBox = null;
+      }
+    }
+
+    function showModel(type) {
+      clearScene();
+      const entry = FurnitureRegistry.get(type);
+      const builder = entry?.builder;
+      if (!builder) return;
+
+      const result = builder({ type, position: [0, 0, 0], rotation: 0 });
+      const mesh = (result && result.mesh) || (result instanceof THREE.Mesh || result instanceof THREE.Group ? result : null);
+      if (!mesh) return;
+
+      scene.add(mesh);
+      currentMesh = mesh;
+
+      // Compute bounding box
+      const box = new THREE.Box3().setFromObject(mesh);
+      const size = new THREE.Vector3();
+      box.getSize(size);
+      const center = new THREE.Vector3();
+      box.getCenter(center);
+
+      // Wireframe box
+      const boxGeo = new THREE.BoxGeometry(size.x, size.y, size.z);
+      const boxMat = new THREE.MeshBasicMaterial({ color: 0x06b6d4, wireframe: true, transparent: true, opacity: 0.25 });
+      currentBox = new THREE.Mesh(boxGeo, boxMat);
+      currentBox.position.copy(center);
+      scene.add(currentBox);
+
+      // Focus camera
+      const maxDim = Math.max(size.x, size.y, size.z);
+      const dist = maxDim * 1.8;
+      controls.target.set(center.x, center.y, center.z);
+      camera.position.set(center.x + dist, center.y + dist * 0.6, center.z + dist);
+      controls.update();
+
+      // Update info
+      document.getElementById('info-name').textContent = type;
+      document.getElementById('info-w').textContent = size.x.toFixed(3) + ' m';
+      document.getElementById('info-h').textContent = size.y.toFixed(3) + ' m';
+      document.getElementById('info-d').textContent = size.z.toFixed(3) + ' m';
+
+      let vertCount = 0;
+      mesh.traverse((c) => { if (c.isMesh && c.geometry) vertCount += c.geometry.attributes.position.count; });
+      document.getElementById('info-v').textContent = vertCount.toLocaleString();
+
+      document.getElementById('overlay').style.display = 'none';
+    }
+
+    // ── Build sidebar list ────────────────────────────────────────
+    const listEl = document.getElementById('list');
+    const searchEl = document.getElementById('search');
+    const types = Array.from(FurnitureRegistry.keys()).sort();
+
+    function renderList(filter = '') {
+      listEl.innerHTML = '';
+      const term = filter.toLowerCase();
+      for (const type of types) {
+        if (!type.toLowerCase().includes(term)) continue;
+        const div = document.createElement('div');
+        div.className = 'item';
+        div.innerHTML = `<span class="dot"></span>${type}`;
+        div.addEventListener('click', () => {
+          document.querySelectorAll('.item').forEach((el) => el.classList.remove('active'));
+          div.classList.add('active');
+          showModel(type);
+        });
+        listEl.appendChild(div);
+      }
+    }
+
+    renderList();
+    searchEl.addEventListener('input', (e) => renderList(e.target.value));
+
+    // ── Loop ──────────────────────────────────────────────────────
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+      const w = viewer.clientWidth;
+      const h = viewer.clientHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+    });
+  </script>
+</body>
+</html>
