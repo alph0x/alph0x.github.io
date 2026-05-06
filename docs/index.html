@@ -3,18 +3,18 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ALPH0X // NETRUNNER</title>
+  <title>BSc Computer Engineer, Alfredo E. Pérez Leal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Press+Start+2P&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-  <meta name="theme-color" content="#08080c">
+  <meta name="theme-color" content="#0c0a09">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #0c0a09; }
     body { font-family: 'Share Tech Mono', monospace; user-select: none; }
     canvas { display: block; image-rendering: pixelated; position: fixed; inset: 0; width: 100%; height: 100%; }
 
-    /* ── CRT OVERLAY ─────────────────────────────────── */
+    /* ── MONITOR OVERLAY ─────────────────────────────── */
     #crt-overlay {
       position: fixed; inset: 0; pointer-events: none; z-index: 1000;
       background: repeating-linear-gradient(0deg, transparent 0px, transparent 3px, rgba(0,0,0,0.03) 3px, rgba(0,0,0,0.03) 6px);
@@ -28,83 +28,74 @@
     /* ── CROSSHAIR ───────────────────────────────────── */
     #crosshair {
       position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-      z-index: 200; pointer-events: none; color: rgba(0,240,255,0.7);
+      z-index: 200; pointer-events: none; color: rgba(124,58,237,0.7);
       font-size: 24px; font-family: monospace; line-height: 1;
-      text-shadow: 0 0 8px rgba(0,240,255,0.5);
+      text-shadow: 0 0 8px rgba(124,58,237,0.5);
     }
 
     /* ── HUD ─────────────────────────────────────────── */
     #hud {
       position: fixed; bottom: 0; left: 0; right: 0; z-index: 150;
-      height: 72px; background: rgba(8,8,12,0.92); border-top: 2px solid #2a2a3a;
+      height: 72px; background: rgba(12,10,9,0.92); border-top: 2px solid #292524;
       display: flex; align-items: center; padding: 0 20px; gap: 20px;
       font-family: 'Press Start 2P', monospace; font-size: 10px;
       pointer-events: none;
     }
     .hud-block { display: flex; flex-direction: column; gap: 4px; min-width: 80px; }
-    .hud-label { color: #4a4a60; font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; }
+    .hud-label { color: #57534e; font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; }
     .hud-value { font-size: 14px; letter-spacing: 0.04em; }
-    .hud-green { color: #00ff88; text-shadow: 0 0 8px rgba(0,255,136,0.5); }
-    .hud-yellow { color: #fcee0a; text-shadow: 0 0 8px rgba(252,238,10,0.5); }
-    .hud-cyan { color: #00f0ff; text-shadow: 0 0 8px rgba(0,240,255,0.5); }
-    .hud-pink { color: #ff003c; text-shadow: 0 0 8px rgba(255,0,60,0.5); }
-    .hud-bar { width: 100px; height: 10px; background: #1a1a28; border: 1px solid #3a3a50; position: relative; }
+    .hud-green { color: #10b981; text-shadow: 0 0 8px rgba(16,185,129,0.5); }
+    .hud-yellow { color: #f59e0b; text-shadow: 0 0 8px rgba(245,158,11,0.5); }
+    .hud-cyan { color: #06b6d4; text-shadow: 0 0 8px rgba(6,182,212,0.5); }
+    .hud-pink { color: #ec4899; text-shadow: 0 0 8px rgba(236,72,153,0.5); }
+    .hud-bar { width: 100px; height: 10px; background: #1c1917; border: 1px solid #44403c; position: relative; }
     .hud-bar-inner { height: 100%; background: repeating-linear-gradient(90deg, var(--c) 0px, var(--c) 4px, transparent 4px, transparent 6px); }
 
     /* ── PROMPT ──────────────────────────────────────── */
     #prompt {
       position: fixed; top: 62%; left: 50%; transform: translate(-50%, -50%);
-      z-index: 200; pointer-events: none; color: #fcee0a;
+      z-index: 200; pointer-events: none; color: #f59e0b;
       font-family: 'Press Start 2P', monospace; font-size: 10px;
-      text-shadow: 0 0 12px rgba(252,238,10,0.6); opacity: 0; transition: opacity 0.2s;
-      background: rgba(0,0,0,0.6); padding: 8px 16px; border: 1px solid #fcee0a;
+      text-shadow: 0 0 12px rgba(245,158,11,0.6); opacity: 0; transition: opacity 0.2s;
+      background: rgba(0,0,0,0.6); padding: 8px 16px; border: 1px solid #f59e0b;
     }
     #prompt.active { opacity: 1; }
 
-    /* ── AMMO COUNTER ────────────────────────────────── */
-    #ammo-counter {
-      position: fixed; bottom: 80px; right: 24px; z-index: 150;
-      font-family: 'Press Start 2P', monospace; font-size: 14px;
-      color: #fcee0a; text-shadow: 0 0 8px rgba(252,238,10,0.5);
-      pointer-events: none; text-align: right;
-    }
-    #ammo-counter .ammo-num { font-size: 28px; }
-
     /* ── LOADING SCREEN ──────────────────────────────── */
     #loading {
-      position: fixed; inset: 0; z-index: 5000; background: #08080c;
+      position: fixed; inset: 0; z-index: 5000; background: #0c0a09;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 24px; color: #fcee0a; font-family: 'Press Start 2P', monospace; font-size: 12px;
+      gap: 24px; color: #f59e0b; font-family: 'Press Start 2P', monospace; font-size: 12px;
     }
-    #loading-bar { width: 300px; height: 6px; background: #1a1a28; border: 1px solid #3a3a50; }
-    #loading-bar-fill { width: 0%; height: 100%; background: #fcee0a; transition: width 0.3s; }
+    #loading-bar { width: 300px; height: 6px; background: #1c1917; border: 1px solid #44403c; }
+    #loading-bar-fill { width: 0%; height: 100%; background: #f59e0b; transition: width 0.3s; }
 
     /* ── START SCREEN ────────────────────────────────── */
     #start-screen {
-      position: fixed; inset: 0; z-index: 4000; background: #08080c;
+      position: fixed; inset: 0; z-index: 4000; background: #0c0a09;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       gap: 40px; cursor: default;
     }
     #start-screen h1 {
       font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: clamp(40px, 8vw, 100px);
-      color: #e8e8f0; text-transform: uppercase; letter-spacing: -0.02em;
-      text-shadow: 3px 3px 0 #ff003c, 6px 6px 0 rgba(255,0,60,0.3), 0 0 40px rgba(252,238,10,0.15);
+      color: #e7e5e4; text-transform: uppercase; letter-spacing: -0.02em;
+      text-shadow: 3px 3px 0 #ec4899, 6px 6px 0 rgba(236,72,153,0.3), 0 0 40px rgba(124,58,237,0.15);
       text-align: center; line-height: 0.9;
     }
-    #start-screen h1 span { display: block; color: #fcee0a; }
+    #start-screen h1 span { display: block; color: #f59e0b; }
     #start-screen .subtitle {
-      font-family: 'Share Tech Mono', monospace; font-size: 14px; color: #6a6a80;
+      font-family: 'Share Tech Mono', monospace; font-size: 14px; color: #78716c;
       letter-spacing: 0.2em; text-transform: uppercase;
     }
     #start-btn {
-      font-family: 'Press Start 2P', monospace; font-size: 12px; color: #08080c;
-      background: #fcee0a; border: none; padding: 16px 40px; cursor: pointer;
-      box-shadow: 0 0 20px rgba(252,238,10,0.3); text-transform: uppercase;
+      font-family: 'Press Start 2P', monospace; font-size: 12px; color: #0c0a09;
+      background: #f59e0b; border: none; padding: 16px 40px; cursor: pointer;
+      box-shadow: 0 0 20px rgba(245,158,11,0.3); text-transform: uppercase;
       transition: transform 0.1s, box-shadow 0.2s;
     }
-    #start-btn:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(252,238,10,0.5); }
+    #start-btn:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(245,158,11,0.5); }
     #start-screen .controls-hint {
-      font-family: 'Share Tech Mono', monospace; font-size: 12px; color: #4a4a60;
+      font-family: 'Share Tech Mono', monospace; font-size: 12px; color: #57534e;
       display: flex; gap: 24px; margin-top: 10px;
     }
 
@@ -112,17 +103,17 @@
     .info-panel {
       position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.9);
       z-index: 3000; width: 90%; max-width: 900px; max-height: 85vh; overflow-y: auto;
-      background: rgba(8,8,12,0.97); border: 2px solid #2a2a3a;
+      background: rgba(12,10,9,0.97); border: 2px solid #292524;
       box-shadow: 0 0 40px rgba(0,0,0,0.9), inset 0 0 60px rgba(0,0,0,0.5);
       padding: 40px; opacity: 0; pointer-events: none; transition: all 0.3s;
     }
     .info-panel.active { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
     .info-panel::-webkit-scrollbar { width: 4px; }
-    .info-panel::-webkit-scrollbar-thumb { background: #fcee0a; }
+    .info-panel::-webkit-scrollbar-thumb { background: #f59e0b; }
 
     .panel-header {
       display: flex; align-items: center; gap: 12px; margin-bottom: 32px;
-      padding-bottom: 16px; border-bottom: 2px solid #1a1a28;
+      padding-bottom: 16px; border-bottom: 2px solid #1c1917;
     }
     .panel-header .panel-icon {
       width: 40px; height: 40px; border: 2px solid var(--accent); display: flex;
@@ -131,87 +122,81 @@
     }
     .panel-header h2 {
       font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 28px;
-      text-transform: uppercase; color: #e8e8f0; letter-spacing: 0.04em;
+      text-transform: uppercase; color: #e7e5e4; letter-spacing: 0.04em;
     }
     .panel-close {
       margin-left: auto; font-family: 'Press Start 2P', monospace; font-size: 10px;
-      color: #ff003c; background: none; border: 2px solid #ff003c; padding: 8px 16px;
+      color: #ec4899; background: none; border: 2px solid #ec4899; padding: 8px 16px;
       cursor: pointer; transition: all 0.2s; text-transform: uppercase;
     }
-    .panel-close:hover { background: #ff003c; color: #e8e8f0; }
+    .panel-close:hover { background: #ec4899; color: #e7e5e4; }
 
-    .panel-body { font-family: 'Share Tech Mono', monospace; font-size: 14px; line-height: 1.8; color: #e8e8f0; }
+    .panel-body { font-family: 'Share Tech Mono', monospace; font-size: 14px; line-height: 1.8; color: #e7e5e4; }
     .panel-body .section-label {
-      font-family: 'Press Start 2P', monospace; font-size: 9px; color: #4a4a60;
+      font-family: 'Press Start 2P', monospace; font-size: 9px; color: #57534e;
       letter-spacing: 0.12em; text-transform: uppercase; margin: 24px 0 12px;
       display: flex; align-items: center; gap: 10px;
     }
-    .panel-body .section-label::after { content: ''; flex: 1; height: 1px; background: #1a1a28; }
+    .panel-body .section-label::after { content: ''; flex: 1; height: 1px; background: #1c1917; }
     .panel-body .bio-text { max-width: 700px; }
     .panel-body .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
-    .panel-body .stat-block { background: #11111a; border: 2px solid #1a1a28; padding: 16px; position: relative; }
+    .panel-body .stat-block { background: #111114; border: 2px solid #1c1917; padding: 16px; position: relative; }
     .panel-body .stat-block::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--accent); box-shadow: 0 0 10px var(--accent-glow); }
     .panel-body .stat-num { font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 28px; color: var(--accent); text-shadow: 0 0 10px var(--accent-glow); }
-    .panel-body .stat-label { font-family: 'Press Start 2P', monospace; font-size: 8px; color: #4a4a60; margin-top: 6px; }
+    .panel-body .stat-label { font-family: 'Press Start 2P', monospace; font-size: 8px; color: #57534e; margin-top: 6px; }
     .panel-body .skills-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 3px; }
-    .panel-body .skill-chip { padding: 12px 14px; background: #11111a; border: 2px solid #1a1a28; position: relative; transition: all 0.15s; }
+    .panel-body .skill-chip { padding: 12px 14px; background: #111114; border: 2px solid #1c1917; position: relative; transition: all 0.15s; }
     .panel-body .skill-chip:hover { border-color: var(--accent); box-shadow: 0 0 12px var(--accent-glow); }
     .panel-body .skill-chip::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--accent); transform: scaleY(0); transform-origin: bottom; transition: transform 0.25s; }
     .panel-body .skill-chip:hover::before { transform: scaleY(1); }
-    .panel-body .skill-name { font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 13px; text-transform: uppercase; color: #e8e8f0; }
-    .panel-body .skill-type { font-family: 'Press Start 2P', monospace; font-size: 7px; color: #4a4a60; margin-top: 4px; }
-    .panel-body .mission-entry { border-top: 2px solid #1a1a28; padding: 24px 0; }
-    .panel-body .mission-role { font-family: 'Orbitron', sans-serif; font-weight: 800; font-size: 18px; text-transform: uppercase; color: #e8e8f0; margin-bottom: 4px; }
-    .panel-body .mission-corp { font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 14px; text-transform: uppercase; color: #ff003c; margin-bottom: 10px; text-shadow: 0 0 10px rgba(255,0,60,0.3); }
-    .panel-body .mission-desc { color: #e8e8f0; font-size: 13px; line-height: 1.7; max-width: 600px; }
+    .panel-body .skill-name { font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 13px; text-transform: uppercase; color: #e7e5e4; }
+    .panel-body .skill-type { font-family: 'Press Start 2P', monospace; font-size: 7px; color: #57534e; margin-top: 4px; }
+    .panel-body .mission-entry { border-top: 2px solid #1c1917; padding: 24px 0; }
+    .panel-body .mission-role { font-family: 'Orbitron', sans-serif; font-weight: 800; font-size: 18px; text-transform: uppercase; color: #e7e5e4; margin-bottom: 4px; }
+    .panel-body .mission-corp { font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 14px; text-transform: uppercase; color: #ec4899; margin-bottom: 10px; text-shadow: 0 0 10px rgba(236,72,153,0.3); }
+    .panel-body .mission-desc { color: #e7e5e4; font-size: 13px; line-height: 1.7; max-width: 600px; }
     .panel-body .mission-desc li { list-style: none; padding-left: 16px; position: relative; margin-bottom: 4px; }
-    .panel-body .mission-desc li::before { content: '>'; position: absolute; left: 0; color: #ff003c; font-family: 'Press Start 2P'; font-size: 8px; }
+    .panel-body .mission-desc li::before { content: '>'; position: absolute; left: 0; color: #ec4899; font-family: 'Press Start 2P'; font-size: 8px; }
     .panel-body .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
     .panel-body .tag { font-family: 'Press Start 2P', monospace; font-size: 7px; letter-spacing: 0.06em; text-transform: uppercase; padding: 5px 10px; border: 2px solid transparent; }
-    .tag-cyber-fill { background: #fcee0a; color: #08080c; border-color: #fcee0a; }
-    .tag-pink-fill { background: #ff003c; color: #e8e8f0; border-color: #ff003c; }
-    .tag-cyan-fill { background: #00f0ff; color: #08080c; border-color: #00f0ff; }
-    .tag-orange-fill { background: #ff6b00; color: #08080c; border-color: #ff6b00; }
-    .tag-green-fill { background: #00ff88; color: #08080c; border-color: #00ff88; }
-    .tag-dim-out { border-color: #3a3a50; color: #6a6a80; background: transparent; }
+    .tag-cyber-fill { background: #f59e0b; color: #0c0a09; border-color: #f59e0b; }
+    .tag-pink-fill { background: #ec4899; color: #e7e5e4; border-color: #ec4899; }
+    .tag-cyan-fill { background: #06b6d4; color: #0c0a09; border-color: #06b6d4; }
+    .tag-orange-fill { background: #f97316; color: #0c0a09; border-color: #f97316; }
+    .tag-green-fill { background: #10b981; color: #0c0a09; border-color: #10b981; }
+    .tag-dim-out { border-color: #44403c; color: #78716c; background: transparent; }
     .panel-body .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; }
     @media (max-width: 768px) { .panel-body .two-col { grid-template-columns: 1fr; } .panel-body .stat-row { grid-template-columns: 1fr; } }
-    .panel-body .info-block { padding: 18px 20px; background: #11111a; border: 2px solid #1a1a28; }
-    .panel-body .info-title { font-family: 'Orbitron', sans-serif; font-weight: 800; font-size: 12px; text-transform: uppercase; color: #fcee0a; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #1a1a28; text-shadow: 0 0 10px rgba(252,238,10,0.3); }
-    .panel-body .info-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #1a1a28; font-size: 12px; }
+    .panel-body .info-block { padding: 18px 20px; background: #111114; border: 2px solid #1c1917; }
+    .panel-body .info-title { font-family: 'Orbitron', sans-serif; font-weight: 800; font-size: 12px; text-transform: uppercase; color: #f59e0b; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #1c1917; text-shadow: 0 0 10px rgba(245,158,11,0.3); }
+    .panel-body .info-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #1c1917; font-size: 12px; }
     .panel-body .info-row:last-child { border-bottom: none; }
-    .panel-body .info-key { font-family: 'Press Start 2P', monospace; font-size: 7px; color: #4a4a60; text-transform: uppercase; }
-    .panel-body .info-val { color: #e8e8f0; text-align: right; }
+    .panel-body .info-key { font-family: 'Press Start 2P', monospace; font-size: 7px; color: #57534e; text-transform: uppercase; }
+    .panel-body .info-val { color: #e7e5e4; text-align: right; }
     .panel-body .contact-links { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 16px; }
-    .panel-body .contact-link { display: inline-flex; padding: 12px 20px; font-family: 'Press Start 2P', monospace; font-size: 8px; letter-spacing: 0.06em; text-transform: uppercase; color: #08080c; background: rgba(0,0,0,0.15); border: 2px solid rgba(0,0,0,0.25); transition: all 0.2s; text-decoration: none; }
-    .panel-body .contact-link:hover { background: #08080c; color: #fcee0a; border-color: #08080c; box-shadow: 0 0 20px rgba(252,238,10,0.3); }
-    .panel-body .contact-link-primary { background: #08080c; color: #fcee0a; border-color: #08080c; }
-    .panel-body .contact-link-primary:hover { background: #fcee0a; color: #08080c; border-color: #fcee0a; }
-
-    /* ── WEAPON OVERLAY (HTML fallback) ──────────────── */
-    #weapon-hud {
-      position: fixed; bottom: 80px; right: 40px; z-index: 120;
-      width: 200px; height: 150px; pointer-events: none;
-    }
+    .panel-body .contact-link { display: inline-flex; padding: 12px 20px; font-family: 'Press Start 2P', monospace; font-size: 8px; letter-spacing: 0.06em; text-transform: uppercase; color: #0c0a09; background: rgba(0,0,0,0.15); border: 2px solid rgba(0,0,0,0.25); transition: all 0.2s; text-decoration: none; }
+    .panel-body .contact-link:hover { background: #0c0a09; color: #f59e0b; border-color: #0c0a09; box-shadow: 0 0 20px rgba(245,158,11,0.3); }
+    .panel-body .contact-link-primary { background: #0c0a09; color: #f59e0b; border-color: #0c0a09; }
+    .panel-body .contact-link-primary:hover { background: #f59e0b; color: #0c0a09; border-color: #f59e0b; }
 
     /* ── MOBILE RESUME (static fallback) ─────────────── */
     #mobile-resume { display: none; }
     @media (max-width: 768px), (hover: none) and (pointer: coarse) {
-      #game-container, #loading, #start-screen, #hud, #crosshair, #prompt, #ammo-counter, .info-panel { display: none !important; }
-      #mobile-resume { display: block !important; background: #08080c; color: #e8e8f0; font-family: 'Share Tech Mono', monospace; padding: 20px; }
+      #game-container, #loading, #start-screen, #hud, #crosshair, #prompt, .info-panel { display: none !important; }
+      #mobile-resume { display: block !important; background: #0c0a09; color: #e7e5e4; font-family: 'Share Tech Mono', monospace; padding: 20px; }
       #mobile-resume .m-header { text-align: center; margin-bottom: 30px; }
-      #mobile-resume .m-header h1 { font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 2.2rem; text-transform: uppercase; line-height: 0.9; text-shadow: 2px 2px 0 #ff003c; }
-      #mobile-resume .m-header h1 span { color: #fcee0a; }
-      #mobile-resume .m-avatar { width: 120px; height: 120px; object-fit: cover; border: 2px solid #ff003c; margin: 0 auto 16px; display: block; filter: grayscale(0.3) contrast(1.1); }
+      #mobile-resume .m-header h1 { font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 2.2rem; text-transform: uppercase; line-height: 0.9; text-shadow: 2px 2px 0 #ec4899; }
+      #mobile-resume .m-header h1 span { color: #f59e0b; }
+      #mobile-resume .m-avatar { width: 120px; height: 120px; object-fit: cover; border: 2px solid #ec4899; margin: 0 auto 16px; display: block; filter: grayscale(0.3) contrast(1.1); }
       #mobile-resume .m-section { margin-bottom: 28px; }
-      #mobile-resume .m-label { font-family: 'Press Start 2P', monospace; font-size: 8px; color: #4a4a60; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 8px; border-bottom: 1px solid #1a1a28; padding-bottom: 4px; }
-      #mobile-resume .m-title { font-family: 'Orbitron', sans-serif; font-weight: 800; font-size: 1.1rem; text-transform: uppercase; color: #fcee0a; margin-bottom: 2px; }
-      #mobile-resume .m-corp { font-family: 'Orbitron', sans-serif; font-size: 0.85rem; color: #ff003c; text-transform: uppercase; margin-bottom: 6px; }
-      #mobile-resume .m-text { font-size: 13px; line-height: 1.7; color: #e8e8f0; }
+      #mobile-resume .m-label { font-family: 'Press Start 2P', monospace; font-size: 8px; color: #57534e; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 8px; border-bottom: 1px solid #1c1917; padding-bottom: 4px; }
+      #mobile-resume .m-title { font-family: 'Orbitron', sans-serif; font-weight: 800; font-size: 1.1rem; text-transform: uppercase; color: #f59e0b; margin-bottom: 2px; }
+      #mobile-resume .m-corp { font-family: 'Orbitron', sans-serif; font-size: 0.85rem; color: #ec4899; text-transform: uppercase; margin-bottom: 6px; }
+      #mobile-resume .m-text { font-size: 13px; line-height: 1.7; color: #e7e5e4; }
       #mobile-resume .m-skills { display: flex; flex-wrap: wrap; gap: 4px; }
-      #mobile-resume .m-skill { font-family: 'Press Start 2P', monospace; font-size: 7px; text-transform: uppercase; padding: 5px 8px; background: #11111a; border: 1px solid #2a2a3a; color: #fcee0a; }
-      #mobile-resume .m-contact a { display: block; color: #fcee0a; text-decoration: none; margin-bottom: 6px; font-size: 13px; }
-      #mobile-resume .m-footer { text-align: center; font-size: 11px; color: #4a4a60; margin-top: 30px; padding-top: 20px; border-top: 1px solid #1a1a28; }
+      #mobile-resume .m-skill { font-family: 'Press Start 2P', monospace; font-size: 7px; text-transform: uppercase; padding: 5px 8px; background: #111114; border: 1px solid #292524; color: #f59e0b; }
+      #mobile-resume .m-contact a { display: block; color: #f59e0b; text-decoration: none; margin-bottom: 6px; font-size: 13px; }
+      #mobile-resume .m-footer { text-align: center; font-size: 11px; color: #57534e; margin-top: 30px; padding-top: 20px; border-top: 1px solid #1c1917; }
     }
   </style>
   <script type="importmap">
@@ -234,28 +219,22 @@
   <!-- Prompt -->
   <div id="prompt">[CLICK TO INTERACT]</div>
 
-  <!-- Ammo -->
-  <div id="ammo-counter">
-    <div>AMMO</div>
-    <div class="ammo-num" id="ammo-num">50</div>
-  </div>
-
   <!-- HUD -->
   <div id="hud">
     <div class="hud-block">
-      <span class="hud-label">Bio-Sync</span>
+      <span class="hud-label">Level</span>
       <span class="hud-value hud-green">12+</span>
-      <div class="hud-bar"><div class="hud-bar-inner" style="--c: #00ff88; width: 100%;"></div></div>
+      <div class="hud-bar"><div class="hud-bar-inner" style="--c: #10b981; width: 100%;"></div></div>
     </div>
     <div class="hud-block">
-      <span class="hud-label">Buffer</span>
+      <span class="hud-label">HP</span>
       <span class="hud-value hud-yellow">100%</span>
-      <div class="hud-bar"><div class="hud-bar-inner" style="--c: #fcee0a; width: 100%;"></div></div>
+      <div class="hud-bar"><div class="hud-bar-inner" style="--c: #f59e0b; width: 100%;"></div></div>
     </div>
     <div class="hud-block">
-      <span class="hud-label">RAM</span>
+      <span class="hud-label">MP</span>
       <span class="hud-value hud-cyan">MAX</span>
-      <div class="hud-bar"><div class="hud-bar-inner" style="--c: #00f0ff; width: 100%;"></div></div>
+      <div class="hud-bar"><div class="hud-bar-inner" style="--c: #06b6d4; width: 100%;"></div></div>
     </div>
     <div style="margin-left: auto; display: flex; gap: 16px; align-items: center;">
       <div class="hud-block" style="text-align: right; min-width: auto;">
@@ -271,36 +250,36 @@
 
   <!-- Loading -->
   <div id="loading">
-    <div>INITIALIZING NEURAL LINK...</div>
+    <div>LOADING SAVE FILE...</div>
     <div id="loading-bar"><div id="loading-bar-fill"></div></div>
   </div>
 
   <!-- Start Screen -->
   <div id="start-screen" style="display: none;">
     <div>
-      <h1>ALFREDO<span>PÉREZ</span></h1>
-      <div class="subtitle">Lead iOS Engineer & Architect // 12+ Years</div>
+      <h1>BSc Computer Engineer<br><span>Alfredo E. Pérez Leal</span></h1>
+      <div class="subtitle">Lead iOS Engineer & Architect // Level 12+</div>
     </div>
     <div class="controls-hint">
       <span>[WASD] MOVE</span>
       <span>[MOUSE] LOOK</span>
-      <span>[CLICK] SHOOT</span>
+      <span>[CLICK] INTERACT</span>
       <span>[E] INTERACT</span>
     </div>
-    <button id="start-btn">JACK IN</button>
+    <button id="start-btn">ENTER</button>
   </div>
 
   <!-- ── INFO PANELS ────────────────────────────────── -->
 
   <!-- Profile Panel -->
-  <div class="info-panel" id="panel-profile" style="--accent: #fcee0a; --accent-glow: rgba(252,238,10,0.3);">
+  <div class="info-panel" id="panel-profile" style="--accent: #f59e0b; --accent-glow: rgba(252,238,10,0.3);">
     <div class="panel-header">
       <div class="panel-icon">◈</div>
-      <h2>Operative Profile</h2>
+      <h2>Player Profile</h2>
       <button class="panel-close" onclick="closePanels()">[ CLOSE ]</button>
     </div>
     <div class="panel-body">
-      <div class="section-label">[ SYS.01 ] — bio.dat</div>
+      <div class="section-label">[ SAVE.01 ] — bio.dat</div>
       <p class="bio-text">
         12+ years building iOS products — from fintech startups to one of Latin America's largest delivery platforms.
         iOS Lead &amp; Software Architect at GeoPagos since 2019; now expanding into React Native to ship cross-platform
@@ -309,14 +288,14 @@
       </p>
       <div class="section-label">[ STATS ]</div>
       <div class="stat-row">
-        <div class="stat-block" style="--accent: #00ff88; --accent-glow: rgba(0,255,136,0.3);">
+        <div class="stat-block" style="--accent: #10b981; --accent-glow: rgba(16,185,129,0.3);">
           <div class="stat-num">12+</div><div class="stat-label">Years Active</div>
         </div>
-        <div class="stat-block" style="--accent: #fcee0a; --accent-glow: rgba(252,238,10,0.3);">
+        <div class="stat-block" style="--accent: #f59e0b; --accent-glow: rgba(245,158,11,0.3);">
           <div class="stat-num">100%</div><div class="stat-label">Availability</div>
         </div>
-        <div class="stat-block" style="--accent: #00f0ff; --accent-glow: rgba(0,240,255,0.3);">
-          <div class="stat-num">MAX</div><div class="stat-label">Chrome Level</div>
+        <div class="stat-block" style="--accent: #06b6d4; --accent-glow: rgba(6,182,212,0.3);">
+          <div class="stat-num">MAX</div><div class="stat-label">Focus Level</div>
         </div>
       </div>
       <div class="section-label">[ PERSONAL INFO ]</div>
@@ -344,46 +323,46 @@
   </div>
 
   <!-- Skills Panel -->
-  <div class="info-panel" id="panel-skills" style="--accent: #00f0ff; --accent-glow: rgba(0,240,255,0.3);">
+  <div class="info-panel" id="panel-skills" style="--accent: #06b6d4; --accent-glow: rgba(0,240,255,0.3);">
     <div class="panel-header">
       <div class="panel-icon">◈</div>
-      <h2>Implants &amp; Soft</h2>
+      <h2>Skills &amp; Gear</h2>
       <button class="panel-close" onclick="closePanels()">[ CLOSE ]</button>
     </div>
     <div class="panel-body">
-      <div class="section-label">[ CORE IMPLANTS ]</div>
+      <div class="section-label">[ CORE SKILLS ]</div>
       <div class="skills-grid">
-        <div class="skill-chip" style="--accent: #fcee0a; --accent-glow: rgba(252,238,10,0.2);"><div class="skill-name">React Native</div><div class="skill-type">Mobile · Expert</div></div>
-        <div class="skill-chip" style="--accent: #fcee0a; --accent-glow: rgba(252,238,10,0.2);"><div class="skill-name">Swift</div><div class="skill-type">Language · Expert</div></div>
-        <div class="skill-chip" style="--accent: #fcee0a; --accent-glow: rgba(252,238,10,0.2);"><div class="skill-name">iOS</div><div class="skill-type">Platform · Expert</div></div>
-        <div class="skill-chip" style="--accent: #fcee0a; --accent-glow: rgba(252,238,10,0.2);"><div class="skill-name">SwiftUI</div><div class="skill-type">UI · Advanced</div></div>
-        <div class="skill-chip" style="--accent: #00f0ff; --accent-glow: rgba(0,240,255,0.2);"><div class="skill-name">Objective-C</div><div class="skill-type">Language · Advanced</div></div>
-        <div class="skill-chip" style="--accent: #ff003c; --accent-glow: rgba(255,0,60,0.2);"><div class="skill-name">Clean Arch</div><div class="skill-type">Architecture · Expert</div></div>
-        <div class="skill-chip" style="--accent: #ff003c; --accent-glow: rgba(255,0,60,0.2);"><div class="skill-name">MVVM</div><div class="skill-type">Architecture · Expert</div></div>
-        <div class="skill-chip" style="--accent: #ff003c; --accent-glow: rgba(255,0,60,0.2);"><div class="skill-name">VIPER</div><div class="skill-type">Architecture · Advanced</div></div>
-        <div class="skill-chip" style="--accent: #00f0ff; --accent-glow: rgba(0,240,255,0.2);"><div class="skill-name">REST APIs</div><div class="skill-type">Integration · Expert</div></div>
-        <div class="skill-chip" style="--accent: #00f0ff; --accent-glow: rgba(0,240,255,0.2);"><div class="skill-name">Redux</div><div class="skill-type">State mgmt · Advanced</div></div>
+        <div class="skill-chip" style="--accent: #f59e0b; --accent-glow: rgba(252,238,10,0.2);"><div class="skill-name">React Native</div><div class="skill-type">Mobile · Expert</div></div>
+        <div class="skill-chip" style="--accent: #f59e0b; --accent-glow: rgba(252,238,10,0.2);"><div class="skill-name">Swift</div><div class="skill-type">Language · Expert</div></div>
+        <div class="skill-chip" style="--accent: #f59e0b; --accent-glow: rgba(252,238,10,0.2);"><div class="skill-name">iOS</div><div class="skill-type">Platform · Expert</div></div>
+        <div class="skill-chip" style="--accent: #f59e0b; --accent-glow: rgba(252,238,10,0.2);"><div class="skill-name">SwiftUI</div><div class="skill-type">UI · Advanced</div></div>
+        <div class="skill-chip" style="--accent: #06b6d4; --accent-glow: rgba(0,240,255,0.2);"><div class="skill-name">Objective-C</div><div class="skill-type">Language · Advanced</div></div>
+        <div class="skill-chip" style="--accent: #ec4899; --accent-glow: rgba(255,0,60,0.2);"><div class="skill-name">Clean Arch</div><div class="skill-type">Architecture · Expert</div></div>
+        <div class="skill-chip" style="--accent: #ec4899; --accent-glow: rgba(255,0,60,0.2);"><div class="skill-name">MVVM</div><div class="skill-type">Architecture · Expert</div></div>
+        <div class="skill-chip" style="--accent: #ec4899; --accent-glow: rgba(255,0,60,0.2);"><div class="skill-name">VIPER</div><div class="skill-type">Architecture · Advanced</div></div>
+        <div class="skill-chip" style="--accent: #06b6d4; --accent-glow: rgba(0,240,255,0.2);"><div class="skill-name">REST APIs</div><div class="skill-type">Integration · Expert</div></div>
+        <div class="skill-chip" style="--accent: #06b6d4; --accent-glow: rgba(0,240,255,0.2);"><div class="skill-name">Redux</div><div class="skill-type">State mgmt · Advanced</div></div>
         <div class="skill-chip" style="--accent: #ff6b00; --accent-glow: rgba(255,107,0,0.2);"><div class="skill-name">Payments</div><div class="skill-type">Fintech · Advanced</div></div>
         <div class="skill-chip" style="--accent: #ff6b00; --accent-glow: rgba(255,107,0,0.2);"><div class="skill-name">Combine</div><div class="skill-type">Reactive · Advanced</div></div>
-        <div class="skill-chip" style="--accent: #00ff88; --accent-glow: rgba(0,255,136,0.2);"><div class="skill-name">CI/CD</div><div class="skill-type">Infra · Advanced</div></div>
-        <div class="skill-chip" style="--accent: #00ff88; --accent-glow: rgba(0,255,136,0.2);"><div class="skill-name">TDD / BDD</div><div class="skill-type">Testing · Advanced</div></div>
-        <div class="skill-chip" style="--accent: #00ff88; --accent-glow: rgba(0,255,136,0.2);"><div class="skill-name">Vapor</div><div class="skill-type">Backend · Mid</div></div>
+        <div class="skill-chip" style="--accent: #10b981; --accent-glow: rgba(0,255,136,0.2);"><div class="skill-name">CI/CD</div><div class="skill-type">Infra · Advanced</div></div>
+        <div class="skill-chip" style="--accent: #10b981; --accent-glow: rgba(0,255,136,0.2);"><div class="skill-name">TDD / BDD</div><div class="skill-type">Testing · Advanced</div></div>
+        <div class="skill-chip" style="--accent: #10b981; --accent-glow: rgba(0,255,136,0.2);"><div class="skill-name">Vapor</div><div class="skill-type">Backend · Mid</div></div>
       </div>
     </div>
   </div>
 
   <!-- Experience Panel -->
-  <div class="info-panel" id="panel-experience" style="--accent: #ff003c; --accent-glow: rgba(255,0,60,0.3);">
+  <div class="info-panel" id="panel-experience" style="--accent: #ec4899; --accent-glow: rgba(255,0,60,0.3);">
     <div class="panel-header">
       <div class="panel-icon">◈</div>
-      <h2>Mission Log</h2>
+      <h2>Quest Log</h2>
       <button class="panel-close" onclick="closePanels()">[ CLOSE ]</button>
     </div>
     <div class="panel-body">
-      <div class="section-label">[ SYS.02 ] — work_history.log</div>
+      <div class="section-label">[ SAVE.02 ] — work_history.log</div>
 
       <div class="mission-entry">
-        <div style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #fcee0a; margin-bottom: 4px;">SEP 2023 ▸ PRESENT</div>
+        <div style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #f59e0b; margin-bottom: 4px;">SEP 2023 ▸ PRESENT</div>
         <div class="mission-role">Multiplatform Mobile Software Engineer</div>
         <div class="mission-corp">GeoPagos — Buenos Aires, AR</div>
         <ul class="mission-desc">
@@ -399,7 +378,7 @@
       </div>
 
       <div class="mission-entry">
-        <div style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #fcee0a; margin-bottom: 4px;">APR 2021 ▸ PRESENT</div>
+        <div style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #f59e0b; margin-bottom: 4px;">APR 2021 ▸ PRESENT</div>
         <div class="mission-role">Lead iOS Software Engineer &amp; Architect</div>
         <div class="mission-corp">GeoPagos — Buenos Aires, AR</div>
         <ul class="mission-desc">
@@ -415,7 +394,7 @@
       </div>
 
       <div class="mission-entry">
-        <div style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #4a4a60; margin-bottom: 4px;">JUL 2019 ▸ DEC 2020</div>
+        <div style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #57534e; margin-bottom: 4px;">JUL 2019 ▸ DEC 2020</div>
         <div class="mission-role">iOS Software Engineer</div>
         <div class="mission-corp">Rappi — Buenos Aires, AR</div>
         <ul class="mission-desc">
@@ -431,7 +410,7 @@
       </div>
 
       <div class="mission-entry">
-        <div style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #4a4a60; margin-bottom: 4px;">JAN 2019 ▸ JUL 2019</div>
+        <div style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #57534e; margin-bottom: 4px;">JAN 2019 ▸ JUL 2019</div>
         <div class="mission-role">Lead iOS Software Engineer</div>
         <div class="mission-corp">GeoPagos — Buenos Aires, AR</div>
         <ul class="mission-desc">
@@ -445,7 +424,7 @@
       </div>
 
       <div class="mission-entry">
-        <div style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #4a4a60; margin-bottom: 4px;">DEC 2015 ▸ DEC 2018</div>
+        <div style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #57534e; margin-bottom: 4px;">DEC 2015 ▸ DEC 2018</div>
         <div class="mission-role">iOS Software Engineer</div>
         <div class="mission-corp">GeoPagos — Buenos Aires, AR</div>
         <ul class="mission-desc">
@@ -459,7 +438,7 @@
       </div>
 
       <div class="mission-entry">
-        <div style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #4a4a60; margin-bottom: 4px;">JUL 2014 ▸ DEC 2015</div>
+        <div style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #57534e; margin-bottom: 4px;">JUL 2014 ▸ DEC 2015</div>
         <div class="mission-role">iOS Developer</div>
         <div class="mission-corp">Blanclink — Maracaibo, Venezuela</div>
         <ul class="mission-desc">
@@ -474,7 +453,7 @@
       </div>
 
       <div class="mission-entry">
-        <div style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #4a4a60; margin-bottom: 4px;">OCT 2013 ▸ JUL 2014</div>
+        <div style="font-family: 'Press Start 2P', monospace; font-size: 8px; color: #57534e; margin-bottom: 4px;">OCT 2013 ▸ JUL 2014</div>
         <div class="mission-role">Jr. Consultant in Configuration</div>
         <div class="mission-corp">Megagroup, CA — Maracaibo, Venezuela</div>
         <ul class="mission-desc">
@@ -487,7 +466,7 @@
         </div>
       </div>
 
-      <div class="section-label">[ EDUCATION ]</div>
+      <div class="section-label">[ BACKGROUND ]</div>
       <div class="two-col">
         <div class="info-block">
           <div class="info-title">Universidad Rafael Belloso Chacín</div>
@@ -512,8 +491,8 @@
   <div id="mobile-resume">
     <div class="m-header">
       <img src="images/profile.jpeg" alt="Alfredo Pérez" class="m-avatar" loading="lazy">
-      <h1>ALFREDO<span>PÉREZ</span></h1>
-      <p style="color:#6a6a80; font-size:12px; margin-top:8px;">Lead iOS Engineer & Architect // 12+ Years</p>
+      <h1>BSc Computer Engineer<br><span>Alfredo E. Pérez Leal</span></h1>
+      <p style="color:#78716c; font-size:12px; margin-top:8px;">Lead iOS Engineer & Architect // 12+ Years</p>
     </div>
 
     <div class="m-section">
@@ -578,16 +557,16 @@
   </div>
 
   <!-- Contact Panel -->
-  <div class="info-panel" id="panel-contact" style="--accent: #fcee0a; --accent-glow: rgba(252,238,10,0.3);">
+  <div class="info-panel" id="panel-contact" style="--accent: #f59e0b; --accent-glow: rgba(252,238,10,0.3);">
     <div class="panel-header">
       <div class="panel-icon">◈</div>
-      <h2>Establish Uplink</h2>
+      <h2>Send Message</h2>
       <button class="panel-close" onclick="closePanels()">[ CLOSE ]</button>
     </div>
     <div class="panel-body">
-      <div class="section-label">[ SYS.04 ] — contact.init</div>
+      <div class="section-label">[ SAVE.04 ] — contact.init</div>
       <p class="bio-text" style="margin-bottom: 24px;">
-        Ready to jack in? I'm available for remote full-time positions, freelance contracts, and consulting.
+        Ready to team up? I'm available for remote full-time positions, freelance contracts, and consulting.
         Let's build something that lasts.
       </p>
       <div class="contact-links">
@@ -613,6 +592,18 @@
     </div>
   </div>
 
+  <div id="error-display" style="position:fixed;bottom:20px;left:20px;right:20px;z-index:9999;color:#ff4444;font-family:'Share Tech Mono',monospace;font-size:12px;white-space:pre-wrap;max-height:200px;overflow:auto;background:rgba(0,0,0,0.85);padding:12px;display:none;border:1px solid #ff4444;"></div>
+  <script>
+    (function() {
+      const errDiv = document.getElementById('error-display');
+      function showErr(msg) { errDiv.style.display = 'block'; errDiv.textContent += msg + '\n'; }
+      if (window.location.protocol === 'file:') {
+        showErr('FATAL: Cannot open via file://. You must use a local server.\nRun: python3 -m http.server 8765 --directory docs\nThen open: http://localhost:8765');
+      }
+      window.addEventListener('error', function(e) { showErr('ERROR: ' + e.message + ' at ' + (e.filename || '') + ':' + (e.lineno || '')); });
+      window.addEventListener('unhandledrejection', function(e) { showErr('UNHANDLED: ' + e.reason); e.preventDefault(); });
+    })();
+  </script>
   <script type="module">
     import { initGame } from './js/app.js';
     initGame();

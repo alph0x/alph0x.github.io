@@ -23,7 +23,6 @@ describe('createGameState', () => {
     expect(s).toHaveProperty('interactables');
     expect(s).toHaveProperty('implants');
     expect(s).toHaveProperty('particles');
-    expect(s).toHaveProperty('ammo');
     expect(s).toHaveProperty('isPanelOpen');
     expect(s).toHaveProperty('currentRoom');
   });
@@ -46,7 +45,6 @@ describe('createGameState', () => {
 
   it('initializes scalar values correctly', () => {
     const s = createGameState();
-    expect(s.ammo).toBe(50);
     expect(s.prevTime).toBe(0);
     expect(s.isPanelOpen).toBe(false);
     expect(s.currentRoom).toBe('HUB');
