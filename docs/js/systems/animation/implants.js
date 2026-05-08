@@ -1,5 +1,5 @@
-export function updateImplants(delta, time, state) {
-  state.implants.forEach((imp) => {
+export function updateImplants(delta, time, implants) {
+  implants.forEach((imp) => {
     if (imp.isTV) { imp.mesh.material.opacity = 0.02 + Math.random() * 0.06; return; }
     if (imp.isCar) {
       imp.mesh.position.x += Math.sin(time * 0.001 * imp.speed + imp.phase) * 0.02;

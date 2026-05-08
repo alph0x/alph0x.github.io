@@ -22,7 +22,7 @@ export class InteractionManager {
    */
   constructor(deps) {
     this._renderer = deps.renderer;
-    this._camera = deps.camera;
+    this._getCamera = typeof deps.camera === 'function' ? deps.camera : () => deps.camera;
     this._state = deps.state;
     this._floorPlane = deps.floorPlane;
     this._furnitureManager = deps.furnitureManager;
@@ -32,13 +32,18 @@ export class InteractionManager {
     this._config = deps.config;
     this._snap = deps.snap;
     this._onSpawnPlaced = deps.onSpawnPlaced || (() => {});
+    this._onFurniturePlaced = deps.onFurniturePlaced || (() => {});
     this._onDragMove = deps.onDragMove || (() => {});
     this._onDragEnd = deps.onDragEnd || (() => {});
-
     this._boundOnPointerDown = this.onPointerDown.bind(this);
     this._boundOnPointerMove = this.onPointerMove.bind(this);
     this._boundOnPointerUp = this.onPointerUp.bind(this);
     this._boundOnKeyDown = this.onKeyDown.bind(this);
+  }
+
+  /** Backward-compat getter for tests that read im._camera */
+  get _camera() {
+    return this._getCamera();
   }
 
   attach() {
@@ -109,7 +114,16 @@ export class InteractionManager {
   onKeyDown(e) {
     if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
       e.preventDefault();
-      this._furnitureManager.undo();
+      if (e.shiftKey) {
+        this._furnitureManager.redo();
+      } else {
+        this._furnitureManager.undo();
+      }
+      return;
+    }
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || e.key === 'Y')) {
+      e.preventDefault();
+      this._furnitureManager.redo();
       return;
     }
     if (e.key === 'Delete' || e.key === 'Backspace') {
@@ -135,14 +149,14 @@ export class InteractionManager {
 
   _intersectFloor(e) {
     const ndc = this._getPointerNDC(e);
-    this._state.raycaster.setFromCamera(ndc, this._camera);
+    this._state.raycaster.setFromCamera(ndc, this._getCamera());
     const hits = this._state.raycaster.intersectObject(this._floorPlane);
     return hits.length > 0 ? hits[0].point : null;
   }
 
   _intersectSpawn(e) {
     const ndc = this._getPointerNDC(e);
-    this._state.raycaster.setFromCamera(ndc, this._camera);
+    this._state.raycaster.setFromCamera(ndc, this._getCamera());
     const hits = this._state.raycaster.intersectObjects(this._spawnManager._group.children, true);
     return hits.length > 0 ? hits[0].object.userData.spawnType : null;
   }
@@ -159,7 +173,7 @@ export class InteractionManager {
 
   _tryStartFurnitureDrag(e) {
     const ndc = this._getPointerNDC(e);
-    this._state.raycaster.setFromCamera(ndc, this._camera);
+    this._state.raycaster.setFromCamera(ndc, this._getCamera());
     const placedHit = this._furnitureManager.hitTest(
       this._state.raycaster,
       Array.from(this._furnitureManager.meshMap.values())
@@ -188,8 +202,9 @@ export class InteractionManager {
       this._onSpawnPlaced('lulu');
     } else if (this._state.activeTool && this._state.activeTool.startsWith('place:')) {
       const type = this._state.activeTool.slice(6);
-      const y = type === 'ceilingLamp' ? this._config.wallH : 0;
+      const y = type === 'ceilingLamp' ? this._config.wallH : type === 'window' ? 1.5 : 0;
       this._furnitureManager.place(type, s(pt.x), y, s(pt.z));
+      this._onFurniturePlaced();
     } else {
       this._furnitureManager.select(null);
     }

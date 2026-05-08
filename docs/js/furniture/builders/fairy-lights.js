@@ -23,7 +23,7 @@ function buildFairyLights(cfg) {
       group.add(makeLight(color, 0.08, 1.2, [pos[0] - 0.8 + i * 0.18, pos[1], pos[2] + 0.05]));
     }
   }
-  return group;
+  return { mesh: group };
 }
 
 register('fairyLights', buildFairyLights);

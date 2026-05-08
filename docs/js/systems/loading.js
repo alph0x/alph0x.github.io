@@ -24,14 +24,18 @@ export class LoadingSystem {
 
     document.getElementById('start-btn').addEventListener('click', () => {
       document.getElementById('start-screen').style.display = 'none';
-      this.controls.lock();
+      if (typeof this.controls.lock === 'function') {
+        try { this.controls.lock(); } catch (_) {}
+      }
     });
-    this.controls.addEventListener('unlock', () => {
-      const panelOpen = document.querySelectorAll('.info-panel.active').length > 0;
-      if (!panelOpen) document.getElementById('start-screen').style.display = 'flex';
-    });
-    this.controls.addEventListener('lock', () => {
-      document.getElementById('start-screen').style.display = 'none';
-    });
+    if (typeof this.controls.addEventListener === 'function') {
+      this.controls.addEventListener('unlock', () => {
+        const panelOpen = document.querySelectorAll('.info-panel.active').length > 0;
+        if (!panelOpen) document.getElementById('start-screen').style.display = 'flex';
+      });
+      this.controls.addEventListener('lock', () => {
+        document.getElementById('start-screen').style.display = 'none';
+      });
+    }
   }
 }

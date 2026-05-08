@@ -61,7 +61,7 @@ export class RoomBuilder {
   _createFloor(shape, colorHex) {
     const mesh = new THREE.Mesh(
       new THREE.ShapeGeometry(shape),
-      new THREE.MeshStandardMaterial({ color: hexToInt(colorHex), roughness: 0.9 })
+      new THREE.MeshStandardMaterial({ color: hexToInt(colorHex), flatShading: true, roughness: 1, metalness: 0 }),
     );
     mesh.rotation.x = -Math.PI / 2;
     mesh.position.y = 0.001;
@@ -72,7 +72,7 @@ export class RoomBuilder {
   _createCeiling(shape, colorHex) {
     const mesh = new THREE.Mesh(
       new THREE.ShapeGeometry(shape),
-      new THREE.MeshStandardMaterial({ color: hexToInt(colorHex), roughness: 0.9 })
+      new THREE.MeshStandardMaterial({ color: hexToInt(colorHex), flatShading: true, roughness: 1, metalness: 0 }),
     );
     mesh.rotation.x = Math.PI / 2;
     mesh.position.y = this._config.wallH;
@@ -100,7 +100,7 @@ export class RoomBuilder {
   }
 
   _buildWalls(outline, wallColorHex) {
-    this._wallMaterial = new THREE.MeshStandardMaterial({ color: hexToInt(wallColorHex) });
+    this._wallMaterial = new THREE.MeshStandardMaterial({ color: hexToInt(wallColorHex), flatShading: true, roughness: 1, metalness: 0 });
     for (let i = 0; i < outline.length; i++) {
       const wallMesh = this._buildWallSegment(
         outline[i],

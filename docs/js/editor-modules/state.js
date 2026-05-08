@@ -89,9 +89,6 @@ export class EditorState {
   get decorations() { return this._data.decorations; }
   set decorations(v) { this._data.decorations = v; }
 
-  get lastAction() { return this._data.lastAction; }
-  set lastAction(v) { this._data.lastAction = v; }
-
   // ── Controlled mutations ────────────────────────────────────────
 
   setOutlineVertex(index, value) {

@@ -33,7 +33,7 @@ describe('Editor seed load integration', () => {
       <button id="toolOutline"></button><button id="btnResetRect"></button>
       <button id="btnViewMode"></button><button id="btnRotate"></button>
       <button id="btnDelete"></button><button id="btnUndo"></button>
-      <button id="btnExport"></button>
+      <button id="btnRedo"></button><button id="btnExport"></button>
       <input id="colorFloor" value="#000000"/><input id="colorFloorText" value="#000000"/>
       <input id="colorWall" value="#000000"/><input id="colorWallText" value="#000000"/>
       <input id="colorCeiling" value="#000000"/><input id="colorCeilingText" value="#000000"/>

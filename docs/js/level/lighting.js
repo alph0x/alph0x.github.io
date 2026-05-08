@@ -7,8 +7,14 @@ import { COLORS } from '../core.js';
 import { makeLight } from '../primitives.js';
 
 export function setupLighting(scene) {
-  scene.add(new THREE.AmbientLight(0x201810, 0.5));
-  scene.add(new THREE.HemisphereLight(0x443322, 0x110d08, 0.4));
+  // PSX: very high ambient so flat-shaded Lambert materials stay visible
+  scene.add(new THREE.AmbientLight(0x8080a0, 3.0));
+  scene.add(new THREE.HemisphereLight(0x90a0c0, 0x505070, 2.0));
+
+  // Key directional light (moon/window light from above-front)
+  const dir = new THREE.DirectionalLight(0xc0d0f0, 2.0);
+  dir.position.set(2, 4, 3);
+  scene.add(dir);
 
   // Main ceiling light
   const ceilMain = new THREE.PointLight(0xffedd5, 2.5, 6, 1);

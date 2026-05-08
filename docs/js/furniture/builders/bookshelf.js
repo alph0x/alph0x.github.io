@@ -5,12 +5,12 @@ import { makeBox } from '../../primitives.js';
 
 function buildBookshelf(cfg) {
   const g = new THREE.Group(); g.position.set(...cfg.position); g.rotation.y = cfg.rotation;
-  const mat = makeStd({ color: 0x4a3333, roughness: 0.7, metalness: 0.0 });
+  const mat = makeStd({ color: 0x4a3333 });
   const books = [
-    makeStd({ color: 0x552222, roughness: 0.8, metalness: 0.0 }),
-    makeStd({ color: 0x225533, roughness: 0.8, metalness: 0.0 }),
-    makeStd({ color: 0x223355, roughness: 0.8, metalness: 0.0 }),
-    makeStd({ color: 0x554422, roughness: 0.8, metalness: 0.0 }),
+    makeStd({ color: 0x552222 }),
+    makeStd({ color: 0x225533 }),
+    makeStd({ color: 0x223355 }),
+    makeStd({ color: 0x554422 }),
   ];
   g.add(makeBox(mat, [0.8, 1.8, 0.25], [0, 0.9, 0]));
   for (let s = 0; s < 4; s++) {
@@ -22,6 +22,6 @@ function buildBookshelf(cfg) {
       g.add(makeBox(books[Math.floor(Math.random() * books.length)], [bw, bh, 0.18], [-0.3 + b * 0.07, sy + bh / 2 + 0.015, 0]));
     }
   }
-  return g;
+  return { mesh: g };
 }
 register('bookshelf', buildBookshelf);

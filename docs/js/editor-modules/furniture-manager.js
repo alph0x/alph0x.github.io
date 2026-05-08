@@ -1,6 +1,7 @@
 /**
- * @fileoverview FurnitureManager — placement, selection, transformation, and undo for placed items.
+ * @fileoverview FurnitureManager — placement, selection, transformation, and undo/redo for placed items.
  * Owns the placedMeshes Map and nextId counter. Depends on Three.js and FurnitureRegistry.
+ * Undo/redo is delegated to an injected UndoManager (SRP + DIP).
  */
 
 import * as THREE from 'three';
@@ -12,11 +13,13 @@ export class FurnitureManager {
    * @param {THREE.Scene} scene
    * @param {EditorState} state
    * @param {number} wallH — wall height (for ceiling-lamp Y default)
+   * @param {UndoManager} undoManager — generic undo/redo stack
    */
-  constructor(scene, state, wallH) {
+  constructor(scene, state, wallH, undoManager) {
     this._scene = scene;
     this._state = state;
     this._wallH = wallH;
+    this._undoManager = undoManager;
     this._placedMeshes = new Map();
     this._nextId = 1;
   }
@@ -25,10 +28,12 @@ export class FurnitureManager {
 
   get meshMap() { return this._placedMeshes; }
   get nextId() { return this._nextId; }
+  get canUndo() { return this._undoManager.canUndo; }
+  get canRedo() { return this._undoManager.canRedo; }
 
   // ── Placement ───────────────────────────────────────────────────
 
-  placeConfig(cfg, skipSelect = false) {
+  placeConfig(cfg, skipSelect = false, skipUndo = false) {
     const entry = FurnitureRegistry.get(cfg.type);
     const builder = entry?.builder;
     if (!builder) return;
@@ -49,9 +54,11 @@ export class FurnitureManager {
 
     this._scene.add(mesh);
     this._placedMeshes.set(this._nextId, mesh);
-    this._state.addPlaced({ id: this._nextId, type: cfg.type, mesh, config: { ...cfg } });
+    this._state.addPlaced({ id: this._nextId, type: cfg.type, name: cfg.name || '', mesh, config: { ...cfg } });
 
-    this._state.lastAction = { type: 'place', id: this._nextId };
+    if (!skipUndo) {
+      this._undoManager.record({ type: 'place', id: this._nextId, config: { ...cfg } });
+    }
 
     if (!skipSelect) {
       this.select(this._nextId);
@@ -76,6 +83,7 @@ export class FurnitureManager {
     this._placedMeshes.clear();
     this._state.placed = [];
     this._nextId = 1;
+    this._undoManager.clear();
   }
 
   /** Load items from a deserialized seed layout. */
@@ -89,7 +97,8 @@ export class FurnitureManager {
       if (item.text != null) cfg.text = item.text;
       if (item.color != null) cfg.color = item.color;
       if (item.intensity != null) { cfg.intensity = item.intensity; cfg.distance = item.distance; }
-      this.placeConfig(cfg, true);
+      if (item.name != null) cfg.name = item.name;
+      this.placeConfig(cfg, true, true);
     }
     this.select(null);
     this._updatePlacedList();
@@ -118,10 +127,11 @@ export class FurnitureManager {
     if (this._state.selectedId === null) return;
     const item = this._state.placed.find((p) => p.id === this._state.selectedId);
     if (item) {
-      this._state.lastAction = {
+      this._undoManager.record({
         type: 'delete',
+        id: this._state.selectedId,
         item: { ...item, config: { ...item.config } },
-      };
+      });
     }
     const mesh = this._placedMeshes.get(this._state.selectedId);
     if (mesh) {
@@ -144,7 +154,12 @@ export class FurnitureManager {
     mesh.rotation.y = normalizeRotation(mesh.rotation.y);
     const item = this._state.placed.find((p) => p.id === this._state.selectedId);
     if (item) item.config.rotation = mesh.rotation.y;
-    this._state.lastAction = { type: 'rotate', id: this._state.selectedId, oldRot };
+    this._undoManager.record({
+      type: 'rotate',
+      id: this._state.selectedId,
+      oldRot,
+      newRot: mesh.rotation.y,
+    });
     this._rebuildOutline(mesh);
     if (mesh.userData._outline) mesh.userData._outline.material.opacity = 1;
     this._updateSelectionInfo();
@@ -159,7 +174,12 @@ export class FurnitureManager {
     mesh.rotation.y = normalizeRotation(rad);
     const item = this._state.placed.find((p) => p.id === this._state.selectedId);
     if (item) item.config.rotation = mesh.rotation.y;
-    this._state.lastAction = { type: 'rotate', id: this._state.selectedId, oldRot };
+    this._undoManager.record({
+      type: 'rotate',
+      id: this._state.selectedId,
+      oldRot,
+      newRot: mesh.rotation.y,
+    });
     this._rebuildOutline(mesh);
     if (mesh.userData._outline) mesh.userData._outline.material.opacity = 1;
     this._updateSelectionInfo();
@@ -197,6 +217,13 @@ export class FurnitureManager {
     this._updatePlacedList();
   }
 
+  setName(name) {
+    if (this._state.selectedId === null) return;
+    const item = this._state.placed.find((p) => p.id === this._state.selectedId);
+    if (item) item.name = String(name || '');
+    this._updatePlacedList();
+  }
+
   // ── Drag move (used by InteractionManager) ──────────────────────
 
   beginMove(id, offset) {
@@ -224,62 +251,29 @@ export class FurnitureManager {
     const mesh = this._placedMeshes.get(id);
     if (!mesh || !startPos) return;
     if (mesh.position.x !== startPos.x || mesh.position.z !== startPos.z) {
-      this._state.lastAction = { type: 'move', id, oldPos: startPos.clone() };
+      this._undoManager.record({
+        type: 'move',
+        id,
+        oldPos: { x: startPos.x, y: startPos.y, z: startPos.z },
+        newPos: { x: mesh.position.x, y: mesh.position.y, z: mesh.position.z },
+      });
     }
   }
 
-  // ── Undo ────────────────────────────────────────────────────────
+  // ── Undo / Redo ─────────────────────────────────────────────────
 
   undo() {
-    const action = this._state.lastAction;
+    const action = this._undoManager.popUndo();
     if (!action) return;
+    this._applyInverse(action);
+    this._updateUIAfterUndoRedo();
+  }
 
-    switch (action.type) {
-      case 'place': {
-        const mesh = this._placedMeshes.get(action.id);
-        if (mesh) {
-          this._scene.remove(mesh);
-          this._placedMeshes.delete(action.id);
-        }
-        this._state.placed = this._state.placed.filter((p) => p.id !== action.id);
-        this.select(null);
-        break;
-      }
-      case 'move': {
-        const mesh = this._placedMeshes.get(action.id);
-        if (mesh) {
-          mesh.position.x = action.oldPos.x;
-          mesh.position.z = action.oldPos.z;
-          const item = this._state.placed.find((p) => p.id === action.id);
-          if (item) {
-            item.config.position[0] = mesh.position.x;
-            item.config.position[2] = mesh.position.z;
-          }
-          this.select(action.id);
-        }
-        break;
-      }
-      case 'delete': {
-        const cfg = action.item.config;
-        this.placeConfig(cfg, true);
-        this._state.lastAction = { type: 'place', id: this._nextId - 1 };
-        this.select(this._nextId - 1);
-        break;
-      }
-      case 'rotate': {
-        const mesh = this._placedMeshes.get(action.id);
-        if (mesh) {
-          mesh.rotation.y = action.oldRot;
-          const item = this._state.placed.find((p) => p.id === action.id);
-          if (item) item.config.rotation = mesh.rotation.y;
-          this.select(action.id);
-        }
-        break;
-      }
-    }
-
-    this._updatePlacedList();
-    this._updateSelectionInfo();
+  redo() {
+    const action = this._undoManager.popRedo();
+    if (!action) return;
+    this._applyForward(action);
+    this._updateUIAfterUndoRedo();
   }
 
   // ── Raycast helpers ─────────────────────────────────────────────
@@ -305,6 +299,126 @@ export class FurnitureManager {
   }
 
   // ── Private ─────────────────────────────────────────────────────
+
+  _applyInverse(action) {
+    switch (action.type) {
+      case 'place': {
+        const mesh = this._placedMeshes.get(action.id);
+        if (mesh) {
+          this._scene.remove(mesh);
+          this._placedMeshes.delete(action.id);
+        }
+        this._state.placed = this._state.placed.filter((p) => p.id !== action.id);
+        this.select(null);
+        break;
+      }
+      case 'move': {
+        const mesh = this._placedMeshes.get(action.id);
+        if (mesh) {
+          mesh.position.set(action.oldPos.x, action.oldPos.y, action.oldPos.z);
+          const item = this._state.placed.find((p) => p.id === action.id);
+          if (item) {
+            item.config.position[0] = action.oldPos.x;
+            item.config.position[1] = action.oldPos.y;
+            item.config.position[2] = action.oldPos.z;
+          }
+          this.select(action.id);
+        }
+        break;
+      }
+      case 'delete': {
+        // Rebuild the deleted mesh with its original id (do not use placeConfig to avoid new undo record)
+        const cfg = action.item.config;
+        const entry = FurnitureRegistry.get(cfg.type);
+        const builder = entry?.builder;
+        if (builder) {
+          const result = builder(cfg);
+          const mesh = extractMeshFromResult(result);
+          if (mesh) {
+            mesh.position.set(...cfg.position);
+            mesh.rotation.y = cfg.rotation || 0;
+            this._attachOutline(mesh, action.id, cfg.type);
+            const bb = new THREE.Box3().setFromObject(mesh);
+            const bbSize = new THREE.Vector3();
+            bb.getSize(bbSize);
+            mesh.userData._hitSize = bbSize.x * bbSize.y * bbSize.z;
+            this._scene.add(mesh);
+            this._placedMeshes.set(action.id, mesh);
+            this._state.placed.push({ id: action.id, type: cfg.type, mesh, config: { ...cfg } });
+            this.select(action.id);
+          }
+        }
+        break;
+      }
+      case 'rotate': {
+        const mesh = this._placedMeshes.get(action.id);
+        if (mesh) {
+          mesh.rotation.y = action.oldRot;
+          const item = this._state.placed.find((p) => p.id === action.id);
+          if (item) item.config.rotation = action.oldRot;
+          this.select(action.id);
+        }
+        break;
+      }
+    }
+  }
+
+  _applyForward(action) {
+    switch (action.type) {
+      case 'place': {
+        this.placeConfig(action.config, true, true);
+        break;
+      }
+      case 'move': {
+        const mesh = this._placedMeshes.get(action.id);
+        if (mesh) {
+          mesh.position.set(action.newPos.x, action.newPos.y, action.newPos.z);
+          const item = this._state.placed.find((p) => p.id === action.id);
+          if (item) {
+            item.config.position[0] = action.newPos.x;
+            item.config.position[1] = action.newPos.y;
+            item.config.position[2] = action.newPos.z;
+          }
+          this.select(action.id);
+        }
+        break;
+      }
+      case 'delete': {
+        const mesh = this._placedMeshes.get(action.id);
+        if (mesh) {
+          this._scene.remove(mesh);
+          this._placedMeshes.delete(action.id);
+        }
+        this._state.placed = this._state.placed.filter((p) => p.id !== action.id);
+        this.select(null);
+        break;
+      }
+      case 'rotate': {
+        const mesh = this._placedMeshes.get(action.id);
+        if (mesh) {
+          mesh.rotation.y = action.newRot;
+          const item = this._state.placed.find((p) => p.id === action.id);
+          if (item) item.config.rotation = action.newRot;
+          this.select(action.id);
+        }
+        break;
+      }
+    }
+  }
+
+  _updateUIAfterUndoRedo() {
+    this._updatePlacedList();
+    this._updateSelectionInfo();
+    this._syncSelectionControls();
+    this._syncUndoRedoButtons();
+  }
+
+  _syncUndoRedoButtons() {
+    const undoBtn = document.getElementById('btnUndo');
+    const redoBtn = document.getElementById('btnRedo');
+    if (undoBtn) undoBtn.disabled = !this.canUndo;
+    if (redoBtn) redoBtn.disabled = !this.canRedo;
+  }
 
   _attachOutline(mesh, editorId, type) {
     const box = new THREE.Box3().setFromObject(mesh);
@@ -346,8 +460,9 @@ export class FurnitureManager {
     if (!item) return;
     const m = item.mesh;
     const deg = Math.round((m.rotation.y * 180) / Math.PI);
+    const displayName = item.name ? `${item.name} <span style="color:#78716c;font-size:11px;">(${item.type})</span>` : `<strong>${item.type}</strong>`;
     info.innerHTML = `
-      <strong>${item.type}</strong><br>
+      ${displayName}<br>
       x: ${m.position.x.toFixed(2)} &nbsp; y: ${m.position.y.toFixed(2)} &nbsp; z: ${m.position.z.toFixed(2)}<br>
       rot: ${deg}°
     `;
@@ -368,6 +483,9 @@ export class FurnitureManager {
     if (yRange) yRange.value = yVal;
     const rotDeg = mesh ? ((mesh.rotation.y * 180) / Math.PI).toFixed(0) : '0';
     if (rotInput) rotInput.value = rotDeg;
+    const nameInput = document.getElementById('selName');
+    const item = this._state.selectedId !== null ? this._state.placed.find((p) => p.id === this._state.selectedId) : null;
+    if (nameInput) nameInput.value = item ? (item.name || '') : '';
   }
 
   _updatePlacedList() {
@@ -379,7 +497,8 @@ export class FurnitureManager {
     }
     list.innerHTML = this._state.placed.map((p) => {
       const sel = p.id === this._state.selectedId ? 'style="color:#7c3aed;font-weight:600;"' : '';
-      return `<div ${sel} style="cursor:pointer;padding:2px 0;" onclick="window.__editorSelectItem(${p.id})">${p.type} <span style="color:#57534e;font-size:11px;">(${p.mesh.position.x.toFixed(1)}, ${p.mesh.position.y.toFixed(1)}, ${p.mesh.position.z.toFixed(1)})</span></div>`;
+      const label = p.name ? `${p.name} <span style="color:#57534e;font-size:11px;">(${p.type})</span>` : p.type;
+      return `<div ${sel} style="cursor:pointer;padding:2px 0;" onclick="window.__editorSelectItem(${p.id})">${label} <span style="color:#57534e;font-size:11px;">(${p.mesh.position.x.toFixed(1)}, ${p.mesh.position.y.toFixed(1)}, ${p.mesh.position.z.toFixed(1)})</span></div>`;
     }).join('');
   }
 }

@@ -19,12 +19,17 @@ describe('playerSpawn validity', () => {
   });
 
   it('does not collide with any wall or furniture bounds', () => {
-    const state = { walls: [], interactables: [], implants: [], particles: [] };
+    const worldState = {
+      room: { walls: [], interactables: [] },
+      pet: { mesh: null, model: null },
+      effects: { implants: [], particles: [] },
+      input: {}, ui: {}, meta: {},
+    };
     const scene = new THREE.Scene();
-    buildLevel(scene, state);
+    buildLevel(scene, worldState);
 
     const [x, z] = [0.5, 0.5];
     const playerRadius = 0.35;
-    expect(checkCollision(x, z, state.walls, playerRadius)).toBe(false);
+    expect(checkCollision(x, z, worldState.room.walls, playerRadius)).toBe(false);
   });
 });

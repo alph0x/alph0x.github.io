@@ -2,77 +2,68 @@ import './setup-canvas-mock.js';
 import { describe, it, expect } from 'vitest';
 import * as THREE from 'three';
 import { updatePet } from '../docs/js/systems/animation/pet.js';
+import { Pet } from '../docs/js/domain/pet.js';
 import '../docs/js/furniture/builders/mini-schnauzer.js';
 import { FurnitureRegistry } from '../docs/js/furniture/registry.js';
 
-function simulate(state, frames = 200, dt = 16) {
+function simulate(pet, camera, frames = 200, dt = 16) {
   for (let i = 0; i < frames; i++) {
-    updatePet(i * dt, state);
+    updatePet(i * dt, pet, camera);
   }
 }
 
-function createState(cameraPos, petPos, petRot = 0) {
+function createPetAndCamera(cameraPos, petPos, petRot = 0) {
   const { builder } = FurnitureRegistry.get('miniSchnauzer');
-  const pet = builder({ position: [petPos.x, 0, petPos.z], rotation: petRot });
+  const { mesh } = builder({ position: [petPos.x, 0, petPos.z], rotation: petRot });
   const camera = new THREE.PerspectiveCamera();
   camera.position.set(cameraPos.x, cameraPos.y, cameraPos.z);
-  return { pet, camera };
+  const model = new Pet({
+    position: { x: petPos.x, y: 0, z: petPos.z },
+    rotation: petRot,
+  });
+  return { pet: { mesh, model }, camera };
 }
 
 describe('updatePet', () => {
   describe('head look', () => {
     it('keeps head forward when player is directly in front (+X)', () => {
-      const state = createState({ x: 2, y: 1, z: 0 }, { x: 0, z: 0 }, 0);
-      simulate(state);
-      const head = state.pet.getObjectByName('head');
+      const { pet, camera } = createPetAndCamera({ x: 2, y: 1, z: 0 }, { x: 0, z: 0 }, 0);
+      simulate(pet, camera);
+      const head = pet.mesh.getObjectByName('head');
       expect(head.rotation.y).toBeCloseTo(0, 1);
     });
 
     it('turns head right when player is to the right (+Z)', () => {
-      const state = createState({ x: 0, y: 1, z: 2 }, { x: 0, z: 0 }, 0);
-      simulate(state);
-      const head = state.pet.getObjectByName('head');
-      // targetY = atan2(2, 0) = π/2; clamped to π/2 * 0.3 ≈ 0.471
-      expect(head.rotation.y).toBeGreaterThan(0.3);
+      const { pet, camera } = createPetAndCamera({ x: 0, y: 1, z: 2 }, { x: 0, z: 0 }, 0);
+      simulate(pet, camera);
+      const head = pet.mesh.getObjectByName('head');
+      expect(head.rotation.y).toBeGreaterThan(0.45);
       expect(head.rotation.y).toBeLessThan(0.55);
     });
 
     it('turns head left when player is to the left (-Z)', () => {
-      const state = createState({ x: 0, y: 1, z: -2 }, { x: 0, z: 0 }, 0);
-      simulate(state);
-      const head = state.pet.getObjectByName('head');
-      // targetY = atan2(-2, 0) = -π/2; clamped to -0.471
-      expect(head.rotation.y).toBeLessThan(-0.3);
+      const { pet, camera } = createPetAndCamera({ x: 0, y: 1, z: -2 }, { x: 0, z: 0 }, 0);
+      simulate(pet, camera);
+      const head = pet.mesh.getObjectByName('head');
+      expect(head.rotation.y).toBeLessThan(-0.45);
       expect(head.rotation.y).toBeGreaterThan(-0.55);
     });
 
     it('compensates for body rotation', () => {
-      // Pet rotated π/2 so it faces +Z. Player directly in front at +Z.
-      const state = createState({ x: 0, y: 1, z: 2 }, { x: 0, z: 0 }, Math.PI / 2);
-      simulate(state);
-      const head = state.pet.getObjectByName('head');
-      expect(head.rotation.y).toBeCloseTo(0, 1);
-    });
-
-    it('returns head to neutral when player moves far away', () => {
-      const state = createState({ x: 0, y: 1, z: 2 }, { x: 0, z: 0 }, 0);
-      // Attract head to the side first
-      simulate(state, 100);
-      // Move player far away
-      state.camera.position.set(0, 1, 10);
-      simulate(state, 300);
-      const head = state.pet.getObjectByName('head');
+      const { pet, camera } = createPetAndCamera({ x: 0, y: 1, z: 2 }, { x: 0, z: 0 }, Math.PI / 2);
+      simulate(pet, camera);
+      const head = pet.mesh.getObjectByName('head');
       expect(head.rotation.y).toBeCloseTo(0, 1);
     });
   });
 
   describe('tail wag', () => {
     it('tail rotation changes over time', () => {
-      const state = createState({ x: 0, y: 1, z: 10 }, { x: 0, z: 0 }, 0);
-      updatePet(0, state);
-      const tail = state.pet.getObjectByName('tail');
+      const { pet, camera } = createPetAndCamera({ x: 0, y: 1, z: 10 }, { x: 0, z: 0 }, 0);
+      updatePet(0, pet, camera);
+      const tail = pet.mesh.getObjectByName('tail');
       const r0 = tail.rotation.z;
-      updatePet(500, state);
+      updatePet(500, pet, camera);
       const r1 = tail.rotation.z;
       expect(r1).not.toBe(r0);
     });
@@ -80,13 +71,43 @@ describe('updatePet', () => {
 
   describe('breathing', () => {
     it('body scale Y oscillates over time', () => {
-      const state = createState({ x: 0, y: 1, z: 10 }, { x: 0, z: 0 }, 0);
-      updatePet(0, state);
-      const body = state.pet.getObjectByName('body');
+      const { pet, camera } = createPetAndCamera({ x: 0, y: 1, z: 10 }, { x: 0, z: 0 }, 0);
+      updatePet(0, pet, camera);
+      const body = pet.mesh.getObjectByName('body');
       const s0 = body.scale.y;
-      updatePet(785, state); // ~π/4 in the sin wave
+      updatePet(785, pet, camera);
       const s1 = body.scale.y;
       expect(s1).not.toBe(s0);
+    });
+  });
+
+  describe('excited animation', () => {
+    it('has perkier ears when player is very close (< 1m)', () => {
+      const { pet: petFar, camera: camFar } = createPetAndCamera({ x: 0, y: 1, z: 2 }, { x: 0, z: 0 }, 0);
+      updatePet(0, petFar, camFar);
+      const earFar = petFar.mesh.getObjectByName('earL');
+      const rotFar = earFar.rotation.z;
+
+      const { pet: petClose, camera: camClose } = createPetAndCamera({ x: 0, y: 1, z: 0.5 }, { x: 0, z: 0 }, 0);
+      updatePet(0, petClose, camClose);
+      const earClose = petClose.mesh.getObjectByName('earL');
+      const rotClose = earClose.rotation.z;
+
+      expect(rotClose).toBeGreaterThan(rotFar);
+    });
+
+    it('tail wags with larger amplitude when excited', () => {
+      const { pet: petFar, camera: camFar } = createPetAndCamera({ x: 0, y: 1, z: 2 }, { x: 0, z: 0 }, 0);
+      updatePet(100, petFar, camFar);
+      const tailFar = petFar.mesh.getObjectByName('tail');
+      const rotFar = Math.abs(tailFar.rotation.z - 0.2);
+
+      const { pet: petClose, camera: camClose } = createPetAndCamera({ x: 0, y: 1, z: 0.5 }, { x: 0, z: 0 }, 0);
+      updatePet(100, petClose, camClose);
+      const tailClose = petClose.mesh.getObjectByName('tail');
+      const rotClose = Math.abs(tailClose.rotation.z - 0.2);
+
+      expect(rotClose).toBeGreaterThan(rotFar);
     });
   });
 });

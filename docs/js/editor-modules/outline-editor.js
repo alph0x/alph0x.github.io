@@ -21,7 +21,7 @@ export class OutlineEditor {
     this._state = state;
     this._roomBuilder = roomBuilder;
     this._config = config;
-    this._camera = camera;
+    this._getCamera = typeof camera === 'function' ? camera : () => camera;
     this._snap = snap;
     this._isSelfIntersecting = isSelfIntersecting;
     this._getClosestEdgePoint = getClosestEdgePoint;
@@ -49,6 +49,8 @@ export class OutlineEditor {
   onPointerDown(e, intersectFloorFn) {
     const eIndex = this._intersectEdge(e);
     if (eIndex !== null) {
+      const pt = intersectFloorFn(e);
+      if (pt) this._state.dragOffset.set(pt.x, 0, pt.z);
       this._beginEdgeDrag(eIndex, e);
       return true;
     }
@@ -154,9 +156,12 @@ export class OutlineEditor {
 
   _intersectHandle(e) {
     const ndc = this._getNDC(e);
-    this._state.raycaster.setFromCamera(ndc, this._camera);
+    this._state.raycaster.setFromCamera(ndc, this._getCamera());
     const hits = this._state.raycaster.intersectObjects(this._group.children, true);
-    return hits.length > 0 ? hits[0].object : null;
+    for (const hit of hits) {
+      if (hit.object.userData.isEdge || hit.object.userData.isVertex) return hit.object;
+    }
+    return null;
   }
 
   _getNDC(e) {
@@ -188,8 +193,6 @@ export class OutlineEditor {
     this._state.isDragging = true;
     this._state.dragTarget = 'edge';
     this._state.dragEdgeIndex = index;
-    const pt = this._intersectFloor(e);
-    if (pt) this._state.dragOffset.set(pt.x, 0, pt.z);
     const i = index;
     const j = (i + 1) % this._state.outline.length;
     this._state.dragEdgeVerts = [
@@ -232,8 +235,21 @@ export class OutlineEditor {
     if (this._state.dragEdgeIndex === null || !this._state.dragEdgeVerts) return;
     const i = this._state.dragEdgeIndex;
     const j = (i + 1) % this._state.outline.length;
-    const dx = pt.x - this._state.dragOffset.x;
-    const dz = pt.z - this._state.dragOffset.z;
+    let dx = pt.x - this._state.dragOffset.x;
+    let dz = pt.z - this._state.dragOffset.z;
+
+    // Axis-lock: horizontal edges move only in Z, vertical edges only in X
+    const v0 = this._state.dragEdgeVerts[0];
+    const v1 = this._state.dragEdgeVerts[1];
+    const epsilon = 0.01;
+    if (Math.abs(v0[0] - v1[0]) < epsilon) {
+      // Vertical edge (same X) → lock to X-only movement
+      dz = 0;
+    } else if (Math.abs(v0[1] - v1[1]) < epsilon) {
+      // Horizontal edge (same Z) → lock to Z-only movement
+      dx = 0;
+    }
+
     const newOutline = [...this._state.outline];
     newOutline[i] = [this._snap(this._state.dragEdgeVerts[0][0] + dx), this._snap(this._state.dragEdgeVerts[0][1] + dz)];
     newOutline[j] = [this._snap(this._state.dragEdgeVerts[1][0] + dx), this._snap(this._state.dragEdgeVerts[1][1] + dz)];
@@ -251,7 +267,7 @@ export class OutlineEditor {
 
   _intersectFloor(e) {
     const ndc = this._getNDC(e);
-    this._state.raycaster.setFromCamera(ndc, this._camera);
+    this._state.raycaster.setFromCamera(ndc, this._getCamera());
     // Floor plane is not accessible here; caller should provide it.
     // This is a fallback that returns null.
     return null;

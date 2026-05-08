@@ -34,7 +34,7 @@ describe('Editor init smoke', () => {
       <button id="toolOutline"></button><button id="btnResetRect"></button>
       <button id="btnViewMode"></button><button id="btnRotate"></button>
       <button id="btnDelete"></button><button id="btnUndo"></button>
-      <button id="btnExport"></button>
+      <button id="btnRedo"></button><button id="btnExport"></button>
       <input id="colorFloor" value="#1c1917"/><input id="colorFloorText" value="#1c1917"/>
       <input id="colorWall" value="#44403c"/><input id="colorWallText" value="#44403c"/>
       <input id="colorCeiling" value="#1c1917"/><input id="colorCeilingText" value="#1c1917"/>

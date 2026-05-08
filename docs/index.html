@@ -198,6 +198,98 @@
       #mobile-resume .m-contact a { display: block; color: #f59e0b; text-decoration: none; margin-bottom: 6px; font-size: 13px; }
       #mobile-resume .m-footer { text-align: center; font-size: 11px; color: #57534e; margin-top: 30px; padding-top: 20px; border-top: 1px solid #1c1917; }
     }
+
+    /* ── ALPHGPT CHAT ────────────────────────────────── */
+    .chat-container { display: flex; flex-direction: column; height: 55vh; max-height: 460px; }
+    .chat-messages { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 4px; }
+    .chat-msg { padding: 10px 12px; max-width: 88%; font-size: 13px; line-height: 1.6; white-space: pre-wrap; }
+    .chat-msg-bot { background: #111114; border-left: 3px solid #10b981; color: #e7e5e4; align-self: flex-start; }
+    .chat-msg-user { background: #1c1917; border-right: 3px solid #f59e0b; color: #e7e5e4; align-self: flex-end; text-align: right; }
+    .chat-msg-meta { font-family: 'Press Start 2P', monospace; font-size: 7px; color: #57534e; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.08em; }
+    .chat-input-row { display: flex; gap: 8px; padding-top: 10px; border-top: 2px solid #1c1917; }
+    .chat-input { flex: 1; background: #111114; border: 1px solid #292524; color: #e7e5e4; padding: 10px 12px; font-family: 'Share Tech Mono', monospace; font-size: 13px; outline: none; }
+    .chat-input:focus { border-color: #f59e0b; }
+    .chat-send { background: #f59e0b; color: #0c0a09; border: none; padding: 10px 16px; font-family: 'Press Start 2P', monospace; font-size: 9px; cursor: pointer; text-transform: uppercase; }
+    .chat-send:hover { background: #fbbf24; }
+    .chat-typing { display: flex; gap: 4px; padding: 8px 12px; }
+    .chat-typing-dot { width: 6px; height: 6px; background: #10b981; border-radius: 50%; animation: chatBounce 1s infinite; }
+    .chat-typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .chat-typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes chatBounce { 0%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-4px); } }
+
+    /* ── TOUCH CONTROLS (mobile only) ────────────────── */
+    #touch-controls { display: none; }
+    @media (max-width: 768px), (hover: none) and (pointer: coarse) {
+      #touch-controls {
+        display: block;
+        position: fixed;
+        inset: 0;
+        z-index: 250;
+        pointer-events: none;
+      }
+      #touch-joystick-base {
+        position: absolute;
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.06);
+        border: 2px solid rgba(255,255,255,0.12);
+        transform: translate(-50%, -50%);
+        opacity: 0;
+        transition: opacity 0.15s;
+        pointer-events: auto;
+      }
+      #touch-joystick-knob {
+        position: absolute;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: rgba(245,158,11,0.45);
+        border: 2px solid #f59e0b;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        box-shadow: 0 0 14px rgba(245,158,11,0.25);
+      }
+      #touch-interact {
+        position: absolute;
+        right: 28px;
+        bottom: 140px;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: rgba(16,185,129,0.12);
+        border: 2px solid #10b981;
+        color: #10b981;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Press Start 2P', monospace;
+        font-size: 12px;
+        pointer-events: auto;
+        box-shadow: 0 0 12px rgba(16,185,129,0.15);
+        user-select: none;
+        -webkit-user-select: none;
+        transition: background 0.1s, transform 0.1s;
+      }
+      #touch-interact.active {
+        background: rgba(16,185,129,0.4);
+        transform: scale(0.95);
+      }
+      #touch-hint {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: rgba(255,255,255,0.15);
+        font-family: 'Press Start 2P', monospace;
+        font-size: 9px;
+        letter-spacing: 0.15em;
+        pointer-events: none;
+        transition: opacity 1s;
+      }
+      #crosshair { display: none !important; }
+    }
   </style>
   <script type="importmap">
   {
@@ -592,6 +684,25 @@
     </div>
   </div>
 
+  <!-- AlphGPT Panel -->
+  <div class="info-panel" id="panel-alphgpt" style="--accent: #10b981; --accent-glow: rgba(16,185,129,0.3);">
+    <div class="panel-header">
+      <div class="panel-icon">◈</div>
+      <h2>AlphGPT // Terminal</h2>
+      <button class="panel-close" onclick="closePanels()">[ CLOSE ]</button>
+    </div>
+    <div class="panel-body">
+      <div class="section-label">[ AI.ASSISTANT ] — v1.0.0</div>
+      <div class="chat-container">
+        <div class="chat-messages" id="alphgpt-messages"></div>
+        <div class="chat-input-row">
+          <input type="text" class="chat-input" id="alphgpt-input" placeholder="> Ask me anything..." autocomplete="off" />
+          <button class="chat-send" id="alphgpt-send">SEND</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div id="error-display" style="position:fixed;bottom:20px;left:20px;right:20px;z-index:9999;color:#ff4444;font-family:'Share Tech Mono',monospace;font-size:12px;white-space:pre-wrap;max-height:200px;overflow:auto;background:rgba(0,0,0,0.85);padding:12px;display:none;border:1px solid #ff4444;"></div>
   <script>
     (function() {
@@ -601,9 +712,70 @@
         showErr('FATAL: Cannot open via file://. You must use a local server.\nRun: python3 -m http.server 8765 --directory docs\nThen open: http://localhost:8765');
       }
       window.addEventListener('error', function(e) { showErr('ERROR: ' + e.message + ' at ' + (e.filename || '') + ':' + (e.lineno || '')); });
-      window.addEventListener('unhandledrejection', function(e) { showErr('UNHANDLED: ' + e.reason); e.preventDefault(); });
+      window.addEventListener('unhandledrejection', function(e) {
+        const msg = String(e.reason);
+        if (msg.includes('pointer lock') || msg.includes('PointerLock') || msg.includes('WrongDocumentError')) return;
+        showErr('UNHANDLED: ' + msg);
+        e.preventDefault();
+      });
     })();
   </script>
+  <script type="module">
+    import { askAlphGPT } from './js/systems/alphgpt.js';
+
+    const messagesEl = document.getElementById('alphgpt-messages');
+    const inputEl = document.getElementById('alphgpt-input');
+    const sendBtn = document.getElementById('alphgpt-send');
+    let lastIntent = null;
+
+    function appendMsg(text, isUser) {
+      const div = document.createElement('div');
+      div.className = 'chat-msg ' + (isUser ? 'chat-msg-user' : 'chat-msg-bot');
+      const meta = document.createElement('div');
+      meta.className = 'chat-msg-meta';
+      meta.textContent = isUser ? 'You // Guest' : 'AlphGPT // Bot';
+      div.appendChild(meta);
+      const body = document.createElement('div');
+      body.textContent = text;
+      div.appendChild(body);
+      messagesEl.appendChild(div);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function showTyping() {
+      const div = document.createElement('div');
+      div.className = 'chat-msg chat-msg-bot chat-typing';
+      div.id = 'alphgpt-typing';
+      div.innerHTML = '<div class="chat-typing-dot"></div><div class="chat-typing-dot"></div><div class="chat-typing-dot"></div>';
+      messagesEl.appendChild(div);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function removeTyping() {
+      const el = document.getElementById('alphgpt-typing');
+      if (el) el.remove();
+    }
+
+    function handleSend() {
+      const text = inputEl.value.trim();
+      if (!text) return;
+      appendMsg(text, true);
+      inputEl.value = '';
+      showTyping();
+      setTimeout(() => {
+        removeTyping();
+        const result = askAlphGPT(text, lastIntent);
+        appendMsg(result.text, false);
+        lastIntent = result.intent;
+      }, 600 + Math.random() * 400);
+    }
+
+    sendBtn.addEventListener('click', handleSend);
+    inputEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleSend(); });
+
+    appendMsg("AlphGPT online. I'm Alfredo's digital assistant. Ask me about his skills, experience, projects, or how to reach him.", false);
+  </script>
+
   <script type="module">
     import { initGame } from './js/app.js';
     initGame();

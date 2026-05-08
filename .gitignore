@@ -26,3 +26,9 @@ build/
 
 # AI context files (local conversation state)
 CONTEXT.md
+
+# Playwright test artifacts
+test-results/
+
+# Agent local state
+.agents/

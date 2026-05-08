@@ -10,11 +10,11 @@ function buildMiniSchnauzer(cfg) {
   const s = 1.6;
   g.scale.set(s, s, s);
 
-  const darkGray = makeStd({ color: 0x4a4a55, roughness: 0.9, metalness: 0.0 });
-  const lightGray = makeStd({ color: 0xaaaab5, roughness: 0.9, metalness: 0.0 });
-  const white = makeStd({ color: 0xe4e4e8, roughness: 0.95, metalness: 0.0 });
-  const noseMat = makeStd({ color: 0x1a1a1e, roughness: 0.3, metalness: 0.1 });
-  const eyeMat = makeStd({ color: 0x0a0a0e, roughness: 0.1, metalness: 0.0 });
+  const darkGray = makeStd({ color: 0x6a6a75 });
+  const lightGray = makeStd({ color: 0xcacad5 });
+  const white = makeStd({ color: 0xe4e4e8 });
+  const noseMat = makeStd({ color: 0x1a1a1e });
+  const eyeMat = makeStd({ color: 0x0a0a0e });
 
   // Body (laying)
   const body = makeBox(darkGray, [0.35, 0.12, 0.18], [0, 0.06, 0]);
@@ -95,14 +95,14 @@ function buildMiniSchnauzer(cfg) {
   g.add(tail);
 
   // Collar tag
-  g.add(makeBox(makeStd({ color: 0xf59e0b, roughness: 0.4, metalness: 0.6 }), [0.02, 0.015, 0.015], [0.1, 0.14, 0.06]));
+  g.add(makeBox(makeStd({ color: 0xf59e0b }), [0.02, 0.015, 0.015], [0.1, 0.14, 0.06]));
 
   // Warm accent light
   const light = new THREE.PointLight(0xffaa55, 0.4, 2, 1);
   light.position.set(0, 0.15, 0);
   g.add(light);
 
-  return g;
+  return { mesh: g };
 }
 
 register('miniSchnauzer', buildMiniSchnauzer);

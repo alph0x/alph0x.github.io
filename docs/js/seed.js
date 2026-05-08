@@ -26,7 +26,8 @@ export function serializeLayout({ outline, placed, playerSpawn, luluSpawn, decor
     const o = { t: item.type, p: cfg.position.map((n) => Math.round(n * 100) / 100) };
     if (cfg.rotation) o.r = Math.round(cfg.rotation * 1000) / 1000;
     if (cfg.panelId) o.pid = cfg.panelId;
-    if (cfg.name) o.n = cfg.name;
+    if (item.name) o.n = item.name;
+    else if (cfg.name) o.n = cfg.name;
     if (cfg.coat) o.c = cfg.coat;
     if (cfg.pose) o.pos = cfg.pose;
     if (cfg.noCollision) o.nc = 1;
@@ -105,7 +106,7 @@ export function deserializeSeed(seedStr) {
     const cfg = { type: item.t, position: item.p };
     if (item.r != null) cfg.rotation = item.r;
     if (item.pid) cfg.panelId = item.pid;
-    if (item.n) cfg.name = item.n;
+    if (item.n != null) cfg.name = item.n;
     if (item.c) cfg.coat = item.c;
     if (item.pos) cfg.pose = item.pos;
     if (item.nc) cfg.noCollision = true;

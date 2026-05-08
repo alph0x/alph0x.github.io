@@ -10,15 +10,20 @@ import { checkCollision, resolveMove } from '../docs/js/core.js';
 
 describe('buildLevel collision bounds', () => {
   it('stores raw AABB bounds without radius padding', () => {
-    const state = { walls: [], interactables: [], implants: [], particles: [] };
+    const worldState = {
+      room: { walls: [], interactables: [] },
+      pet: { mesh: null, model: null },
+      effects: { implants: [], particles: [] },
+      input: {}, ui: {}, meta: {},
+    };
     const scene = new THREE.Scene();
-    buildLevel(scene, state);
+    buildLevel(scene, worldState);
 
     // Verify at least one wall/piece was registered
-    expect(state.walls.length).toBeGreaterThan(0);
+    expect(worldState.room.walls.length).toBeGreaterThan(0);
 
     // Bed AABB should be within its real geometry size (~2.0 x 1.4)
-    const bedWall = state.walls.find((w) =>
+    const bedWall = worldState.room.walls.find((w) =>
       w.minX < -1.0 && w.maxX > -1.0 && w.minZ < -0.9 && w.maxZ > -0.9
     );
     if (bedWall) {
