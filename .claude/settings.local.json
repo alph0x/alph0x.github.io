@@ -1,7 +1,19 @@
 {
   "permissions": {
     "allow": [
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git:*)",
+      "WebSearch",
+      "WebFetch(domain:www.creativebloq.com)",
+      "WebFetch(domain:www.brace.design)",
+      "WebFetch(domain:www.space.com)",
+      "Bash(python3:*)",
+      "Bash(ollama list:*)",
+      "Bash(ls /Users/alph0x/.claude/*.json 2>/dev/null)",
+      "Bash(brew services:*)"
     ]
   }
 }

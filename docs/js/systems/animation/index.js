@@ -5,17 +5,20 @@ import { updatePet } from './pet.js';
 import { updateParallax } from './parallax.js';
 
 export class AnimationSystem {
-  constructor({ scene, state, camera }) {
+  constructor({ scene, worldState, camera }) {
     this.scene = scene;
-    this.state = state;
-    this.state.camera = camera;
+    this.worldState = worldState;
+    this.camera = camera;
   }
 
+  /** Cache-bust: 2026-05-08T18:48:00 */
+
   update(delta, time) {
-    updateImplants(delta, time, this.state);
-    updateParticles(delta, this.state);
+    const { effects, pet } = this.worldState;
+    updateImplants(delta, time, effects.implants);
+    updateParticles(delta, effects.particles);
     updateFlickerLights(this.scene, time);
-    updatePet(time, this.state);
-    updateParallax(this.scene, this.state.camera);
+    updatePet(time, pet, this.camera);
+    updateParallax(this.scene, this.camera);
   }
 }

@@ -8,14 +8,16 @@ import * as THREE from 'three';
 import '../docs/js/furniture/index.js';
 import { FurnitureManager } from '../docs/js/editor-modules/furniture-manager.js';
 import { EditorState } from '../docs/js/editor-modules/state.js';
+import { UndoManager } from '../docs/js/editor-modules/undo-manager.js';
 
 describe('FurnitureManager', () => {
-  let scene, state, manager;
+  let scene, state, undoManager, manager;
 
   beforeEach(() => {
     scene = new THREE.Scene();
     state = new EditorState();
-    manager = new FurnitureManager(scene, state, 2.8);
+    undoManager = new UndoManager();
+    manager = new FurnitureManager(scene, state, 2.8, undoManager);
   });
 
   it('places an item and increments nextId', () => {
@@ -95,11 +97,67 @@ describe('FurnitureManager', () => {
   it('undo restores moved position', () => {
     manager.place('bed', 1, 0, 2, 0);
     const id = state.placed[0].id;
+    const startPos = new THREE.Vector3(1, 0, 2);
     manager.updateMove(id, 5, 5);
-    state.lastAction = { type: 'move', id, oldPos: new THREE.Vector3(1, 0, 2) };
+    manager.endMove(id, startPos);
     manager.undo();
     expect(state.placed[0].config.position[0]).toBe(1);
     expect(state.placed[0].config.position[2]).toBe(2);
+  });
+
+  it('redo re-applies undone place', () => {
+    manager.place('bed', 1, 0, 2, 0);
+    expect(state.placedCount).toBe(1);
+    manager.undo();
+    expect(state.placedCount).toBe(0);
+    manager.redo();
+    expect(state.placedCount).toBe(1);
+    expect(state.placed[0].type).toBe('bed');
+  });
+
+  it('redo re-applies undone delete', () => {
+    manager.place('bed', 1, 0, 2, 0);
+    const id = state.placed[0].id;
+    manager.select(id);
+    manager.deleteSelected();
+    expect(state.placedCount).toBe(0);
+    manager.undo();
+    expect(state.placedCount).toBe(1);
+    manager.redo();
+    expect(state.placedCount).toBe(0);
+  });
+
+  it('redo re-applies undone move', () => {
+    manager.place('bed', 1, 0, 2, 0);
+    const id = state.placed[0].id;
+    const startPos = new THREE.Vector3(1, 0, 2);
+    manager.updateMove(id, 5, 5);
+    manager.endMove(id, startPos);
+    manager.undo();
+    expect(state.placed[0].config.position[0]).toBe(1);
+    expect(state.placed[0].config.position[2]).toBe(2);
+    manager.redo();
+    expect(state.placed[0].config.position[0]).toBe(5);
+    expect(state.placed[0].config.position[2]).toBe(5);
+  });
+
+  it('redo re-applies undone rotation', () => {
+    manager.place('bed', 1, 0, 2, 0);
+    const id = state.placed[0].id;
+    manager.select(id);
+    manager.rotateSelected(90);
+    const afterRotate = state.placed[0].config.rotation;
+    manager.undo();
+    expect(state.placed[0].config.rotation).toBe(0);
+    manager.redo();
+    expect(state.placed[0].config.rotation).toBe(afterRotate);
+  });
+
+  it('clearAll clears undo stack', () => {
+    manager.place('bed', 1, 0, 2, 0);
+    manager.clearAll();
+    expect(manager.canUndo).toBe(false);
+    expect(manager.canRedo).toBe(false);
   });
 
   it('clearAll removes everything', () => {
@@ -151,5 +209,17 @@ describe('FurnitureManager', () => {
     manager.setZ(-3.2);
     expect(state.placed[0].config.position[2]).toBe(-3.2);
     expect(state.placed[0].mesh.position.z).toBe(-3.2);
+  });
+
+  it('setName updates item name', () => {
+    manager.place('bed', 1, 0, 2, 0);
+    manager.select(state.placed[0].id);
+    manager.setName('My Bed');
+    expect(state.placed[0].name).toBe('My Bed');
+  });
+
+  it('name defaults to empty string', () => {
+    manager.place('bed', 1, 0, 2, 0);
+    expect(state.placed[0].name).toBe('');
   });
 });

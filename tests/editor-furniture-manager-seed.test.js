@@ -9,6 +9,7 @@ import * as THREE from 'three';
 import '../docs/js/furniture/index.js';
 import { FurnitureManager } from '../docs/js/editor-modules/furniture-manager.js';
 import { EditorState } from '../docs/js/editor-modules/state.js';
+import { UndoManager } from '../docs/js/editor-modules/undo-manager.js';
 import { deserializeSeed } from '../docs/js/seed.js';
 import { DEFAULT_SEED } from '../docs/js/core.js';
 
@@ -18,7 +19,7 @@ describe('FurnitureManager seed loading', () => {
   beforeEach(() => {
     scene = new THREE.Scene();
     state = new EditorState();
-    manager = new FurnitureManager(scene, state, 2.8);
+    manager = new FurnitureManager(scene, state, 2.8, new UndoManager());
   });
 
   it('loads DEFAULT_SEED and places all items', () => {

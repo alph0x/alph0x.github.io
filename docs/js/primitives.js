@@ -21,22 +21,29 @@ export function makePlane(material, size, pos) {
   return mesh;
 }
 
+/** Low-poly cylinder (8 radial segments for PSX look). */
 export function makeCylinder(material, params, pos) {
-  const mesh = new THREE.Mesh(new THREE.CylinderGeometry(...params), material);
+  // Force low segment count: [radiusTop, radiusBottom, height, 8]
+  const lp = [params[0], params[1], params[2], 8];
+  const mesh = new THREE.Mesh(new THREE.CylinderGeometry(...lp), material);
   mesh.position.set(...pos);
   mesh.castShadow = true; mesh.receiveShadow = true;
   return mesh;
 }
 
+/** Low-poly cone (8 radial segments for PSX look). */
 export function makeCone(material, params, pos) {
-  const mesh = new THREE.Mesh(new THREE.ConeGeometry(...params), material);
+  const lp = [params[0], params[1], 8];
+  const mesh = new THREE.Mesh(new THREE.ConeGeometry(...lp), material);
   mesh.position.set(...pos);
   mesh.castShadow = true; mesh.receiveShadow = true;
   return mesh;
 }
 
+/** Low-poly sphere (8x6 segments for PSX look). */
 export function makeSphere(material, params, pos) {
-  const mesh = new THREE.Mesh(new THREE.SphereGeometry(...params), material);
+  const lp = [params[0], 8, 6];
+  const mesh = new THREE.Mesh(new THREE.SphereGeometry(...lp), material);
   mesh.position.set(...pos);
   mesh.castShadow = true; mesh.receiveShadow = true;
   return mesh;

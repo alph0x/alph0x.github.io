@@ -141,4 +141,78 @@ describe('editor edge dragging logic', () => {
     // This documents the current behavior (no prevention)
     expect(Math.abs(area)).toBeGreaterThan(0);
   });
+
+  it('locks vertical edges to X-only movement', () => {
+    const outline = [
+      [-2.25, -1.75],
+      [2.25, -1.75],
+      [2.25, 1.75],
+      [-2.25, 1.75],
+    ];
+    const edgeIndex = 1; // right edge: vertical (same X = 2.25)
+    const dragOffset = { x: 2.25, z: 0 };
+    const pt = { x: 3.0, z: 1.5 }; // dragged right AND up
+
+    let dx = pt.x - dragOffset.x;
+    let dz = pt.z - dragOffset.z;
+
+    // Apply axis-lock logic
+    const v0 = [outline[edgeIndex][0], outline[edgeIndex][1]];
+    const v1 = [outline[(edgeIndex + 1) % outline.length][0], outline[(edgeIndex + 1) % outline.length][1]];
+    const epsilon = 0.01;
+    if (Math.abs(v0[0] - v1[0]) < epsilon) {
+      dz = 0; // vertical edge → X-only
+    } else if (Math.abs(v0[1] - v1[1]) < epsilon) {
+      dx = 0; // horizontal edge → Z-only
+    }
+
+    expect(dx).toBe(0.75);
+    expect(dz).toBe(0);
+
+    const i = edgeIndex;
+    const j = (i + 1) % outline.length;
+    const newOutline = [...outline];
+    newOutline[i] = [snap(v0[0] + dx), snap(v0[1] + dz)];
+    newOutline[j] = [snap(v1[0] + dx), snap(v1[1] + dz)];
+
+    expect(newOutline[1]).toEqual([3.0, -1.75]);
+    expect(newOutline[2]).toEqual([3.0, 1.75]);
+  });
+
+  it('locks horizontal edges to Z-only movement', () => {
+    const outline = [
+      [-2.25, -1.75],
+      [2.25, -1.75],
+      [2.25, 1.75],
+      [-2.25, 1.75],
+    ];
+    const edgeIndex = 2; // top edge: horizontal (same Z = 1.75)
+    const dragOffset = { x: 0, z: 1.75 };
+    const pt = { x: 1.5, z: 2.5 }; // dragged right AND up
+
+    let dx = pt.x - dragOffset.x;
+    let dz = pt.z - dragOffset.z;
+
+    // Apply axis-lock logic
+    const v0 = [outline[edgeIndex][0], outline[edgeIndex][1]];
+    const v1 = [outline[(edgeIndex + 1) % outline.length][0], outline[(edgeIndex + 1) % outline.length][1]];
+    const epsilon = 0.01;
+    if (Math.abs(v0[0] - v1[0]) < epsilon) {
+      dz = 0; // vertical edge → X-only
+    } else if (Math.abs(v0[1] - v1[1]) < epsilon) {
+      dx = 0; // horizontal edge → Z-only
+    }
+
+    expect(dx).toBe(0);
+    expect(dz).toBe(0.75);
+
+    const i = edgeIndex;
+    const j = (i + 1) % outline.length;
+    const newOutline = [...outline];
+    newOutline[i] = [snap(v0[0] + dx), snap(v0[1] + dz)];
+    newOutline[j] = [snap(v1[0] + dx), snap(v1[1] + dz)];
+
+    expect(newOutline[2]).toEqual([2.25, 2.5]);
+    expect(newOutline[3]).toEqual([-2.25, 2.5]);
+  });
 });

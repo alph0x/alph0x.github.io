@@ -6,7 +6,7 @@ import { makeBox } from '../../primitives.js';
 
 function buildDrone(cfg) {
   const g = new THREE.Group(); g.position.set(...cfg.position); g.rotation.y = cfg.rotation || 0;
-  const bodyMat = makeStd({ color: 0x4a4a55, roughness: 0.4, metalness: 0.5 });
+  const bodyMat = makeStd({ color: 0x4a4a55 });
   g.add(makeBox(bodyMat, [0.15, 0.06, 0.1], [0, 0, 0]));
   for (const lx of [-0.12, 0.12]) {
     const arm = makeBox(bodyMat, [0.04, 0.02, 0.12], [lx, 0, 0]);
@@ -15,6 +15,6 @@ function buildDrone(cfg) {
     g.add(rotor);
   }
   g.add(makeBox(new THREE.MeshBasicMaterial({ color: COLORS.cyan }), [0.02, 0.02, 0.02], [0, 0, 0.06]));
-  return g;
+  return { mesh: g };
 }
 register('drone', buildDrone);

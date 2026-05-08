@@ -5,10 +5,7 @@ import { makeBox, makeLight } from '../primitives.js';
 export function buildWindow(cfg) {
   const group = new THREE.Group();
   const winW = 1.8, winH = 1.2;
-  const winMat = new THREE.MeshStandardMaterial({
-    color: 0x080810, emissive: 0x0a0a12, emissiveIntensity: 0.08,
-    roughness: 0.2, metalness: 0.5
-  });
+  const winMat = new THREE.MeshStandardMaterial({ color: 0x080810, flatShading: true, roughness: 1, metalness: 0 });
   const win = new THREE.Mesh(new THREE.PlaneGeometry(winW, winH), winMat);
   win.position.set(...cfg.position); group.add(win);
   const frameMat = new THREE.MeshBasicMaterial({ color: 0x1a1a1e });

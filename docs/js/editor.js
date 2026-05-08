@@ -22,6 +22,7 @@ import { OutlineEditor } from './editor-modules/outline-editor.js';
 import { PreviewManager } from './editor-modules/preview-manager.js';
 import { SpawnManager } from './editor-modules/spawn-manager.js';
 import { InteractionManager } from './editor-modules/interaction-manager.js';
+import { UndoManager } from './editor-modules/undo-manager.js';
 
 /* error display */ {
   const show = (msg) => {
@@ -88,11 +89,11 @@ function init() {
     setupScene();
     roomBuilder = new RoomBuilder(roomGroup, scene, { wallH: CONFIG.wallH, wallT: CONFIG.wallT });
     roomBuilder.rebuild(state.outline, state.mat);
-    furnitureManager = new FurnitureManager(scene, state, CONFIG.wallH);
+    const undoManager = new UndoManager();
+    furnitureManager = new FurnitureManager(scene, state, CONFIG.wallH, undoManager);
     outlineEditor = new OutlineEditor(
       outlineGroup, state, roomBuilder, CONFIG, () => camera,
-      editorSnap, isSelfIntersecting, getClosestEdgePoint,
-      () => updateRoomDimensions()
+      editorSnap, isSelfIntersecting, getClosestEdgePoint
     );
     previewManager = new PreviewManager(CONFIG.preview, document.getElementById('preview-wrap'));
     previewManager.init();
@@ -110,6 +111,9 @@ function init() {
       snap: (v) => editorSnap(v, CONFIG.snap),
       onSpawnPlaced: (type) => {
         document.getElementById(type === 'player' ? 'toolPlayer' : 'toolLulu').classList.remove('active');
+      },
+      onFurniturePlaced: () => {
+        deactivateAllTools();
       },
       onDragMove: (pt) => {
         guideGroup.visible = true;
@@ -165,6 +169,7 @@ function setupTopCamera(container) {
     0.1, 100
   );
   camera.position.set(0, CONFIG.cameraY, 0);
+  camera.up.set(0, 0, 1);
   camera.lookAt(0, 0, 0);
 }
 
@@ -179,10 +184,13 @@ function setCameraMode(mode) {
   state.viewMode = mode;
   const container = document.getElementById('canvas-wrap');
 
+  if (controls) controls.dispose();
+
   if (mode === '3d') {
     setup3DCamera(container);
-    controls.object = camera;
+    controls = new OrbitControls(camera, renderer.domElement);
     controls.enableRotate = true;
+    controls.target.set(0, 0, 0);
     const mat = roomBuilder.wallMaterial;
     if (mat) {
       mat.transparent = true;
@@ -191,8 +199,11 @@ function setCameraMode(mode) {
     }
   } else {
     setupTopCamera(container);
-    controls.object = camera;
+    controls = new OrbitControls(camera, renderer.domElement);
     controls.enableRotate = false;
+    controls.mouseButtons = { LEFT: null, MIDDLE: THREE.MOUSE.PAN, RIGHT: THREE.MOUSE.PAN };
+    controls.zoomToCursor = true;
+    controls.target.set(0, 0, 0);
     const mat = roomBuilder.wallMaterial;
     if (mat) {
       mat.transparent = false;
@@ -303,7 +314,9 @@ function bindUI() {
   bindPositionControls();
   bindYControls();
   bindRotationControl();
+  bindNameControl();
   document.getElementById('btnUndo').addEventListener('click', () => furnitureManager.undo());
+  document.getElementById('btnRedo').addEventListener('click', () => furnitureManager.redo());
   document.getElementById('btnExport').addEventListener('click', exportLayout);
 }
 
@@ -372,6 +385,13 @@ function bindYControls() {
 function bindRotationControl() {
   const rotInput = document.getElementById('selRot');
   rotInput.addEventListener('change', (e) => furnitureManager.setRotation(e.target.value));
+}
+
+function bindNameControl() {
+  const nameInput = document.getElementById('selName');
+  if (nameInput) {
+    nameInput.addEventListener('input', (e) => furnitureManager.setName(e.target.value));
+  }
 }
 
 function buildPaletteUI() {
@@ -474,6 +494,16 @@ function exportLayout() {
 
 window.__editorSelectItem = (id) => {
   furnitureManager.select(id);
+};
+window.__editorState = state;
+window.__editorProject = (x, z) => {
+  const v = new THREE.Vector3(x, 0, z);
+  v.project(camera);
+  const rect = renderer.domElement.getBoundingClientRect();
+  return {
+    x: ((v.x + 1) / 2) * rect.width + rect.left,
+    y: ((-v.y + 1) / 2) * rect.height + rect.top,
+  };
 };
 
 // ── Loop ────────────────────────────────────────────────────────

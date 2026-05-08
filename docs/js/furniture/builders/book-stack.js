@@ -10,10 +10,10 @@ function buildBookStack(cfg) {
     const bw = 0.15 + Math.random() * 0.05;
     const bh = 0.03 + Math.random() * 0.02;
     const bl = 0.2 + Math.random() * 0.05;
-    const book = makeBox(makeStd({ color: colors[i % colors.length], roughness: 0.85, metalness: 0.0 }), [bw, bh, bl], [(Math.random() - 0.5) * 0.02, i * 0.035, (Math.random() - 0.5) * 0.02]);
+    const book = makeBox(makeStd({ color: colors[i % colors.length] }), [bw, bh, bl], [(Math.random() - 0.5) * 0.02, i * 0.035, (Math.random() - 0.5) * 0.02]);
     book.rotation.y = (Math.random() - 0.5) * 0.1;
     g.add(book);
   }
-  return g;
+  return { mesh: g };
 }
 register('bookStack', buildBookStack);

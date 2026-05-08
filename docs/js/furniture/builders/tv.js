@@ -16,9 +16,8 @@ function buildTV(cfg) {
   g.add(makeBox(frameMat, [w, h, d], [0, 0, 0]));
   g.add(makePlane(screenMat, [w - 0.03, h - 0.03], [0, 0, d / 2 + 0.004]));
 
-  const noiseMat = new THREE.MeshStandardMaterial({
-    color: 0xffffff, transparent: true, opacity: 0.05,
-    emissive: COLORS.accent, emissiveIntensity: 0.5
+  const noiseMat = new THREE.MeshBasicMaterial({
+    color: 0xffffff, transparent: true, opacity: 0.05
   });
   const noise = makePlane(noiseMat, [w - 0.03, h - 0.03], [0, 0, d / 2 + 0.008]);
   g.add(noise);
@@ -26,8 +25,7 @@ function buildTV(cfg) {
   // Subtle wall-wash glow behind the panel
   g.add(makeLight(COLORS.accent, 0.6, 4, [0, 0, 0.25]));
 
-  const result = { mesh: g, type: 'terminal', panelId: cfg.panelId, label: 'TV', room: 'APT' };
-  return [g, result, noise];
+  return { mesh: g, type: 'terminal', panelId: cfg.panelId, label: 'TV', room: 'APT' };
 }
 
 register('tv', buildTV);

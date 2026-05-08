@@ -9,6 +9,7 @@ import * as THREE from 'three';
 import '../docs/js/furniture/index.js';
 import { FurnitureManager } from '../docs/js/editor-modules/furniture-manager.js';
 import { EditorState } from '../docs/js/editor-modules/state.js';
+import { UndoManager } from '../docs/js/editor-modules/undo-manager.js';
 
 describe('Builder return formats', () => {
   let scene, state, manager;
@@ -16,7 +17,7 @@ describe('Builder return formats', () => {
   beforeEach(() => {
     scene = new THREE.Scene();
     state = new EditorState();
-    manager = new FurnitureManager(scene, state, 2.8);
+    manager = new FurnitureManager(scene, state, 2.8, new UndoManager());
   });
 
   it('handles raw Group (bed)', () => {

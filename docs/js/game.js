@@ -2,35 +2,38 @@
  * @fileoverview Game orchestrator — wires systems together. No implementation logic.
  */
 
-import * as THREE from 'three';
-import { CFG, resolveMove } from './core.js';
+import { CFG } from './core.js';
 import { buildLevel } from './level/index.js';
 import { InputSystem } from './systems/input.js';
 import { InteractionSystem } from './systems/interaction.js';
 import { AnimationSystem } from './systems/animation/index.js';
 import { LoadingSystem } from './systems/loading.js';
+import { AudioSystem } from './systems/audio.js';
+import { updatePlayerMovement } from './application/player-movement.js';
+import { extractCameraForwardXZ, syncPlayerToCamera } from './infrastructure/player-renderer.js';
 
 export class Game {
-  constructor({ renderer, scene, camera, controls, state, composer }) {
+  constructor({ renderer, scene, camera, controls, worldState, touchControls }) {
     this.renderer = renderer;
     this.scene = scene;
     this.camera = camera;
     this.controls = controls;
-    this.state = state;
-    this.composer = composer;
+    this.worldState = worldState;
+    this.touchControls = touchControls;
     this.prevTime = performance.now();
     this._boundAnimate = this.animate.bind(this);
 
     // Subsystems (composition over inheritance)
     this.input = new InputSystem({ game: this });
-    this.interaction = new InteractionSystem({ camera, state, controls });
-    this.animation = new AnimationSystem({ scene, state, camera });
+    this.interaction = new InteractionSystem({ camera, worldState, controls });
+    this.animation = new AnimationSystem({ scene, worldState, camera });
     this.loading = new LoadingSystem({ controls });
+    this.audio = new AudioSystem();
   }
 
   init() {
-    buildLevel(this.scene, this.state);
-    this.state.interactables.forEach((i) => {
+    buildLevel(this.scene, this.worldState);
+    this.worldState.room.interactables.forEach((i) => {
       i.mesh.traverse((c) => { if (c.isMesh) c.userData = { label: i.label }; });
     });
     this.input.bind();
@@ -45,10 +48,11 @@ export class Game {
     this.camera.aspect = window.innerWidth / window.innerHeight;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(window.innerWidth, window.innerHeight, false);
-    if (this.composer) this.composer.setSize(window.innerWidth, window.innerHeight);
+    // No post-processing — render directly
   }
 
   start() {
+    this.audio.startAmbient();
     requestAnimationFrame(this._boundAnimate);
   }
 
@@ -58,39 +62,25 @@ export class Game {
     const delta = (time - this.prevTime) / 1000;
     this.prevTime = time;
 
-    if (this.controls.isLocked) {
+    const canMove = this.controls.isLocked || (this.touchControls?.isActive ?? false);
+    if (canMove) {
       this._updateMovement(delta);
     }
 
+    this.touchControls?.update();
+
     this.animation.update(delta, time);
+    this.audio.update(delta);
     this.interaction.updatePrompt();
-    this.composer.render();
+    this.renderer.render(this.scene, this.camera);
   }
 
   _updateMovement(delta) {
-    const isDiagonal = (this.state.moveForward && (this.state.moveLeft || this.state.moveRight)) ||
-                       (this.state.moveBackward && (this.state.moveLeft || this.state.moveRight));
-    const speed = isDiagonal ? CFG.runSpeed * 0.85 : CFG.speed;
-
-    const forward = new THREE.Vector3();
-    this.camera.getWorldDirection(forward);
-    forward.y = 0;
-    forward.normalize();
-
-    const right = new THREE.Vector3();
-    right.crossVectors(forward, this.camera.up).normalize();
-
-    const mx = (this.state.moveRight ? 1 : 0) - (this.state.moveLeft ? 1 : 0);
-    const mz = (this.state.moveForward ? 1 : 0) - (this.state.moveBackward ? 1 : 0);
-    const moveDir = new THREE.Vector3();
-    moveDir.addScaledVector(forward, mz);
-    moveDir.addScaledVector(right, mx);
-    if (moveDir.length() > 0) moveDir.normalize();
-
-    const dx = moveDir.x * speed * delta;
-    const dz = moveDir.z * speed * delta;
-
-    resolveMove(this.camera.position, dx, dz, this.state.walls);
+    const { player, input, room } = this.worldState;
+    const cameraForward = extractCameraForwardXZ(this.camera);
+    updatePlayerMovement(player, input, cameraForward, room.walls, delta);
+    syncPlayerToCamera(player, this.camera);
+    this.audio.setMoving(player.isMoving);
   }
 
   interact() {

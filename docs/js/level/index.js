@@ -5,17 +5,15 @@
 import * as THREE from 'three';
 import { CFG, ROOM_LAYOUT } from '../core.js';
 import { FurnitureRegistry } from '../furniture/index.js';
-import { buildClosedDoor } from './room.js';
-import { buildWindow } from './window.js';
-import { buildCityscape } from './cityscape.js';
 import { placeDecorations } from './decorations/index.js';
 import { setupLighting } from './lighting.js';
+import { Pet } from '../domain/pet.js';
 
 function hexToInt(hex) {
   return parseInt(hex.replace('#', ''), 16);
 }
 
-function buildPolygonRoom(scene, state) {
+function buildPolygonRoom(scene, worldState) {
   const outline = ROOM_LAYOUT.outline;
   const wallH = CFG.wallH;
   const wallT = ROOM_LAYOUT.wallThickness || 0.2;
@@ -30,14 +28,14 @@ function buildPolygonRoom(scene, state) {
   shape.closePath();
 
   const floorGeo = new THREE.ShapeGeometry(shape);
-  const floorMat = new THREE.MeshStandardMaterial({ color: hexToInt(mat.floor), roughness: 0.9 });
+  const floorMat = new THREE.MeshStandardMaterial({ color: hexToInt(mat.floor), flatShading: true, roughness: 1, metalness: 0 });
   const floor = new THREE.Mesh(floorGeo, floorMat);
   floor.rotation.x = -Math.PI / 2;
   floor.receiveShadow = true;
   scene.add(floor);
 
   const ceilingGeo = new THREE.ShapeGeometry(shape);
-  const ceilingMat = new THREE.MeshStandardMaterial({ color: hexToInt(mat.ceiling), roughness: 0.9 });
+  const ceilingMat = new THREE.MeshStandardMaterial({ color: hexToInt(mat.ceiling), flatShading: true, roughness: 1, metalness: 0 });
   const ceiling = new THREE.Mesh(ceilingGeo, ceilingMat);
   ceiling.rotation.x = Math.PI / 2;
   ceiling.position.y = wallH;
@@ -45,7 +43,7 @@ function buildPolygonRoom(scene, state) {
   scene.add(ceiling);
 
   // Walls along each edge
-  const wallMat = new THREE.MeshStandardMaterial({ color: hexToInt(mat.wall) });
+  const wallMat = new THREE.MeshStandardMaterial({ color: hexToInt(mat.wall), flatShading: true, roughness: 1, metalness: 0 });
   const edges = [];
   for (let i = 0; i < outline.length; i++) {
     const p1 = outline[i];
@@ -68,7 +66,7 @@ function buildPolygonRoom(scene, state) {
 
     // Collision bounds from rotated box
     const box = new THREE.Box3().setFromObject(mesh);
-    state.walls.push({
+    worldState.room.walls.push({
       minX: box.min.x,
       maxX: box.max.x,
       minZ: box.min.z,
@@ -78,85 +76,51 @@ function buildPolygonRoom(scene, state) {
     edges.push({ p1, p2, midX, midZ, angle, len, mesh });
   }
 
-  // Find north-most edge (lowest z midpoint) for window
-  // Find south-most edge (highest z midpoint) for door
-  let northEdge = null, southEdge = null;
-  let northZ = Infinity, southZ = -Infinity;
-  for (const e of edges) {
-    if (e.midZ < northZ) { northZ = e.midZ; northEdge = e; }
-    if (e.midZ > southZ) { southZ = e.midZ; southEdge = e; }
-  }
-
-  // Window on north edge
-  if (northEdge) {
-    const winPos = [northEdge.midX, 1.5, northEdge.midZ];
-    scene.add(buildWindow({ position: winPos }));
-    scene.add(buildCityscape({ position: winPos }));
-  }
-
-  // Door on south edge
-  if (southEdge) {
-    const door = buildClosedDoor(southEdge.midX, southEdge.midZ, 0);
-    door.rotation.y = southEdge.angle;
-    scene.add(door);
-    const doorBox = new THREE.Box3().setFromObject(door);
-    state.walls.push({
-      minX: doorBox.min.x,
-      maxX: doorBox.max.x,
-      minZ: doorBox.min.z,
-      maxZ: doorBox.max.z,
-    });
-  }
-
   return { edges };
 }
 
-export function buildLevel(scene, state) {
-  buildPolygonRoom(scene, state);
+export function buildLevel(scene, worldState) {
+  buildPolygonRoom(scene, worldState);
 
   for (const item of ROOM_LAYOUT.furniture) {
     const entry = FurnitureRegistry.get(item.type);
     if (!entry?.builder) { console.warn('Unknown furniture type:', item.type); continue; }
     const result = entry.builder(item);
-    const results = Array.isArray(result) ? result : [result];
-    for (const r of results) {
-      let mesh = null;
-      if (r && r.mesh) {
-        scene.add(r.mesh);
-        mesh = r.mesh;
-        if (r.type === 'terminal') state.interactables.push(r);
-      } else if (r && r.isGroup) {
-        scene.add(r);
-        mesh = r;
-      } else if (r instanceof THREE.Mesh || r instanceof THREE.Group) {
-        scene.add(r);
-        mesh = r;
-      }
+    if (!result || !result.mesh) {
+      console.warn('Builder returned invalid result for', item.type);
+      continue;
+    }
 
-      // Track pet for animation
-      if (item.type === 'miniSchnauzer' && mesh) {
-        state.pet = mesh;
-      }
+    scene.add(result.mesh);
+    if (result.type === 'terminal') worldState.room.interactables.push(result);
 
-      // Collision: extract AABB from placed mesh
-      const noCollisionTypes = new Set(['rug', 'ceilingLamp']);
-      if (mesh && !item.noCollision && !noCollisionTypes.has(item.type)) {
-        const box = new THREE.Box3().setFromObject(mesh);
-        const sizeX = box.max.x - box.min.x;
-        const sizeZ = box.max.z - box.min.z;
-        // Only solid if it has meaningful footprint (exclude thin wall decorations)
-        if (sizeX > 0.05 && sizeZ > 0.05) {
-          state.walls.push({
-            minX: box.min.x,
-            maxX: box.max.x,
-            minZ: box.min.z,
-            maxZ: box.max.z,
-          });
-        }
+    // Track pet for animation
+    if (item.type === 'miniSchnauzer') {
+      worldState.pet.mesh = result.mesh;
+      worldState.pet.model = new Pet({
+        position: { x: item.position[0], y: item.position[1], z: item.position[2] },
+        rotation: item.rotation || 0,
+      });
+    }
+
+    // Collision: extract AABB from placed mesh
+    const noCollisionTypes = new Set(['rug', 'ceilingLamp', 'door', 'window']);
+    if (!item.noCollision && !noCollisionTypes.has(item.type)) {
+      const box = new THREE.Box3().setFromObject(result.mesh);
+      const sizeX = box.max.x - box.min.x;
+      const sizeZ = box.max.z - box.min.z;
+      // Only solid if it has meaningful footprint (exclude thin wall decorations)
+      if (sizeX > 0.05 && sizeZ > 0.05) {
+        worldState.room.walls.push({
+          minX: box.min.x,
+          maxX: box.max.x,
+          minZ: box.min.z,
+          maxZ: box.max.z,
+        });
       }
     }
   }
 
-  placeDecorations(scene, state, ROOM_LAYOUT.decorations);
+  placeDecorations(scene, worldState, ROOM_LAYOUT.decorations);
   setupLighting(scene);
 }

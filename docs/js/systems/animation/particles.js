@@ -1,5 +1,5 @@
-export function updateParticles(delta, state) {
-  state.particles.forEach((p) => {
+export function updateParticles(delta, particles) {
+  particles.forEach((p) => {
     p.mesh.position.x += p.vx;
     p.mesh.position.y += p.vy;
     p.mesh.position.z += p.vz;
