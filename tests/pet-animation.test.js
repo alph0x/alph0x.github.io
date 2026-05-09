@@ -37,20 +37,22 @@ describe('updatePet', () => {
       const { pet, camera } = createPetAndCamera({ x: 0, y: 1, z: 2 }, { x: 0, z: 0 }, 0);
       simulate(pet, camera);
       const head = pet.mesh.getObjectByName('head');
-      expect(head.rotation.y).toBeGreaterThan(0.45);
-      expect(head.rotation.y).toBeLessThan(0.55);
+      expect(head.rotation.y).toBeLessThan(-0.45);
+      expect(head.rotation.y).toBeGreaterThan(-0.55);
     });
 
     it('turns head left when player is to the left (-Z)', () => {
       const { pet, camera } = createPetAndCamera({ x: 0, y: 1, z: -2 }, { x: 0, z: 0 }, 0);
       simulate(pet, camera);
       const head = pet.mesh.getObjectByName('head');
-      expect(head.rotation.y).toBeLessThan(-0.45);
-      expect(head.rotation.y).toBeGreaterThan(-0.55);
+      expect(head.rotation.y).toBeGreaterThan(0.45);
+      expect(head.rotation.y).toBeLessThan(0.55);
     });
 
-    it('compensates for body rotation', () => {
-      const { pet, camera } = createPetAndCamera({ x: 0, y: 1, z: 2 }, { x: 0, z: 0 }, Math.PI / 2);
+    it('compensates for body rotation (counter-clockwise, Three.js convention)', () => {
+      // bodyRotation = -π/2 in Three.js means the pet looks toward +Z.
+      // Player at +Z is directly in front → head should stay forward.
+      const { pet, camera } = createPetAndCamera({ x: 0, y: 1, z: 2 }, { x: 0, z: 0 }, -Math.PI / 2);
       simulate(pet, camera);
       const head = pet.mesh.getObjectByName('head');
       expect(head.rotation.y).toBeCloseTo(0, 1);

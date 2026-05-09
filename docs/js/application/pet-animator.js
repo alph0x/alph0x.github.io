@@ -72,11 +72,26 @@ function updateHead(pet, playerPosition) {
   const dz = playerPosition.z - pet.position.z;
   const angleToPlayer = Math.atan2(dx, dz);
 
-  // Pet local +X corresponds to world angle (π/2 - bodyRotation)
-  let targetY = Math.PI / 2 - angleToPlayer - pet.bodyRotation;
+  // Three.js uses counter-clockwise rotation.y. Pet local +X is its forward.
+  // When bodyRotation=0 the pet looks toward +X; when bodyRotation=π/2 it
+  // looks toward -Z (Three.js convention).
+  let targetY = angleToPlayer - Math.PI / 2 - pet.bodyRotation;
   while (targetY > Math.PI) targetY -= Math.PI * 2;
   while (targetY < -Math.PI) targetY += Math.PI * 2;
 
-  const clamped = Math.max(-MAX_HEAD_TURN, Math.min(MAX_HEAD_TURN, targetY));
+  // When the player is behind the pet (|targetY| near π) we need to know
+  // which side (left/right) they are on so the head turns the correct way.
+  const rightX = -Math.sin(pet.bodyRotation);
+  const rightZ = -Math.cos(pet.bodyRotation);
+  const dotRight = dx * rightX + dz * rightZ;
+
+  let clamped;
+  if (Math.abs(targetY) > Math.PI - MAX_HEAD_TURN) {
+    // Player is behind the pet — pick the side they are actually on
+    clamped = dotRight > 0 ? -MAX_HEAD_TURN : MAX_HEAD_TURN;
+  } else {
+    clamped = Math.max(-MAX_HEAD_TURN, Math.min(MAX_HEAD_TURN, targetY));
+  }
+
   pet.headRotation += (clamped - pet.headRotation) * SMOOTH_FACTOR;
 }
