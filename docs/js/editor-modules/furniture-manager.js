@@ -366,7 +366,7 @@ export class FurnitureManager {
   _applyForward(action) {
     switch (action.type) {
       case 'place': {
-        this.placeConfig(action.config, true, true);
+        this.placeConfig(action.config, false, true);
         break;
       }
       case 'move': {
