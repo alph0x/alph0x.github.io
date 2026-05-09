@@ -122,13 +122,15 @@ export class RoomBuilder {
     const midX = (p1[0] + p2[0]) / 2;
     const midZ = (p1[1] + p2[1]) / 2;
     const angle = Math.atan2(dx, dz);
+    const wallH = this._config.wallH;
+    const wallT = this._config.wallT;
 
     if (!edgeOpenings || edgeOpenings.length === 0) {
       const mesh = new THREE.Mesh(
-        new THREE.BoxGeometry(this._config.wallT, this._config.wallH, len),
+        new THREE.BoxGeometry(wallT, wallH, len),
         material
       );
-      mesh.position.set(midX, this._config.wallH / 2, midZ);
+      mesh.position.set(midX, wallH / 2, midZ);
       mesh.rotation.y = angle;
       return mesh;
     }
@@ -137,47 +139,47 @@ export class RoomBuilder {
     group.position.set(midX, 0, midZ);
     group.rotation.y = angle;
 
-    let currentZ = -len / 2;
+    // 2D subdivision: collect Z and Y cuts, then emit cells that are NOT inside any opening
+    const zCuts = new Set([-len / 2, len / 2]);
+    const yCuts = new Set([0, wallH]);
     for (const o of edgeOpenings) {
       const zLocal = o.t - len / 2;
-      const halfW = o.width / 2;
-      const startZ = zLocal - halfW;
-
-      // Stub before this opening
-      if (startZ - currentZ > 0.01) {
-        const stubLen = startZ - currentZ;
-        const stub = new THREE.Mesh(
-          new THREE.BoxGeometry(this._config.wallT, this._config.wallH, stubLen),
-          material
-        );
-        stub.position.set(0, this._config.wallH / 2, currentZ + stubLen / 2);
-        group.add(stub);
-      }
-
-      // Header above opening
-      const top = o.bottom + o.height;
-      if (top < this._config.wallH - 0.01) {
-        const headerH = this._config.wallH - top;
-        const header = new THREE.Mesh(
-          new THREE.BoxGeometry(this._config.wallT, headerH, o.width),
-          material
-        );
-        header.position.set(0, top + headerH / 2, zLocal);
-        group.add(header);
-      }
-
-      currentZ = zLocal + halfW;
+      zCuts.add(zLocal - o.width / 2);
+      zCuts.add(zLocal + o.width / 2);
+      yCuts.add(o.bottom);
+      yCuts.add(o.bottom + o.height);
     }
+    const zArr = Array.from(zCuts).sort((a, b) => a - b);
+    const yArr = Array.from(yCuts).sort((a, b) => a - b);
 
-    // Final stub after last opening
-    if (len / 2 - currentZ > 0.01) {
-      const stubLen = len / 2 - currentZ;
-      const stub = new THREE.Mesh(
-        new THREE.BoxGeometry(this._config.wallT, this._config.wallH, stubLen),
-        material
-      );
-      stub.position.set(0, this._config.wallH / 2, currentZ + stubLen / 2);
-      group.add(stub);
+    for (let zi = 0; zi < zArr.length - 1; zi++) {
+      const z1 = zArr[zi];
+      const z2 = zArr[zi + 1];
+      const zMid = (z1 + z2) / 2;
+      for (let yi = 0; yi < yArr.length - 1; yi++) {
+        const y1 = yArr[yi];
+        const y2 = yArr[yi + 1];
+        const yMid = (y1 + y2) / 2;
+
+        let insideOpening = false;
+        for (const o of edgeOpenings) {
+          const zLocal = o.t - len / 2;
+          if (zMid >= zLocal - o.width / 2 && zMid <= zLocal + o.width / 2 &&
+              yMid >= o.bottom && yMid <= o.bottom + o.height) {
+            insideOpening = true;
+            break;
+          }
+        }
+
+        if (!insideOpening && z2 - z1 > 0.001 && y2 - y1 > 0.001) {
+          const stub = new THREE.Mesh(
+            new THREE.BoxGeometry(wallT, y2 - y1, z2 - z1),
+            material
+          );
+          stub.position.set(0, (y1 + y2) / 2, (z1 + z2) / 2);
+          group.add(stub);
+        }
+      }
     }
 
     return group;

@@ -71,13 +71,17 @@ function buildPolygonRoom(scene, worldState) {
 
     const edgeOpenings = getEdgeOpenings(openings, p1, p2, wallT);
 
+    const group = new THREE.Group();
+    group.position.set(midX, 0, midZ);
+    group.rotation.y = angle;
+    scene.add(group);
+
     if (!edgeOpenings || edgeOpenings.length === 0) {
       const mesh = new THREE.Mesh(new THREE.BoxGeometry(wallT, wallH, len), wallMat);
-      mesh.position.set(midX, wallH / 2, midZ);
-      mesh.rotation.y = angle;
+      mesh.position.set(0, wallH / 2, 0);
       mesh.castShadow = true;
       mesh.receiveShadow = true;
-      scene.add(mesh);
+      group.add(mesh);
 
       const box = new THREE.Box3().setFromObject(mesh);
       worldState.room.walls.push({
@@ -87,77 +91,58 @@ function buildPolygonRoom(scene, worldState) {
         maxZ: box.max.z,
       });
 
-      edges.push({ p1, p2, midX, midZ, angle, len, mesh });
+      edges.push({ p1, p2, midX, midZ, angle, len, mesh: group });
       continue;
     }
 
-    const group = new THREE.Group();
-    group.position.set(midX, 0, midZ);
-    group.rotation.y = angle;
-    scene.add(group);
-
-    let currentZ = -len / 2;
+    // 2D subdivision: collect Z and Y cuts, then emit cells that are NOT inside any opening
+    const zCuts = new Set([-len / 2, len / 2]);
+    const yCuts = new Set([0, wallH]);
     for (const o of edgeOpenings) {
       const zLocal = o.t - len / 2;
-      const halfW = o.width / 2;
-      const startZ = zLocal - halfW;
-
-      // Stub before opening
-      if (startZ - currentZ > 0.01) {
-        const stubLen = startZ - currentZ;
-        const stub = new THREE.Mesh(new THREE.BoxGeometry(wallT, wallH, stubLen), wallMat);
-        stub.position.set(0, wallH / 2, currentZ + stubLen / 2);
-        stub.castShadow = true;
-        stub.receiveShadow = true;
-        group.add(stub);
-
-        const box = new THREE.Box3().setFromObject(stub);
-        worldState.room.walls.push({
-          minX: box.min.x,
-          maxX: box.max.x,
-          minZ: box.min.z,
-          maxZ: box.max.z,
-        });
-      }
-
-      // Header above opening
-      const top = o.bottom + o.height;
-      if (top < wallH - 0.01) {
-        const headerH = wallH - top;
-        const header = new THREE.Mesh(new THREE.BoxGeometry(wallT, headerH, o.width), wallMat);
-        header.position.set(0, top + headerH / 2, zLocal);
-        header.castShadow = true;
-        header.receiveShadow = true;
-        group.add(header);
-
-        const box = new THREE.Box3().setFromObject(header);
-        worldState.room.walls.push({
-          minX: box.min.x,
-          maxX: box.max.x,
-          minZ: box.min.z,
-          maxZ: box.max.z,
-        });
-      }
-
-      currentZ = zLocal + halfW;
+      zCuts.add(zLocal - o.width / 2);
+      zCuts.add(zLocal + o.width / 2);
+      yCuts.add(o.bottom);
+      yCuts.add(o.bottom + o.height);
     }
+    const zArr = Array.from(zCuts).sort((a, b) => a - b);
+    const yArr = Array.from(yCuts).sort((a, b) => a - b);
 
-    // Final stub
-    if (len / 2 - currentZ > 0.01) {
-      const stubLen = len / 2 - currentZ;
-      const stub = new THREE.Mesh(new THREE.BoxGeometry(wallT, wallH, stubLen), wallMat);
-      stub.position.set(0, wallH / 2, currentZ + stubLen / 2);
-      stub.castShadow = true;
-      stub.receiveShadow = true;
-      group.add(stub);
+    for (let zi = 0; zi < zArr.length - 1; zi++) {
+      const z1 = zArr[zi];
+      const z2 = zArr[zi + 1];
+      const zMid = (z1 + z2) / 2;
+      for (let yi = 0; yi < yArr.length - 1; yi++) {
+        const y1 = yArr[yi];
+        const y2 = yArr[yi + 1];
+        const yMid = (y1 + y2) / 2;
 
-      const box = new THREE.Box3().setFromObject(stub);
-      worldState.room.walls.push({
-        minX: box.min.x,
-        maxX: box.max.x,
-        minZ: box.min.z,
-        maxZ: box.max.z,
-      });
+        let insideOpening = false;
+        for (const o of edgeOpenings) {
+          const zLocal = o.t - len / 2;
+          if (zMid >= zLocal - o.width / 2 && zMid <= zLocal + o.width / 2 &&
+              yMid >= o.bottom && yMid <= o.bottom + o.height) {
+            insideOpening = true;
+            break;
+          }
+        }
+
+        if (!insideOpening && z2 - z1 > 0.001 && y2 - y1 > 0.001) {
+          const stub = new THREE.Mesh(new THREE.BoxGeometry(wallT, y2 - y1, z2 - z1), wallMat);
+          stub.position.set(0, (y1 + y2) / 2, (z1 + z2) / 2);
+          stub.castShadow = true;
+          stub.receiveShadow = true;
+          group.add(stub);
+
+          const box = new THREE.Box3().setFromObject(stub);
+          worldState.room.walls.push({
+            minX: box.min.x,
+            maxX: box.max.x,
+            minZ: box.min.z,
+            maxZ: box.max.z,
+          });
+        }
+      }
     }
 
     edges.push({ p1, p2, midX, midZ, angle, len, mesh: group });
