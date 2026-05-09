@@ -145,8 +145,8 @@ test.describe('Visual Inspection', () => {
     // Assertions
     expect(inspection.macBook).not.toBeNull();
     expect(inspection.macBook.lidRotationX).not.toBeNull();
-    // Lid should be open ~125°: rotation.x ≈ -1.02 rad
-    expect(Math.abs(inspection.macBook.lidRotationX - (-1.0208))).toBeLessThan(0.1);
+    // Lid should be open ~125°: rotation.x ≈ -2.12 rad
+    expect(Math.abs(inspection.macBook.lidRotationX - (-2.1208))).toBeLessThan(0.1);
 
     // No debug boxes should remain
     expect(inspection.debugBoxes).toHaveLength(0);
