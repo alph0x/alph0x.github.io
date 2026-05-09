@@ -16,7 +16,7 @@ function hexToInt(hex) {
 
 /** Compute world-space AABB ensuring ancestor matrices are up to date. */
 function getWorldAABB(object) {
-  object.updateWorldMatrix(true, false);
+  object.updateWorldMatrix(true, true);
   return new THREE.Box3().setFromObject(object);
 }
 
@@ -201,7 +201,7 @@ export function buildLevel(scene, worldState) {
     }
 
     // Collision: extract AABB from placed mesh
-    const noCollisionTypes = new Set(['rug', 'ceilingLamp', 'door', 'window']);
+    const noCollisionTypes = new Set(['rug', 'ceilingLamp', 'window']);
     if (!item.noCollision && !noCollisionTypes.has(item.type)) {
       const box = getWorldAABB(result.mesh);
       const sizeX = box.max.x - box.min.x;

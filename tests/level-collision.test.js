@@ -34,6 +34,18 @@ describe('buildLevel collision bounds', () => {
       expect(depth).toBeGreaterThan(1.0);
       expect(depth).toBeLessThan(2.0);
     }
+
+    // Door AABB should block the opening near z ~ 1.9
+    const doorWall = worldState.room.walls.find((w) =>
+      w.minX < 0.5 && w.maxX > -0.5 && w.minZ < 1.8 && w.maxZ > 1.65
+    );
+    expect(doorWall).toBeDefined();
+    if (doorWall) {
+      const width = doorWall.maxX - doorWall.minX;
+      const depth = doorWall.maxZ - doorWall.minZ;
+      expect(width).toBeGreaterThan(1.0);
+      expect(depth).toBeGreaterThan(0.05);
+    }
   });
 });
 
@@ -64,6 +76,35 @@ describe('resolveMove slides correctly', () => {
     // x goes from 2 to 1.7, which is > 1 + 0.35 so no collision
     expect(pos.x).toBe(1.7);
     expect(pos.z).toBe(0.5);
+  });
+});
+
+describe('door collision blocks movement', () => {
+  it('prevents player from walking through the closed door', () => {
+    const worldState = {
+      room: { walls: [], interactables: [] },
+      pet: { mesh: null, model: null },
+      effects: { implants: [], particles: [] },
+      input: {}, ui: {}, meta: {},
+    };
+    const scene = new THREE.Scene();
+    buildLevel(scene, worldState);
+
+    const doorWall = worldState.room.walls.find((w) =>
+      w.minX < 0.5 && w.maxX > -0.5 && w.minZ < 1.8 && w.maxZ > 1.65
+    );
+    expect(doorWall).toBeDefined();
+
+    // Player starts just in front of the door (z=1.5) and tries to walk toward +Z
+    const pos = { x: 0, z: 1.5 };
+    const walls = worldState.room.walls;
+    // Attempt a large step that would pass through the door
+    resolveMove(pos, 0, 0.5, walls);
+
+    // Player should be stopped before the door (z should not reach 1.7)
+    expect(pos.z).toBeLessThan(1.7);
+    // x should remain unchanged
+    expect(pos.x).toBe(0);
   });
 });
 
