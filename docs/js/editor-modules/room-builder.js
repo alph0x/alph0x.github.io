@@ -4,7 +4,7 @@
  */
 
 import * as THREE from 'three';
-import { buildPolygonShape, hexToInt } from '../editor-utils.js';
+import { buildPolygonShape, hexToInt, getEdgeOpenings } from '../editor-utils.js';
 
 export class RoomBuilder {
   /**
@@ -21,7 +21,7 @@ export class RoomBuilder {
   }
 
   /** Rebuild the entire room from an outline and material colors. */
-  rebuild(outline, materials) {
+  rebuild(outline, materials, openings = []) {
     this._roomGroup.clear();
     this._wallMeshes = [];
 
@@ -29,7 +29,7 @@ export class RoomBuilder {
     this._roomGroup.add(this._createFloor(shape, materials.floor));
     this._roomGroup.add(this._createCeiling(shape, materials.ceiling));
     this._updateGrid(outline);
-    this._buildWalls(outline, materials.wall);
+    this._buildWalls(outline, materials.wall, openings);
   }
 
   /** Update wall visibility based on camera distance (3D view culling). */
@@ -99,14 +99,13 @@ export class RoomBuilder {
     this._scene.add(this._gridHelper);
   }
 
-  _buildWalls(outline, wallColorHex) {
+  _buildWalls(outline, wallColorHex, openings) {
     this._wallMaterial = new THREE.MeshStandardMaterial({ color: hexToInt(wallColorHex), flatShading: true, roughness: 1, metalness: 0 });
     for (let i = 0; i < outline.length; i++) {
-      const wallMesh = this._buildWallSegment(
-        outline[i],
-        outline[(i + 1) % outline.length],
-        this._wallMaterial
-      );
+      const p1 = outline[i];
+      const p2 = outline[(i + 1) % outline.length];
+      const edgeOpenings = getEdgeOpenings(openings, p1, p2, this._config.wallT);
+      const wallMesh = this._buildWallSegment(p1, p2, this._wallMaterial, edgeOpenings);
       if (wallMesh) {
         this._roomGroup.add(wallMesh);
         this._wallMeshes.push({ mesh: wallMesh, mid: wallMesh.position.clone() });
@@ -114,7 +113,7 @@ export class RoomBuilder {
     }
   }
 
-  _buildWallSegment(p1, p2, material) {
+  _buildWallSegment(p1, p2, material, edgeOpenings) {
     const dx = p2[0] - p1[0];
     const dz = p2[1] - p1[1];
     const len = Math.sqrt(dx * dx + dz * dz);
@@ -124,12 +123,63 @@ export class RoomBuilder {
     const midZ = (p1[1] + p2[1]) / 2;
     const angle = Math.atan2(dx, dz);
 
-    const mesh = new THREE.Mesh(
-      new THREE.BoxGeometry(this._config.wallT, this._config.wallH, len),
-      material
-    );
-    mesh.position.set(midX, this._config.wallH / 2, midZ);
-    mesh.rotation.y = angle;
-    return mesh;
+    if (!edgeOpenings || edgeOpenings.length === 0) {
+      const mesh = new THREE.Mesh(
+        new THREE.BoxGeometry(this._config.wallT, this._config.wallH, len),
+        material
+      );
+      mesh.position.set(midX, this._config.wallH / 2, midZ);
+      mesh.rotation.y = angle;
+      return mesh;
+    }
+
+    const group = new THREE.Group();
+    group.position.set(midX, 0, midZ);
+    group.rotation.y = angle;
+
+    let currentZ = -len / 2;
+    for (const o of edgeOpenings) {
+      const zLocal = o.t - len / 2;
+      const halfW = o.width / 2;
+      const startZ = zLocal - halfW;
+
+      // Stub before this opening
+      if (startZ - currentZ > 0.01) {
+        const stubLen = startZ - currentZ;
+        const stub = new THREE.Mesh(
+          new THREE.BoxGeometry(this._config.wallT, this._config.wallH, stubLen),
+          material
+        );
+        stub.position.set(0, this._config.wallH / 2, currentZ + stubLen / 2);
+        group.add(stub);
+      }
+
+      // Header above opening
+      const top = o.bottom + o.height;
+      if (top < this._config.wallH - 0.01) {
+        const headerH = this._config.wallH - top;
+        const header = new THREE.Mesh(
+          new THREE.BoxGeometry(this._config.wallT, headerH, o.width),
+          material
+        );
+        header.position.set(0, top + headerH / 2, zLocal);
+        group.add(header);
+      }
+
+      currentZ = zLocal + halfW;
+    }
+
+    // Final stub after last opening
+    if (len / 2 - currentZ > 0.01) {
+      const stubLen = len / 2 - currentZ;
+      const stub = new THREE.Mesh(
+        new THREE.BoxGeometry(this._config.wallT, this._config.wallH, stubLen),
+        material
+      );
+      stub.position.set(0, this._config.wallH / 2, currentZ + stubLen / 2);
+      group.add(stub);
+    }
+
+    return group;
   }
 }

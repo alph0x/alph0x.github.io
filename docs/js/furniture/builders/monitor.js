@@ -7,7 +7,19 @@ import { makeBox, makeLight } from '../../primitives.js';
 function buildMonitor(cfg) {
   const g = new THREE.Group(); g.position.set(...cfg.position); g.rotation.y = cfg.rotation;
   const frameMat = new THREE.MeshStandardMaterial({ color: 0x1c1c1f, flatShading: true, roughness: 1, metalness: 0 });
-  const screenMat = new THREE.MeshBasicMaterial({ color: COLORS.accent });
+
+  // Screen with code-like texture
+  const c = document.createElement('canvas'); c.width = 128; c.height = 80;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#0a0a14'; ctx.fillRect(0, 0, 128, 80);
+  ctx.fillStyle = '#22d3ee';
+  ctx.font = 'bold 8px monospace';
+  for (let i = 0; i < 8; i++) {
+    ctx.fillText('>' + '01'.repeat(Math.floor(Math.random() * 8) + 2), 4, 10 + i * 10);
+  }
+  const screenTex = new THREE.CanvasTexture(c);
+  const screenMat = new THREE.MeshBasicMaterial({ map: screenTex });
+
   g.add(makeBox(frameMat, [1.2, 0.7, 0.04], [0, 0, 0]));
   g.add(makeBox(screenMat, [1.1, 0.6, 0.02], [0, 0, 0.03]));
   g.add(makeBox(frameMat, [0.08, 0.3, 0.08], [0, -0.5, -0.05]));

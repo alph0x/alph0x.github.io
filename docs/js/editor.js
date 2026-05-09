@@ -88,7 +88,7 @@ function init() {
     setupMainRenderer(container);
     setupScene();
     roomBuilder = new RoomBuilder(roomGroup, scene, { wallH: CONFIG.wallH, wallT: CONFIG.wallT });
-    roomBuilder.rebuild(state.outline, state.mat);
+    roomBuilder.rebuild(state.outline, state.mat, getCurrentOpenings());
     const undoManager = new UndoManager();
     furnitureManager = new FurnitureManager(scene, state, CONFIG.wallH, undoManager);
     outlineEditor = new OutlineEditor(
@@ -105,7 +105,7 @@ function init() {
     createGuideGroup();
 
     interactionManager = new InteractionManager({
-      renderer, camera, state, floorPlane,
+      renderer, camera: () => camera, state, floorPlane,
       furnitureManager, outlineEditor, spawnManager, roomBuilder,
       config: CONFIG,
       snap: (v) => editorSnap(v, CONFIG.snap),
@@ -212,7 +212,7 @@ function setCameraMode(mode) {
     }
   }
   controls.update();
-  roomBuilder.rebuild(state.outline, state.mat);
+  roomBuilder.rebuild(state.outline, state.mat, getCurrentOpenings());
 
   const btn = document.getElementById('btnViewMode');
   if (btn) {
@@ -295,7 +295,7 @@ function bindUI() {
 
   document.getElementById('btnResetRect').addEventListener('click', () => {
     state.outline = [[-2.25, -1.75], [2.25, -1.75], [2.25, 1.75], [-2.25, 1.75]];
-    roomBuilder.rebuild(state.outline, state.mat);
+    roomBuilder.rebuild(state.outline, state.mat, getCurrentOpenings());
     outlineEditor.rebuild();
     updateRoomDimensions();
   });
@@ -350,12 +350,12 @@ function bindColorInputs() {
     picker.addEventListener('input', (e) => {
       state.mat[key] = e.target.value;
       text.value = e.target.value;
-      roomBuilder.rebuild(state.outline, state.mat);
+      roomBuilder.rebuild(state.outline, state.mat, getCurrentOpenings());
     });
     text.addEventListener('change', (e) => {
       state.mat[key] = e.target.value;
       picker.value = e.target.value;
-      roomBuilder.rebuild(state.outline, state.mat);
+      roomBuilder.rebuild(state.outline, state.mat, getCurrentOpenings());
     });
   }
   bindOne('colorFloor', 'colorFloorText', 'floor');
@@ -439,6 +439,20 @@ function buildPaletteUI() {
   }
 }
 
+// ── Openings helper ─────────────────────────────────────────────
+
+function getCurrentOpenings() {
+  return state.placed
+    .filter((p) => p.type === 'door' || p.type === 'window')
+    .map((p) => ({
+      x: p.config.position[0],
+      z: p.config.position[2],
+      width: p.type === 'door' ? 1.6 : 2.0,
+      height: p.type === 'door' ? 2.3 : 1.3,
+      bottom: p.config.position[1],
+    }));
+}
+
 // ── Seed Loading ────────────────────────────────────────────────
 
 function loadSeedIntoEditor(seedStr) {
@@ -459,7 +473,7 @@ function loadSeedIntoEditor(seedStr) {
     furnitureManager.loadFromSeed(layout);
 
     // Rebuild visuals
-    roomBuilder.rebuild(state.outline, state.mat);
+    roomBuilder.rebuild(state.outline, state.mat, getCurrentOpenings());
     spawnManager.rebuild();
     outlineEditor.rebuild();
     buildEditorDecorations();
@@ -536,3 +550,4 @@ function animate() {
 
 // Start
 init();
+window.__furnitureManager = furnitureManager;

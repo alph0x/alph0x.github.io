@@ -11,8 +11,10 @@ function buildDrone(cfg) {
   for (const lx of [-0.12, 0.12]) {
     const arm = makeBox(bodyMat, [0.04, 0.02, 0.12], [lx, 0, 0]);
     g.add(arm);
-    const rotor = makeBox(new THREE.MeshBasicMaterial({ color: 0x1a1a1e }), [0.08, 0.01, 0.01], [lx, 0.04, 0]);
-    g.add(rotor);
+    // Crossed rotor blades
+    const rotorMat = new THREE.MeshBasicMaterial({ color: 0x1a1a1e });
+    g.add(makeBox(rotorMat, [0.12, 0.01, 0.02], [lx, 0.04, 0]));
+    g.add(makeBox(rotorMat, [0.02, 0.01, 0.12], [lx, 0.04, 0]));
   }
   g.add(makeBox(new THREE.MeshBasicMaterial({ color: COLORS.cyan }), [0.02, 0.02, 0.02], [0, 0, 0.06]));
   return { mesh: g };
