@@ -8,7 +8,7 @@ import * as THREE from 'three';
 import { register } from '../registry.js';
 import { buildWindow as makeWindowFrame } from '../../level/window.js';
 import { buildCityscape } from '../../level/cityscape.js';
-import { getInteriorOffset } from './_wall-offset.js';
+import { getInteriorOffset } from './wall-offset.js';
 
 function buildWindow(cfg) {
   const wrapper = new THREE.Group();
