@@ -14,6 +14,12 @@ function hexToInt(hex) {
   return parseInt(hex.replace('#', ''), 16);
 }
 
+/** Compute world-space AABB ensuring ancestor matrices are up to date. */
+function getWorldAABB(object) {
+  object.updateWorldMatrix(true, false);
+  return new THREE.Box3().setFromObject(object);
+}
+
 function buildPolygonRoom(scene, worldState) {
   const outline = ROOM_LAYOUT.outline;
   const wallH = CFG.wallH;
@@ -44,19 +50,33 @@ function buildPolygonRoom(scene, worldState) {
   scene.add(ceiling);
 
   // Collect openings from furniture layout
+  // Window dimensions must match level/window.js (winW=1.8, winH=1.2).
+  // f.position[1] is the frame center, so bottom = center - halfHeight.
   const openings = (ROOM_LAYOUT.furniture || [])
     .filter((f) => f.type === 'door' || f.type === 'window')
-    .map((f) => ({
-      x: f.position[0],
-      z: f.position[2],
-      width: f.type === 'door' ? 1.6 : 2.0,
-      height: f.type === 'door' ? 2.3 : 1.3,
-      bottom: f.position[1],
-    }));
+    .map((f) => {
+      if (f.type === 'door') {
+        return {
+          x: f.position[0],
+          z: f.position[2],
+          width: 1.6,
+          height: 2.3,
+          bottom: f.position[1],
+        };
+      }
+      return {
+        x: f.position[0],
+        z: f.position[2],
+        width: 1.8,
+        height: 1.2,
+        bottom: f.position[1] - 0.6,
+      };
+    });
 
   // Walls along each edge
   const wallMat = new THREE.MeshStandardMaterial({ color: hexToInt(mat.wall), flatShading: true, roughness: 1, metalness: 0 });
   const edges = [];
+  const PLAYER_HEIGHT = 2.0; // stubs above this do not block 2D movement
   for (let i = 0; i < outline.length; i++) {
     const p1 = outline[i];
     const p2 = outline[(i + 1) % outline.length];
@@ -83,7 +103,7 @@ function buildPolygonRoom(scene, worldState) {
       mesh.receiveShadow = true;
       group.add(mesh);
 
-      const box = new THREE.Box3().setFromObject(mesh);
+      const box = getWorldAABB(mesh);
       worldState.room.walls.push({
         minX: box.min.x,
         maxX: box.max.x,
@@ -134,13 +154,15 @@ function buildPolygonRoom(scene, worldState) {
           stub.receiveShadow = true;
           group.add(stub);
 
-          const box = new THREE.Box3().setFromObject(stub);
-          worldState.room.walls.push({
-            minX: box.min.x,
-            maxX: box.max.x,
-            minZ: box.min.z,
-            maxZ: box.max.z,
-          });
+          const box = getWorldAABB(stub);
+          if (y1 < PLAYER_HEIGHT) {
+            worldState.room.walls.push({
+              minX: box.min.x,
+              maxX: box.max.x,
+              minZ: box.min.z,
+              maxZ: box.max.z,
+            });
+          }
         }
       }
     }
@@ -181,7 +203,7 @@ export function buildLevel(scene, worldState) {
     // Collision: extract AABB from placed mesh
     const noCollisionTypes = new Set(['rug', 'ceilingLamp', 'door', 'window']);
     if (!item.noCollision && !noCollisionTypes.has(item.type)) {
-      const box = new THREE.Box3().setFromObject(result.mesh);
+      const box = getWorldAABB(result.mesh);
       const sizeX = box.max.x - box.min.x;
       const sizeZ = box.max.z - box.min.z;
       // Only solid if it has meaningful footprint (exclude thin wall decorations)
