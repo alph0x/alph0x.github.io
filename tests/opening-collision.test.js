@@ -2,7 +2,7 @@
  * @fileoverview Exhaustive tests for wall opening collision geometry.
  *
  * These tests verify that:
- * - Door openings allow player passage (no collision at door center)
+ * - Closed door blocks player passage (collision at door center)
  * - Door side-jambs block movement (collision beside door)
  * - Window openings block passage (collision at window center)
  * - Wall AABBs are in world-space, not local/group space
@@ -38,16 +38,16 @@ describe('buildLevel opening collisions', () => {
     expect(farWalls.length).toBeGreaterThan(0);
   });
 
-  it('allows passage through door opening center', () => {
+  it('blocks passage through door opening center', () => {
     const { worldState } = buildAndCheck();
-    // Door is centered at (0, 0, 1.9) on front wall (z ~ 1.75)
-    expect(checkCollision(0, 1.9, worldState.room.walls)).toBe(false);
+    // Closed door furniture now blocks the opening
+    expect(checkCollision(0, 1.75, worldState.room.walls)).toBe(true);
   });
 
-  it('allows standing slightly inside room in front of door', () => {
+  it('allows standing well inside room away from door', () => {
     const { worldState } = buildAndCheck();
-    // Just inside the room, in front of the door
-    expect(checkCollision(0, 1.5, worldState.room.walls)).toBe(false);
+    // Far enough from the door collision box
+    expect(checkCollision(0, 1.0, worldState.room.walls)).toBe(false);
   });
 
   it('blocks movement into door side-jamb (left)', () => {
@@ -79,13 +79,13 @@ describe('buildLevel opening collisions', () => {
     expect(checkCollision(2.25, 0, worldState.room.walls)).toBe(true);
   });
 
-  it('does not register door furniture as collision', () => {
+  it('registers door furniture as collision', () => {
     const { worldState } = buildAndCheck();
-    // The door mesh itself should not add an extra AABB
+    // The closed door mesh should add an AABB near the front wall
     const doorFurnitureAABB = worldState.room.walls.find(
-      (w) => w.minX < 0.1 && w.maxX > 0.1 && w.minZ < 2.1 && w.maxZ > 2.1
+      (w) => w.minX < 0.5 && w.maxX > -0.5 && w.minZ < 1.85 && w.maxZ > 1.6
     );
-    expect(doorFurnitureAABB).toBeUndefined();
+    expect(doorFurnitureAABB).toBeDefined();
   });
 
   it('does not register window furniture as collision', () => {
