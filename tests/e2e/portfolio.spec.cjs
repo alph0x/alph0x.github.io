@@ -23,7 +23,8 @@ test.describe('Portfolio Desktop', () => {
     });
   });
 
-  test('start screen loads and portfolio renders', async ({ page }) => {
+  test('start screen loads and portfolio renders', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'Desktop-only test');
     await page.goto('/');
 
     const startScreen = page.locator('#start-screen');
@@ -44,9 +45,10 @@ test.describe('Portfolio Desktop', () => {
 });
 
 test.describe('Portfolio Mobile', () => {
-  test('touch controls are visible on mobile', async ({ page }) => {
-    // Set mobile viewport BEFORE navigating so initGame() detects it
-    await page.setViewportSize({ width: 393, height: 851 });
+  test('touch controls are visible on mobile landscape', async ({ page, isMobile }) => {
+    test.skip(!isMobile, 'Mobile-only test');
+    // Set mobile landscape viewport BEFORE navigating so initGame() detects it
+    await page.setViewportSize({ width: 851, height: 393 });
     await page.goto('/');
 
     page.errors = [];
