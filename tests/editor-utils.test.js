@@ -17,6 +17,7 @@ import {
   getClosestEdgePoint,
   fitMeshToPreview,
   normalizeRotation,
+  getEdgeOpenings,
 } from '../docs/js/editor-utils.js';
 
 // ── snap ────────────────────────────────────────────────────────
@@ -202,5 +203,56 @@ describe('fitMeshToPreview', () => {
   it('does not crash on zero-size mesh', () => {
     const mesh = new THREE.Mesh(new THREE.BoxGeometry(0, 0, 0));
     expect(() => fitMeshToPreview(mesh, 1)).not.toThrow();
+  });
+});
+
+// ── getEdgeOpenings ─────────────────────────────────────────────
+
+describe('getEdgeOpenings', () => {
+  const wallT = 0.2;
+
+  it('returns empty array when no openings provided', () => {
+    const p1 = [0, 0];
+    const p2 = [4, 0];
+    expect(getEdgeOpenings([], p1, p2, wallT)).toEqual([]);
+  });
+
+  it('maps a door centered on the edge', () => {
+    const p1 = [0, 0];
+    const p2 = [4, 0];
+    const openings = [{ x: 2, z: 0, width: 1.6, height: 2.3, bottom: 0 }];
+    const result = getEdgeOpenings(openings, p1, p2, wallT);
+    expect(result.length).toBe(1);
+    expect(result[0].t).toBeCloseTo(2, 1);
+    expect(result[0].width).toBe(1.6);
+  });
+
+  it('excludes opening that is too far from the edge', () => {
+    const p1 = [0, 0];
+    const p2 = [4, 0];
+    const openings = [{ x: 2, z: 2, width: 1.6, height: 2.3, bottom: 0 }];
+    expect(getEdgeOpenings(openings, p1, p2, wallT)).toEqual([]);
+  });
+
+  it('sorts multiple openings by distance along edge', () => {
+    const p1 = [0, 0];
+    const p2 = [10, 0];
+    const openings = [
+      { x: 8, z: 0, width: 1.6, height: 2.3, bottom: 0 },
+      { x: 2, z: 0, width: 2.0, height: 1.3, bottom: 1.5 },
+    ];
+    const result = getEdgeOpenings(openings, p1, p2, wallT);
+    expect(result.length).toBe(2);
+    expect(result[0].t).toBeCloseTo(2, 1);
+    expect(result[1].t).toBeCloseTo(8, 1);
+  });
+
+  it('clips t to edge bounds when opening is slightly beyond', () => {
+    const p1 = [0, 0];
+    const p2 = [4, 0];
+    const openings = [{ x: -0.1, z: 0, width: 1.6, height: 2.3, bottom: 0 }];
+    const result = getEdgeOpenings(openings, p1, p2, wallT);
+    expect(result.length).toBe(1);
+    expect(result[0].t).toBe(0);
   });
 });

@@ -3,7 +3,7 @@ import { register } from '../registry.js';
 import { makeStd } from '../../assets/index.js';
 import { makeBox } from '../../primitives.js';
 
-function buildMiniSchnauzer(cfg) {
+export function buildMiniSchnauzer(cfg) {
   const g = new THREE.Group();
   g.position.set(...cfg.position);
   g.rotation.y = cfg.rotation || 0;
@@ -97,10 +97,11 @@ function buildMiniSchnauzer(cfg) {
   // Collar tag
   g.add(makeBox(makeStd({ color: 0xf59e0b }), [0.02, 0.015, 0.015], [0.1, 0.14, 0.06]));
 
-  // Warm accent light
+  // Warm accent light — child of body so it rides the breathing animation
   const light = new THREE.PointLight(0xffaa55, 0.4, 2, 1);
-  light.position.set(0, 0.15, 0);
-  g.add(light);
+  light.name = 'backLight';
+  light.position.set(0, 0.09, 0);
+  body.add(light);
 
   return { mesh: g };
 }

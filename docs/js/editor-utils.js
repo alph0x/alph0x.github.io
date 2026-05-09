@@ -71,6 +71,35 @@ export function normalizeRotation(rad) {
   return ((rad % twoPi) + twoPi) % twoPi;
 }
 
+/**
+ * Map architectural openings (doors/windows) to a specific wall edge.
+ * @param {Array<{x:number,z:number,width:number,height:number,bottom:number}>} openings
+ * @param {Array<number>} p1 — edge start [x, z]
+ * @param {Array<number>} p2 — edge end [x, z]
+ * @param {number} wallT — wall thickness
+ * @returns {Array<{t:number,width:number,height:number,bottom:number}>} openings projected onto the edge, sorted by distance from p1.
+ */
+export function getEdgeOpenings(openings, p1, p2, wallT) {
+  const dx = p2[0] - p1[0];
+  const dz = p2[1] - p1[1];
+  const len = Math.sqrt(dx * dx + dz * dz);
+  if (len < 0.01) return [];
+
+  const result = [];
+  for (const o of openings) {
+    const px = o.x - p1[0];
+    const pz = o.z - p1[1];
+    const t = (px * dx + pz * dz) / len;
+    const cross = px * dz - pz * dx;
+    const perpDist = Math.abs(cross) / len;
+
+    if (perpDist <= wallT / 2 + 0.15 && t >= -0.2 && t <= len + 0.2) {
+      result.push({ ...o, t: Math.max(0, Math.min(len, t)) });
+    }
+  }
+  return result.sort((a, b) => a.t - b.t);
+}
+
 // ── Polygon validation ──────────────────────────────────────────
 
 function orientation(p, q, r) {

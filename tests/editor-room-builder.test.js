@@ -131,4 +131,44 @@ describe('RoomBuilder', () => {
     const walls = roomGroup.children.filter((c) => c.geometry instanceof THREE.BoxGeometry);
     expect(walls.length).toBe(3); // one edge skipped
   });
+
+  it('splits a wall into stubs and header when an opening is provided', () => {
+    const outline = [
+      [-2, -1],
+      [2, -1],
+      [2, 1],
+      [-2, 1],
+    ];
+    const openings = [
+      { x: 0, z: -1, width: 1.6, height: 2.3, bottom: 0 }, // door on front wall
+    ];
+    builder.rebuild(outline, { floor: '#1c1917', wall: '#44403c', ceiling: '#1c1917' }, openings);
+
+    // The front wall (edge from [-2,-1] to [2,-1]) should become a Group with multiple BoxGeometry children
+    const groups = roomGroup.children.filter((c) => c.type === 'Group');
+    expect(groups.length).toBeGreaterThanOrEqual(1);
+
+    const frontWallGroup = groups.find((g) => {
+      const children = g.children.filter((c) => c.geometry instanceof THREE.BoxGeometry);
+      return children.length >= 2; // at least left stub + right stub
+    });
+    expect(frontWallGroup).toBeDefined();
+
+    const boxes = frontWallGroup.children.filter((c) => c.geometry instanceof THREE.BoxGeometry);
+    // Should have left stub, right stub, and possibly header
+    expect(boxes.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('keeps walls solid when no openings are provided', () => {
+    const outline = [
+      [-2, -1],
+      [2, -1],
+      [2, 1],
+      [-2, 1],
+    ];
+    builder.rebuild(outline, { floor: '#1c1917', wall: '#44403c', ceiling: '#1c1917' }, []);
+
+    const walls = roomGroup.children.filter((c) => c.geometry instanceof THREE.BoxGeometry);
+    expect(walls.length).toBe(4);
+  });
 });

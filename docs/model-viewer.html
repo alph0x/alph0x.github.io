@@ -245,6 +245,10 @@
     }
     animate();
 
+    // Expose for Playwright tests
+    window.__scene = scene;
+    Object.defineProperty(window, '__currentMesh', { get: () => currentMesh });
+
     window.addEventListener('resize', () => {
       const w = viewer.clientWidth;
       const h = viewer.clientHeight;

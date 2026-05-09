@@ -11,6 +11,15 @@ function buildFairyLights(cfg) {
   const group = new THREE.Group();
   const colors = [COLORS.magenta, COLORS.cyan, COLORS.accent, COLORS.green];
   const pos = cfg.position;
+
+  // Wire connecting the bulbs
+  const wireGeo = new THREE.BufferGeometry().setFromPoints(
+    Array.from({ length: 10 }, (_, i) =>
+      new THREE.Vector3(pos[0] - 0.8 + i * 0.18, pos[1], pos[2] + 0.05)
+    )
+  );
+  group.add(new THREE.Line(wireGeo, new THREE.LineBasicMaterial({ color: 0x1a1a1e })));
+
   for (let i = 0; i < 10; i++) {
     const color = colors[i % colors.length];
     const bulb = new THREE.Mesh(

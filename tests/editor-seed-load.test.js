@@ -58,6 +58,6 @@ describe('Editor seed load integration', () => {
     const placedList = document.getElementById('placedList');
     expect(placedList.innerHTML).not.toContain('None');
     expect(placedList.innerHTML).toContain('bed');
-    expect(placedList.innerHTML).toContain('tv');
+    expect(placedList.innerHTML).toContain('nightstand');
   });
 });
