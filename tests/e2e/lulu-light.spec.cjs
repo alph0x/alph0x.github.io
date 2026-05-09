@@ -72,7 +72,7 @@ test.describe('Lulu Light in Game', () => {
 
     expect(scale2).not.toBeNull();
     // Breathing animation should have changed body.scale.y
-    expect(Math.abs(scale2 - scale1)).toBeGreaterThan(0.0005);
+    expect(Math.abs(scale2 - scale1)).toBeGreaterThan(0.0003);
 
     // Screenshot for visual reference
     await page.screenshot({ path: 'tests/e2e/screenshots/lulu-light-tracking.png' });

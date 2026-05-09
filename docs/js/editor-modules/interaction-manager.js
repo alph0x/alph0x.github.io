@@ -67,11 +67,20 @@ export class InteractionManager {
 
     if (this._state.activeTool === 'outline') {
       this._outlineEditor.onPointerDown(e, this._intersectFloor.bind(this));
+      if (this._state.isDragging && e.target && e.target.setPointerCapture) {
+        e.target.setPointerCapture(e.pointerId);
+      }
       return;
     }
 
-    if (this._tryStartSpawnDrag(e)) return;
-    if (this._tryStartFurnitureDrag(e)) return;
+    if (this._tryStartSpawnDrag(e)) {
+      if (e.target && e.target.setPointerCapture) e.target.setPointerCapture(e.pointerId);
+      return;
+    }
+    if (this._tryStartFurnitureDrag(e)) {
+      if (e.target && e.target.setPointerCapture) e.target.setPointerCapture(e.pointerId);
+      return;
+    }
 
     const pt = this._intersectFloor(e);
     if (pt) this._handleFloorClick(pt);
@@ -98,7 +107,12 @@ export class InteractionManager {
     this._onDragMove(pt);
   }
 
-  onPointerUp() {
+  onPointerUp(e) {
+    if (e && e.target && e.target.releasePointerCapture && e.pointerId !== undefined) {
+      try {
+        e.target.releasePointerCapture(e.pointerId);
+      } catch (_) {}
+    }
     if (this._state.dragTarget === 'furniture' && this._state.dragStartPos && this._state.selectedId !== null) {
       this._furnitureManager.endMove(this._state.selectedId, this._state.dragStartPos);
     }
