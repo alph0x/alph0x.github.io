@@ -6,7 +6,7 @@
 import * as THREE from 'three';
 import { register } from '../registry.js';
 import { buildClosedDoor } from '../../level/room.js';
-import { getInteriorOffset } from './_wall-offset.js';
+import { getInteriorOffset } from './wall-offset.js';
 
 function buildDoor(cfg) {
   const wrapper = new THREE.Group();
