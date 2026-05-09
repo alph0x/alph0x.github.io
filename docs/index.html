@@ -181,7 +181,7 @@
 
     /* ── MOBILE RESUME (static fallback) ─────────────── */
     #mobile-resume { display: none; }
-    @media (max-width: 768px), (hover: none) and (pointer: coarse) {
+    @media (max-width: 768px) and (orientation: portrait), (hover: none) and (pointer: coarse) and (orientation: portrait) {
       #game-container, #loading, #start-screen, #hud, #crosshair, #prompt, .info-panel { display: none !important; }
       #mobile-resume { display: block !important; background: #0c0a09; color: #e7e5e4; font-family: 'Share Tech Mono', monospace; padding: 20px; }
       #mobile-resume .m-header { text-align: center; margin-bottom: 30px; }
@@ -219,7 +219,7 @@
 
     /* ── TOUCH CONTROLS (mobile only) ────────────────── */
     #touch-controls { display: none; }
-    @media (max-width: 768px), (hover: none) and (pointer: coarse) {
+    @media (hover: none) and (pointer: coarse) and (orientation: landscape) {
       #touch-controls {
         display: block;
         position: fixed;
@@ -709,6 +709,7 @@
       const errDiv = document.getElementById('error-display');
       function showErr(msg) { errDiv.style.display = 'block'; errDiv.textContent += msg + '\n'; }
       if (window.location.protocol === 'file:') {
+        document.getElementById('loading').style.display = 'none';
         showErr('FATAL: Cannot open via file://. You must use a local server.\nRun: python3 -m http.server 8765 --directory docs\nThen open: http://localhost:8765');
       }
       window.addEventListener('error', function(e) { showErr('ERROR: ' + e.message + ' at ' + (e.filename || '') + ':' + (e.lineno || '')); });

@@ -15,39 +15,50 @@ import { TouchControls } from './systems/touch-controls.js';
 export function initGame() {
   const isMobile = window.matchMedia('(max-width: 768px)').matches || ('ontouchstart' in window && navigator.maxTouchPoints > 0);
 
-  const { scene, camera, renderer } = createRenderer();
+  try {
+    const { scene, camera, renderer } = createRenderer();
 
-  // Spawn camera at playerSpawn from seed (fallback to center)
-  const spawn = ROOM_LAYOUT.playerSpawn || [0, 0];
-  camera.position.set(spawn[0], CFG.playerHeight, spawn[1]);
+    // Spawn camera at playerSpawn from seed (fallback to center)
+    const spawn = ROOM_LAYOUT.playerSpawn || [0, 0];
+    camera.position.set(spawn[0], CFG.playerHeight, spawn[1]);
 
-  const worldState = createWorldState({ playerSpawn: spawn, playerHeight: CFG.playerHeight });
+    const worldState = createWorldState({ playerSpawn: spawn, playerHeight: CFG.playerHeight });
 
-  let controls;
-  let touchControls = null;
+    let controls;
+    let touchControls = null;
 
-  if (isMobile) {
-    // Dummy controls — no pointer lock on touch devices
-    controls = { isLocked: false, lock: () => {}, unlock: () => {}, addEventListener: () => {}, removeEventListener: () => {} };
-  } else {
-    controls = new PointerLockControls(camera, document.body);
-  }
+    if (isMobile) {
+      // Dummy controls — no pointer lock on touch devices
+      controls = { isLocked: false, lock: () => {}, unlock: () => {}, addEventListener: () => {}, removeEventListener: () => {} };
+    } else {
+      controls = new PointerLockControls(camera, document.body);
+    }
 
-  const game = new Game({ renderer, scene, camera, controls, worldState, touchControls });
-  game.init();
+    const game = new Game({ renderer, scene, camera, controls, worldState, touchControls });
+    game.init();
 
-  if (isMobile) {
-    touchControls = new TouchControls({ camera, worldState, onInteract: () => game.interact() });
-    touchControls.init();
-    game.touchControls = touchControls;
+    if (isMobile) {
+      touchControls = new TouchControls({ camera, worldState, onInteract: () => game.interact() });
+      touchControls.init();
+      game.touchControls = touchControls;
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('start-screen').style.display = 'none';
+    }
+
+    game.start();
+    window.closePanels = () => game.closePanels();
+    window.__game = game;
+    window.__scene = scene;
+    window.__camera = camera;
+    return game;
+  } catch (err) {
     document.getElementById('loading').style.display = 'none';
-    document.getElementById('start-screen').style.display = 'none';
+    const errDiv = document.getElementById('error-display');
+    if (errDiv) {
+      errDiv.style.display = 'block';
+      errDiv.textContent += 'BOOT ERROR: ' + err.message + '\n' + (err.stack || '') + '\n';
+    }
+    console.error(err);
+    throw err;
   }
-
-  game.start();
-  window.closePanels = () => game.closePanels();
-  window.__game = game;
-  window.__scene = scene;
-  window.__camera = camera;
-  return game;
 }

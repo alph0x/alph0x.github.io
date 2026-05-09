@@ -22,6 +22,15 @@ export class LoadingSystem {
       }
     }, 100);
 
+    // Safety timeout: if something silently fails, don't hang forever
+    setTimeout(() => {
+      if (document.getElementById('loading').style.display !== 'none') {
+        clearInterval(loadInt);
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('start-screen').style.display = 'flex';
+      }
+    }, 8000);
+
     document.getElementById('start-btn').addEventListener('click', () => {
       document.getElementById('start-screen').style.display = 'none';
       if (typeof this.controls.lock === 'function') {
