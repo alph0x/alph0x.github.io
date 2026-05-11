@@ -33,7 +33,7 @@ export class FurnitureManager {
 
   // ── Placement ───────────────────────────────────────────────────
 
-  placeConfig(cfg, skipSelect = false, skipUndo = false) {
+  placeConfig(cfg, skipSelect = false, skipUndo = false, forcedId = null) {
     const entry = FurnitureRegistry.get(cfg.type);
     const builder = entry?.builder;
     if (!builder) return;
@@ -44,7 +44,9 @@ export class FurnitureManager {
 
     mesh.position.set(...cfg.position);
     mesh.rotation.y = cfg.rotation || 0;
-    this._attachOutline(mesh, this._nextId, cfg.type);
+
+    const id = forcedId ?? this._nextId;
+    this._attachOutline(mesh, id, cfg.type);
 
     // Cache bounding-box volume for smarter raycast selection
     const bb = new THREE.Box3().setFromObject(mesh);
@@ -53,18 +55,20 @@ export class FurnitureManager {
     mesh.userData._hitSize = bbSize.x * bbSize.y * bbSize.z;
 
     this._scene.add(mesh);
-    this._placedMeshes.set(this._nextId, mesh);
-    this._state.addPlaced({ id: this._nextId, type: cfg.type, name: cfg.name || '', mesh, config: { ...cfg } });
+    this._placedMeshes.set(id, mesh);
+    this._state.addPlaced({ id, type: cfg.type, name: cfg.name || '', mesh, config: { ...cfg } });
 
     if (!skipUndo) {
-      this._undoManager.record({ type: 'place', id: this._nextId, config: { ...cfg } });
+      this._undoManager.record({ type: 'place', id, config: { ...cfg } });
     }
 
     if (!skipSelect) {
-      this.select(this._nextId);
+      this.select(id);
       this._updatePlacedList();
     }
-    this._nextId++;
+    if (forcedId == null) {
+      this._nextId++;
+    }
   }
 
   place(type, x, y, z, rotation = 0, skipSelect = false) {
@@ -366,7 +370,7 @@ export class FurnitureManager {
   _applyForward(action) {
     switch (action.type) {
       case 'place': {
-        this.placeConfig(action.config, false, true);
+        this.placeConfig(action.config, false, true, action.id);
         break;
       }
       case 'move': {

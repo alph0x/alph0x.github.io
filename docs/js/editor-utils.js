@@ -133,6 +133,69 @@ function segmentsIntersect(p1, p2, p3, p4) {
   return false;
 }
 
+/**
+ * Extract architectural openings (doors/windows) from placed furniture list.
+ * Pure function — no side effects.
+ */
+export function getCurrentOpenings(placed) {
+  return placed
+    .filter((p) => p.type === 'door' || p.type === 'window')
+    .map((p) => ({
+      x: p.config.position[0],
+      z: p.config.position[2],
+      width: p.type === 'door' ? 1.6 : 2.0,
+      height: p.type === 'door' ? 2.3 : 1.3,
+      bottom: p.config.position[1],
+    }));
+}
+
+/**
+ * Count how many edges of an outline are axis-parallel (horizontal or vertical).
+ * Pure function — no side effects.
+ */
+export function countAxisParallel(outline, epsilon = 0.01) {
+  let count = 0;
+  for (let i = 0; i < outline.length; i++) {
+    const p1 = outline[i];
+    const p2 = outline[(i + 1) % outline.length];
+    if (Math.abs(p1[0] - p2[0]) < epsilon || Math.abs(p1[1] - p2[1]) < epsilon) {
+      count++;
+    }
+  }
+  return count;
+}
+
+/**
+ * Calculate room width, depth, and edge count from an outline.
+ * Pure function — no side effects.
+ */
+export function calculateRoomDimensions(outline) {
+  const xs = outline.map((v) => v[0]);
+  const zs = outline.map((v) => v[1]);
+  const width = Math.max(...xs) - Math.min(...xs);
+  const depth = Math.max(...zs) - Math.min(...zs);
+  return {
+    width,
+    depth,
+    totalEdges: outline.length,
+  };
+}
+
+/**
+ * Format export string from a serialized seed.
+ * Pure function — no side effects.
+ */
+export function formatExportOutput(seed) {
+  return [
+    `// ── Seed (copy this into core.js as DEFAULT_SEED) ─────────────`,
+    `export const DEFAULT_SEED = '${seed}';`,
+    ``,
+    `// ── Or load dynamically ────────────────────────────────────────`,
+    `import { deserializeSeed } from './seed.js';`,
+    `export const ROOM_LAYOUT = deserializeSeed(DEFAULT_SEED);`,
+  ].join('\n');
+}
+
 export function isSelfIntersecting(outline) {
   const n = outline.length;
   if (n < 4) return false;

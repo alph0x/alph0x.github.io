@@ -30,6 +30,7 @@ describe('InteractionManager', () => {
       onPointerDown: vi.fn(),
       onPointerMove: vi.fn(),
       onDeleteKey: vi.fn(),
+      onDragEnd: vi.fn(),
     };
 
     mockSpawnManager = {
@@ -185,5 +186,225 @@ describe('InteractionManager', () => {
     state.selectedId = 1;
     im2.onPointerUp();
     expect(onDragEnd).toHaveBeenCalled();
+  });
+
+  it('disables controls when starting an outline edge drag', () => {
+    const mockControls = { enabled: true };
+    mockOutlineEditor.onPointerDown = vi.fn(() => {
+      state.isDragging = true;
+      state.dragTarget = 'edge';
+      return true;
+    });
+    const im2 = new InteractionManager({
+      renderer: im._renderer,
+      camera: im._camera,
+      state,
+      floorPlane: im._floorPlane,
+      furnitureManager: mockFurnitureManager,
+      outlineEditor: mockOutlineEditor,
+      spawnManager: mockSpawnManager,
+      roomBuilder: {},
+      config: { wallH: 2.8 },
+      snap: (v) => v,
+      controls: mockControls,
+    });
+    state.activeTool = 'outline';
+    const e = new PointerEvent('pointerdown', { button: 0, clientX: 400, clientY: 300 });
+    im2.onPointerDown(e);
+    expect(mockControls.enabled).toBe(false);
+  });
+
+  it('disables controls when starting a furniture drag', () => {
+    const mockControls = { enabled: true };
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial());
+    mesh.userData._editorId = 42;
+    mesh.userData._hitSize = 1;
+    mockFurnitureManager.meshMap.set(42, mesh);
+    mockFurnitureManager.hitTest = vi.fn(() => mesh);
+    const im2 = new InteractionManager({
+      renderer: im._renderer,
+      camera: im._camera,
+      state,
+      floorPlane: im._floorPlane,
+      furnitureManager: mockFurnitureManager,
+      outlineEditor: mockOutlineEditor,
+      spawnManager: mockSpawnManager,
+      roomBuilder: {},
+      config: { wallH: 2.8 },
+      snap: (v) => v,
+      controls: mockControls,
+    });
+    const e = new PointerEvent('pointerdown', { button: 0, clientX: 400, clientY: 300 });
+    im2.onPointerDown(e);
+    expect(mockControls.enabled).toBe(false);
+  });
+
+  it('re-enables controls on pointerup after drag', () => {
+    const mockControls = { enabled: false };
+    const im2 = new InteractionManager({
+      renderer: im._renderer,
+      camera: im._camera,
+      state,
+      floorPlane: im._floorPlane,
+      furnitureManager: mockFurnitureManager,
+      outlineEditor: mockOutlineEditor,
+      spawnManager: mockSpawnManager,
+      roomBuilder: {},
+      config: { wallH: 2.8 },
+      snap: (v) => v,
+      controls: mockControls,
+    });
+    state.isDragging = true;
+    state.dragTarget = 'furniture';
+    state.dragStartPos = new THREE.Vector3(1, 0, 2);
+    state.selectedId = 1;
+    im2.onPointerUp();
+    expect(mockControls.enabled).toBe(true);
+  });
+
+  it('re-enables controls on pointercancel after drag', () => {
+    const mockControls = { enabled: false };
+    const im2 = new InteractionManager({
+      renderer: im._renderer,
+      camera: im._camera,
+      state,
+      floorPlane: im._floorPlane,
+      furnitureManager: mockFurnitureManager,
+      outlineEditor: mockOutlineEditor,
+      spawnManager: mockSpawnManager,
+      roomBuilder: {},
+      config: { wallH: 2.8 },
+      snap: (v) => v,
+      controls: mockControls,
+    });
+    state.isDragging = true;
+    state.dragTarget = 'furniture';
+    state.dragStartPos = new THREE.Vector3(1, 0, 2);
+    state.selectedId = 1;
+    im2.onPointerCancel();
+    expect(mockControls.enabled).toBe(true);
+    expect(state.isDragging).toBe(false);
+  });
+
+  it('does not start a new drag if already dragging', () => {
+    mockOutlineEditor.onPointerDown = vi.fn(() => {
+      state.isDragging = true;
+      state.dragTarget = 'edge';
+      return true;
+    });
+    state.isDragging = true;
+    state.dragTarget = 'furniture';
+    state.activeTool = 'outline';
+    const e = new PointerEvent('pointerdown', { button: 0, clientX: 400, clientY: 300 });
+    im.onPointerDown(e);
+    expect(mockOutlineEditor.onPointerDown).not.toHaveBeenCalled();
+    expect(state.dragTarget).toBe('furniture');
+  });
+
+  it('falls through to furniture when outlineEditor does not handle the event', () => {
+    const mockControls = { enabled: true };
+    mockOutlineEditor.onPointerDown = vi.fn(() => false);
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial());
+    mesh.userData._editorId = 99;
+    mesh.userData._hitSize = 1;
+    mockFurnitureManager.meshMap.set(99, mesh);
+    mockFurnitureManager.hitTest = vi.fn(() => mesh);
+    const im2 = new InteractionManager({
+      renderer: im._renderer,
+      camera: im._camera,
+      state,
+      floorPlane: im._floorPlane,
+      furnitureManager: mockFurnitureManager,
+      outlineEditor: mockOutlineEditor,
+      spawnManager: mockSpawnManager,
+      roomBuilder: {},
+      config: { wallH: 2.8 },
+      snap: (v) => v,
+      controls: mockControls,
+    });
+    state.activeTool = 'outline';
+    const e = new PointerEvent('pointerdown', { button: 0, clientX: 400, clientY: 300 });
+    im2.onPointerDown(e);
+    expect(mockFurnitureManager.select).toHaveBeenCalledWith(99);
+    expect(mockControls.enabled).toBe(false);
+  });
+
+  it('does not disable controls when outlineEditor handles but does not start a drag', () => {
+    const mockControls = { enabled: true };
+    mockOutlineEditor.onPointerDown = vi.fn(() => true); // handled, but no drag started
+    const im2 = new InteractionManager({
+      renderer: im._renderer,
+      camera: im._camera,
+      state,
+      floorPlane: im._floorPlane,
+      furnitureManager: mockFurnitureManager,
+      outlineEditor: mockOutlineEditor,
+      spawnManager: mockSpawnManager,
+      roomBuilder: {},
+      config: { wallH: 2.8 },
+      snap: (v) => v,
+      controls: mockControls,
+    });
+    state.activeTool = 'outline';
+    const e = new PointerEvent('pointerdown', { button: 0, clientX: 400, clientY: 300 });
+    im2.onPointerDown(e);
+    expect(mockControls.enabled).toBe(true);
+  });
+
+  it('clears edge drag state on pointercancel', () => {
+    const mockControls = { enabled: false };
+    state.isDragging = true;
+    state.dragTarget = 'edge';
+    state.dragEdgeIndex = 1;
+    state.dragEdgeVerts = [[0, 0], [2, 0]];
+    const im2 = new InteractionManager({
+      renderer: im._renderer,
+      camera: im._camera,
+      state,
+      floorPlane: im._floorPlane,
+      furnitureManager: mockFurnitureManager,
+      outlineEditor: mockOutlineEditor,
+      spawnManager: mockSpawnManager,
+      roomBuilder: {},
+      config: { wallH: 2.8 },
+      snap: (v) => v,
+      controls: mockControls,
+    });
+    im2.onPointerCancel();
+    expect(state.isDragging).toBe(false);
+    expect(state.dragTarget).toBeNull();
+    expect(state.dragEdgeIndex).toBeNull();
+    expect(state.dragEdgeVerts).toBeNull();
+    expect(mockControls.enabled).toBe(true);
+  });
+
+  it('does not crash when controls is null', () => {
+    const im2 = new InteractionManager({
+      renderer: im._renderer,
+      camera: im._camera,
+      state,
+      floorPlane: im._floorPlane,
+      furnitureManager: mockFurnitureManager,
+      outlineEditor: mockOutlineEditor,
+      spawnManager: mockSpawnManager,
+      roomBuilder: {},
+      config: { wallH: 2.8 },
+      snap: (v) => v,
+      controls: null,
+    });
+    state.isDragging = true;
+    state.dragTarget = 'furniture';
+    state.dragStartPos = new THREE.Vector3(1, 0, 2);
+    state.selectedId = 1;
+    expect(() => im2.onPointerUp()).not.toThrow();
+    expect(() => im2.onPointerCancel()).not.toThrow();
+  });
+
+  it('ignores pointerdown with non-left button even when already dragging', () => {
+    state.isDragging = true;
+    state.dragTarget = 'furniture';
+    const e = new PointerEvent('pointerdown', { button: 2, clientX: 400, clientY: 300 });
+    im.onPointerDown(e);
+    expect(state.dragTarget).toBe('furniture');
   });
 });

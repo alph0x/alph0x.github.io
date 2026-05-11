@@ -62,8 +62,10 @@ export class OutlineEditor {
     const pt = intersectFloorFn(e);
     if (pt) {
       const edge = this._getClosestEdgePoint(pt, this._state.outline);
-      if (edge) this._addVertex(edge.index, [this._snap(edge.point[0]), this._snap(edge.point[1])]);
-      return true;
+      if (edge) {
+        this._addVertex(edge.index, [this._snap(edge.point[0]), this._snap(edge.point[1])]);
+        return true;
+      }
     }
     return false;
   }
@@ -231,6 +233,50 @@ export class OutlineEditor {
     if (verts[index]) verts[index].material.color.setHex(this._config.colors.vertexSelected);
   }
 
+  /** Update visual handle positions in-place without full rebuild. */
+  _updateVisualHandles() {
+    const outline = this._state.outline;
+
+    // Update line segments
+    const lines = this._group.children.find((c) => c instanceof THREE.LineSegments);
+    if (lines && lines.geometry.attributes.position) {
+      const positions = lines.geometry.attributes.position.array;
+      for (let i = 0; i < outline.length; i++) {
+        const p1 = outline[i];
+        const p2 = outline[(i + 1) % outline.length];
+        positions[i * 6] = p1[0];
+        positions[i * 6 + 1] = 0.02;
+        positions[i * 6 + 2] = p1[1];
+        positions[i * 6 + 3] = p2[0];
+        positions[i * 6 + 4] = 0.02;
+        positions[i * 6 + 5] = p2[1];
+      }
+      lines.geometry.attributes.position.needsUpdate = true;
+    }
+
+    // Update edge handles
+    const edges = this._group.children.filter((c) => c.userData.isEdge);
+    for (const edge of edges) {
+      const idx = edge.userData.index;
+      const p1 = outline[idx];
+      const p2 = outline[(idx + 1) % outline.length];
+      edge.position.set((p1[0] + p2[0]) / 2, 0.05, (p1[1] + p2[1]) / 2);
+    }
+
+    // Update vertex handles
+    const verts = this._group.children.filter((c) => c.userData.isVertex);
+    for (const vert of verts) {
+      const idx = vert.userData.index;
+      vert.position.set(outline[idx][0], 0.05, outline[idx][1]);
+    }
+  }
+
+  /** Rebuild room geometry and handles. Call on drag end. */
+  onDragEnd() {
+    this._roomBuilder.rebuild(this._state.outline, this._state.mat);
+    this.rebuild();
+  }
+
   _moveDragEdge(pt) {
     if (this._state.dragEdgeIndex === null || !this._state.dragEdgeVerts) return;
     const i = this._state.dragEdgeIndex;
@@ -251,18 +297,23 @@ export class OutlineEditor {
     }
 
     const newOutline = [...this._state.outline];
-    newOutline[i] = [this._snap(this._state.dragEdgeVerts[0][0] + dx), this._snap(this._state.dragEdgeVerts[0][1] + dz)];
-    newOutline[j] = [this._snap(this._state.dragEdgeVerts[1][0] + dx), this._snap(this._state.dragEdgeVerts[1][1] + dz)];
+    newOutline[i] = [this._snap(v0[0] + dx), this._snap(v0[1] + dz)];
+    newOutline[j] = [this._snap(v1[0] + dx), this._snap(v1[1] + dz)];
     if (this._isSelfIntersecting(newOutline)) return;
     this._state.outline = newOutline;
-    this._roomBuilder.rebuild(this._state.outline, this._state.mat);
-    this.rebuild();
+    this._updateVisualHandles();
     this._highlightEdge(i);
   }
 
   _moveDragVertex(pt) {
     if (this._state.dragVertexIndex === null) return;
-    this._updateVertex(this._state.dragVertexIndex, this._snap(pt.x), this._snap(pt.z));
+    const idx = this._state.dragVertexIndex;
+    const newOutline = [...this._state.outline];
+    newOutline[idx] = [this._snap(pt.x), this._snap(pt.z)];
+    if (this._isSelfIntersecting(newOutline)) return;
+    this._state.outline = newOutline;
+    this._updateVisualHandles();
+    this._highlightVertex(idx);
   }
 
   _intersectFloor(e) {
