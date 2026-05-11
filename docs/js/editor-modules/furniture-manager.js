@@ -6,7 +6,7 @@
 
 import * as THREE from 'three';
 import { FurnitureRegistry } from '../furniture/registry.js';
-import { extractMeshFromResult, normalizeRotation } from '../editor-utils.js';
+import { extractMeshFromResult, normalizeRotation, calculateMeshOpeningDims } from '../editor-utils.js';
 
 export class FurnitureManager {
   /**
@@ -56,7 +56,16 @@ export class FurnitureManager {
 
     this._scene.add(mesh);
     this._placedMeshes.set(id, mesh);
-    this._state.addPlaced({ id, type: cfg.type, name: cfg.name || '', mesh, config: { ...cfg } });
+
+    // Cache opening dimensions so wall rebuilds use the real mesh size
+    const openingDims = calculateMeshOpeningDims(mesh);
+    this._state.addPlaced({
+      id,
+      type: cfg.type,
+      name: cfg.name || '',
+      mesh,
+      config: { ...cfg, _openingDims: openingDims },
+    });
 
     if (!skipUndo) {
       this._undoManager.record({ type: 'place', id, config: { ...cfg } });
