@@ -137,16 +137,57 @@ function segmentsIntersect(p1, p2, p3, p4) {
  * Extract architectural openings (doors/windows) from placed furniture list.
  * Pure function — no side effects.
  */
+/**
+ * Calculate the structural bounding box of a furniture mesh for wall-opening purposes.
+ * Excludes decorative/parallax children (e.g. cityscape backdrops).
+ * Operates on a zeroed clone so rotation/position of the wrapper don't distort sizes.
+ */
+export function calculateMeshOpeningDims(mesh) {
+  const clone = mesh.clone();
+  clone.position.set(0, 0, 0);
+  clone.rotation.set(0, 0, 0);
+  clone.scale.set(1, 1, 1);
+
+  const box = new THREE.Box3();
+  clone.traverse((child) => {
+    if (child.userData?._parallax) return;
+    if (child.isMesh && child.geometry) {
+      box.expandByObject(child);
+    }
+  });
+
+  const size = new THREE.Vector3();
+  box.getSize(size);
+
+  return {
+    width: size.x,
+    height: size.y,
+    bottomOffset: box.min.y,
+  };
+}
+
+/**
+ * Extract architectural openings (doors/windows) from placed furniture list.
+ * Dimensions are read from the cached _openingDims config when available;
+ * otherwise computed dynamically from the mesh bounding box.
+ * Pure function — no side effects.
+ */
 export function getCurrentOpenings(placed) {
   return placed
     .filter((p) => p.type === 'door' || p.type === 'window')
-    .map((p) => ({
-      x: p.config.position[0],
-      z: p.config.position[2],
-      width: p.type === 'door' ? 1.6 : 2.0,
-      height: p.type === 'door' ? 2.3 : 1.3,
-      bottom: p.config.position[1],
-    }));
+    .map((p) => {
+      const dims = p.config?._openingDims || (p.mesh ? calculateMeshOpeningDims(p.mesh) : null);
+      const width = dims?.width ?? (p.type === 'door' ? 1.6 : 2.0);
+      const height = dims?.height ?? (p.type === 'door' ? 2.3 : 1.3);
+      const bottomOffset = dims?.bottomOffset ?? 0;
+      return {
+        x: p.config.position[0],
+        z: p.config.position[2],
+        width,
+        height,
+        bottom: p.config.position[1] + bottomOffset,
+      };
+    });
 }
 
 /**

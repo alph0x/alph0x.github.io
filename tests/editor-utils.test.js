@@ -19,6 +19,7 @@ import {
   normalizeRotation,
   getEdgeOpenings,
   getCurrentOpenings,
+  calculateMeshOpeningDims,
   calculateRoomDimensions,
   countAxisParallel,
   formatExportOutput,
@@ -261,6 +262,31 @@ describe('getEdgeOpenings', () => {
   });
 });
 
+// ── calculateMeshOpeningDims ────────────────────────────────────
+
+describe('calculateMeshOpeningDims', () => {
+  it('measures a simple box mesh', () => {
+    const group = new THREE.Group();
+    group.add(new THREE.Mesh(new THREE.BoxGeometry(2, 3, 0.2)));
+    group.position.set(5, 1, 7); // wrapper offset should be ignored
+    const dims = calculateMeshOpeningDims(group);
+    expect(dims.width).toBeCloseTo(2, 1);
+    expect(dims.height).toBeCloseTo(3, 1);
+    expect(dims.bottomOffset).toBeCloseTo(-1.5, 1); // box centered at origin
+  });
+
+  it('excludes parallax children', () => {
+    const group = new THREE.Group();
+    group.add(new THREE.Mesh(new THREE.BoxGeometry(1, 2, 0.1)));
+    const cityscape = new THREE.Mesh(new THREE.BoxGeometry(100, 100, 100));
+    cityscape.userData._parallax = true;
+    group.add(cityscape);
+    const dims = calculateMeshOpeningDims(group);
+    expect(dims.width).toBeCloseTo(1, 1);
+    expect(dims.height).toBeCloseTo(2, 1);
+  });
+});
+
 // ── getCurrentOpenings ──────────────────────────────────────────
 
 describe('getCurrentOpenings', () => {
@@ -276,7 +302,23 @@ describe('getCurrentOpenings', () => {
     expect(getCurrentOpenings(placed)).toEqual([]);
   });
 
-  it('maps door to opening with door dimensions', () => {
+  it('uses cached _openingDims from config when available', () => {
+    const placed = [
+      {
+        type: 'window',
+        config: { position: [0, 1.2, 3], _openingDims: { width: 1.95, height: 1.28, bottomOffset: -0.64 } },
+      },
+    ];
+    const result = getCurrentOpenings(placed);
+    expect(result.length).toBe(1);
+    expect(result[0].x).toBe(0);
+    expect(result[0].z).toBe(3);
+    expect(result[0].width).toBeCloseTo(1.95, 2);
+    expect(result[0].height).toBeCloseTo(1.28, 2);
+    expect(result[0].bottom).toBeCloseTo(0.56, 2);
+  });
+
+  it('falls back to hardcoded defaults when no mesh or dims exist', () => {
     const placed = [
       { type: 'door', config: { position: [1.5, 0, 2.5] } },
     ];
@@ -285,25 +327,34 @@ describe('getCurrentOpenings', () => {
     ]);
   });
 
-  it('maps window to opening with window dimensions', () => {
+  it('computes dims dynamically from mesh when no cache exists', () => {
+    const mesh = new THREE.Group();
+    mesh.add(new THREE.Mesh(new THREE.BoxGeometry(1.5, 2.0, 0.1)));
+    mesh.position.set(0, 0.5, 0);
     const placed = [
-      { type: 'window', config: { position: [0, 1.2, 3] } },
+      { type: 'door', config: { position: [0, 0.5, 0] }, mesh },
     ];
-    expect(getCurrentOpenings(placed)).toEqual([
-      { x: 0, z: 3, width: 2.0, height: 1.3, bottom: 1.2 },
-    ]);
+    const result = getCurrentOpenings(placed);
+    expect(result.length).toBe(1);
+    expect(result[0].width).toBeCloseTo(1.5, 1);
+    expect(result[0].height).toBeCloseTo(2.0, 1);
+    expect(result[0].bottom).toBeCloseTo(-0.5, 1); // 0.5 + (-1.0) where bottomOffset = -1.0
   });
 
   it('mixes doors and windows, skipping furniture', () => {
     const placed = [
-      { type: 'door', config: { position: [0, 0, 0] } },
+      { type: 'door', config: { position: [0, 0, 0], _openingDims: { width: 1.55, height: 2.28, bottomOffset: 0 } } },
       { type: 'sofa', config: { position: [1, 0, 1] } },
-      { type: 'window', config: { position: [2, 0.8, 2] } },
+      { type: 'window', config: { position: [2, 0.8, 2], _openingDims: { width: 1.95, height: 1.28, bottomOffset: -0.64 } } },
     ];
-    expect(getCurrentOpenings(placed)).toEqual([
-      { x: 0, z: 0, width: 1.6, height: 2.3, bottom: 0 },
-      { x: 2, z: 2, width: 2.0, height: 1.3, bottom: 0.8 },
-    ]);
+    const result = getCurrentOpenings(placed);
+    expect(result.length).toBe(2);
+    expect(result[0].width).toBeCloseTo(1.55, 2);
+    expect(result[0].height).toBeCloseTo(2.28, 2);
+    expect(result[0].bottom).toBeCloseTo(0, 2);
+    expect(result[1].width).toBeCloseTo(1.95, 2);
+    expect(result[1].height).toBeCloseTo(1.28, 2);
+    expect(result[1].bottom).toBeCloseTo(0.16, 2);
   });
 });
 

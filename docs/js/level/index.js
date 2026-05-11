@@ -8,7 +8,7 @@ import { FurnitureRegistry } from '../furniture/index.js';
 import { placeDecorations } from './decorations/index.js';
 import { setupLighting } from './lighting.js';
 import { Pet } from '../domain/pet.js';
-import { getEdgeOpenings } from '../editor-utils.js';
+import { getEdgeOpenings, extractMeshFromResult, calculateMeshOpeningDims } from '../editor-utils.js';
 
 function hexToInt(hex) {
   return parseInt(hex.replace('#', ''), 16);
@@ -49,27 +49,26 @@ function buildPolygonRoom(scene, worldState) {
   ceiling.receiveShadow = true;
   scene.add(ceiling);
 
-  // Collect openings from furniture layout
-  // Window dimensions must match level/window.js (winW=1.8, winH=1.2).
-  // f.position[1] is the frame center, so bottom = center - halfHeight.
+  // Collect openings from furniture layout — dimensions derived from actual meshes
   const openings = (ROOM_LAYOUT.furniture || [])
     .filter((f) => f.type === 'door' || f.type === 'window')
     .map((f) => {
-      if (f.type === 'door') {
-        return {
-          x: f.position[0],
-          z: f.position[2],
-          width: 1.6,
-          height: 2.3,
-          bottom: f.position[1],
-        };
+      const entry = FurnitureRegistry.get(f.type);
+      const builder = entry?.builder;
+      let dims = null;
+      if (builder) {
+        const mesh = extractMeshFromResult(builder(f));
+        if (mesh) dims = calculateMeshOpeningDims(mesh);
       }
+      const width = dims?.width ?? (f.type === 'door' ? 1.6 : 1.8);
+      const height = dims?.height ?? (f.type === 'door' ? 2.3 : 1.2);
+      const bottomOffset = dims?.bottomOffset ?? (f.type === 'window' ? -0.6 : 0);
       return {
         x: f.position[0],
         z: f.position[2],
-        width: 1.8,
-        height: 1.2,
-        bottom: f.position[1] - 0.6,
+        width,
+        height,
+        bottom: f.position[1] + bottomOffset,
       };
     });
 
