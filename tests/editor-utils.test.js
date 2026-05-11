@@ -18,6 +18,10 @@ import {
   fitMeshToPreview,
   normalizeRotation,
   getEdgeOpenings,
+  getCurrentOpenings,
+  calculateRoomDimensions,
+  countAxisParallel,
+  formatExportOutput,
 } from '../docs/js/editor-utils.js';
 
 // ── snap ────────────────────────────────────────────────────────
@@ -254,5 +258,142 @@ describe('getEdgeOpenings', () => {
     const result = getEdgeOpenings(openings, p1, p2, wallT);
     expect(result.length).toBe(1);
     expect(result[0].t).toBe(0);
+  });
+});
+
+// ── getCurrentOpenings ──────────────────────────────────────────
+
+describe('getCurrentOpenings', () => {
+  it('returns empty array when no placed items', () => {
+    expect(getCurrentOpenings([])).toEqual([]);
+  });
+
+  it('filters out non-opening furniture', () => {
+    const placed = [
+      { type: 'desk', config: { position: [1, 0, 2] } },
+      { type: 'chair', config: { position: [3, 0, 4] } },
+    ];
+    expect(getCurrentOpenings(placed)).toEqual([]);
+  });
+
+  it('maps door to opening with door dimensions', () => {
+    const placed = [
+      { type: 'door', config: { position: [1.5, 0, 2.5] } },
+    ];
+    expect(getCurrentOpenings(placed)).toEqual([
+      { x: 1.5, z: 2.5, width: 1.6, height: 2.3, bottom: 0 },
+    ]);
+  });
+
+  it('maps window to opening with window dimensions', () => {
+    const placed = [
+      { type: 'window', config: { position: [0, 1.2, 3] } },
+    ];
+    expect(getCurrentOpenings(placed)).toEqual([
+      { x: 0, z: 3, width: 2.0, height: 1.3, bottom: 1.2 },
+    ]);
+  });
+
+  it('mixes doors and windows, skipping furniture', () => {
+    const placed = [
+      { type: 'door', config: { position: [0, 0, 0] } },
+      { type: 'sofa', config: { position: [1, 0, 1] } },
+      { type: 'window', config: { position: [2, 0.8, 2] } },
+    ];
+    expect(getCurrentOpenings(placed)).toEqual([
+      { x: 0, z: 0, width: 1.6, height: 2.3, bottom: 0 },
+      { x: 2, z: 2, width: 2.0, height: 1.3, bottom: 0.8 },
+    ]);
+  });
+});
+
+// ── calculateRoomDimensions ─────────────────────────────────────
+
+describe('calculateRoomDimensions', () => {
+  it('calculates width and depth for a rectangle', () => {
+    const outline = [[-2, -1], [2, -1], [2, 1], [-2, 1]];
+    expect(calculateRoomDimensions(outline)).toEqual({
+      width: 4,
+      depth: 2,
+      totalEdges: 4,
+    });
+  });
+
+  it('calculates for an L-shaped room', () => {
+    const outline = [[0, 0], [3, 0], [3, 2], [1, 2], [1, 3], [0, 3]];
+    expect(calculateRoomDimensions(outline)).toEqual({
+      width: 3,
+      depth: 3,
+      totalEdges: 6,
+    });
+  });
+
+  it('handles negative-only coordinates', () => {
+    const outline = [[-5, -3], [-1, -3], [-1, -1], [-5, -1]];
+    expect(calculateRoomDimensions(outline)).toEqual({
+      width: 4,
+      depth: 2,
+      totalEdges: 4,
+    });
+  });
+
+  it('returns zero for single-point outline', () => {
+    const outline = [[0, 0]];
+    expect(calculateRoomDimensions(outline)).toEqual({
+      width: 0,
+      depth: 0,
+      totalEdges: 1,
+    });
+  });
+});
+
+// ── countAxisParallel ───────────────────────────────────────────
+
+describe('countAxisParallel', () => {
+  it('counts all edges as parallel for a rectangle', () => {
+    const outline = [[-2, -1], [2, -1], [2, 1], [-2, 1]];
+    expect(countAxisParallel(outline)).toBe(4);
+  });
+
+  it('counts zero for a diamond', () => {
+    const outline = [[0, -1], [1, 0], [0, 1], [-1, 0]];
+    expect(countAxisParallel(outline)).toBe(0);
+  });
+
+  it('counts mixed parallel and diagonal', () => {
+    const outline = [[0, 0], [2, 0], [2, 2], [1, 3], [0, 2]];
+    // edges: (0,0)->(2,0) parallel, (2,0)->(2,2) parallel,
+    //        (2,2)->(1,3) diagonal, (1,3)->(0,2) diagonal, (0,2)->(0,0) parallel
+    expect(countAxisParallel(outline)).toBe(3);
+  });
+
+  it('uses custom epsilon', () => {
+    const outline = [[0, 0], [2, 0.005], [2, 2], [0, 2]];
+    expect(countAxisParallel(outline, 0.01)).toBe(4);
+    // With epsilon 0.001, only the nearly-horizontal top edge [2,2]->[0,2] (dz=0)
+    // and the two vertical edges are axis-parallel; [0,0]->[2,0.005] is not.
+    expect(countAxisParallel(outline, 0.001)).toBe(3);
+  });
+});
+
+// ── formatExportOutput ──────────────────────────────────────────
+
+describe('formatExportOutput', () => {
+  it('formats seed string with comment header', () => {
+    const out = formatExportOutput('abc123');
+    expect(out).toContain("export const DEFAULT_SEED = 'abc123';");
+    expect(out).toContain('Seed (copy this into core.js');
+    expect(out).toContain("import { deserializeSeed } from './seed.js';");
+  });
+
+  it('handles empty seed string', () => {
+    const out = formatExportOutput('');
+    expect(out).toContain("export const DEFAULT_SEED = '';");
+  });
+
+  it('produces multiline output', () => {
+    const out = formatExportOutput('x');
+    const lines = out.split('\n');
+    expect(lines.length).toBeGreaterThan(3);
   });
 });

@@ -31,6 +31,7 @@ export class InteractionManager {
     this._roomBuilder = deps.roomBuilder;
     this._config = deps.config;
     this._snap = deps.snap;
+    this._controls = deps.controls || null;
     this._onSpawnPlaced = deps.onSpawnPlaced || (() => {});
     this._onFurniturePlaced = deps.onFurniturePlaced || (() => {});
     this._onDragMove = deps.onDragMove || (() => {});
@@ -38,6 +39,7 @@ export class InteractionManager {
     this._boundOnPointerDown = this.onPointerDown.bind(this);
     this._boundOnPointerMove = this.onPointerMove.bind(this);
     this._boundOnPointerUp = this.onPointerUp.bind(this);
+    this._boundOnPointerCancel = this.onPointerCancel.bind(this);
     this._boundOnKeyDown = this.onKeyDown.bind(this);
   }
 
@@ -50,6 +52,8 @@ export class InteractionManager {
     this._renderer.domElement.addEventListener('pointerdown', this._boundOnPointerDown);
     this._renderer.domElement.addEventListener('pointermove', this._boundOnPointerMove);
     this._renderer.domElement.addEventListener('pointerup', this._boundOnPointerUp);
+    this._renderer.domElement.addEventListener('pointercancel', this._boundOnPointerCancel);
+    this._renderer.domElement.addEventListener('pointerleave', this._boundOnPointerCancel);
     document.addEventListener('keydown', this._boundOnKeyDown);
   }
 
@@ -57,6 +61,8 @@ export class InteractionManager {
     this._renderer.domElement.removeEventListener('pointerdown', this._boundOnPointerDown);
     this._renderer.domElement.removeEventListener('pointermove', this._boundOnPointerMove);
     this._renderer.domElement.removeEventListener('pointerup', this._boundOnPointerUp);
+    this._renderer.domElement.removeEventListener('pointercancel', this._boundOnPointerCancel);
+    this._renderer.domElement.removeEventListener('pointerleave', this._boundOnPointerCancel);
     document.removeEventListener('keydown', this._boundOnKeyDown);
   }
 
@@ -64,21 +70,30 @@ export class InteractionManager {
 
   onPointerDown(e) {
     if (e.button !== 0) return;
+    if (this._state.isDragging) return;
 
     if (this._state.activeTool === 'outline') {
-      this._outlineEditor.onPointerDown(e, this._intersectFloor.bind(this));
-      if (this._state.isDragging && e.target && e.target.setPointerCapture) {
-        e.target.setPointerCapture(e.pointerId);
+      const handled = this._outlineEditor.onPointerDown(e, this._intersectFloor.bind(this));
+      if (handled) {
+        if (this._state.isDragging && e.target && e.target.setPointerCapture) {
+          e.target.setPointerCapture(e.pointerId);
+        }
+        if (this._state.isDragging) {
+          this._disableControls();
+        }
+        return;
       }
-      return;
+      // If outlineEditor did not handle the event, fall through to furniture/spawn/floor.
     }
 
     if (this._tryStartSpawnDrag(e)) {
       if (e.target && e.target.setPointerCapture) e.target.setPointerCapture(e.pointerId);
+      this._disableControls();
       return;
     }
     if (this._tryStartFurnitureDrag(e)) {
       if (e.target && e.target.setPointerCapture) e.target.setPointerCapture(e.pointerId);
+      this._disableControls();
       return;
     }
 
@@ -116,12 +131,38 @@ export class InteractionManager {
     if (this._state.dragTarget === 'furniture' && this._state.dragStartPos && this._state.selectedId !== null) {
       this._furnitureManager.endMove(this._state.selectedId, this._state.dragStartPos);
     }
+    if (this._state.dragTarget === 'edge' || this._state.dragTarget === 'vertex') {
+      this._outlineEditor.onDragEnd();
+    }
     this._state.isDragging = false;
     this._state.dragTarget = null;
     this._state.dragVertexIndex = null;
     this._state.dragEdgeIndex = null;
     this._state.dragEdgeVerts = null;
     this._state.dragStartPos = null;
+    this._enableControls();
+    this._onDragEnd();
+  }
+
+  onPointerCancel(e) {
+    if (e && e.target && e.target.releasePointerCapture && e.pointerId !== undefined) {
+      try {
+        e.target.releasePointerCapture(e.pointerId);
+      } catch (_) {}
+    }
+    if (this._state.dragTarget === 'furniture' && this._state.dragStartPos && this._state.selectedId !== null) {
+      this._furnitureManager.endMove(this._state.selectedId, this._state.dragStartPos);
+    }
+    if (this._state.dragTarget === 'edge' || this._state.dragTarget === 'vertex') {
+      this._outlineEditor.onDragEnd();
+    }
+    this._state.isDragging = false;
+    this._state.dragTarget = null;
+    this._state.dragVertexIndex = null;
+    this._state.dragEdgeIndex = null;
+    this._state.dragEdgeVerts = null;
+    this._state.dragStartPos = null;
+    this._enableControls();
     this._onDragEnd();
   }
 
@@ -149,6 +190,16 @@ export class InteractionManager {
     } else if (e.key === 'r' || e.key === 'R') {
       this._furnitureManager.rotateSelected(45);
     }
+  }
+
+  // ── Private controls helpers ────────────────────────────────────
+
+  _disableControls() {
+    if (this._controls) this._controls.enabled = false;
+  }
+
+  _enableControls() {
+    if (this._controls) this._controls.enabled = true;
   }
 
   // ── Private raycasting ──────────────────────────────────────────

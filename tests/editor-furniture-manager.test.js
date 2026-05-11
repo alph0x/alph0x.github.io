@@ -222,4 +222,18 @@ describe('FurnitureManager', () => {
     manager.place('bed', 1, 0, 2, 0);
     expect(state.placed[0].name).toBe('');
   });
+
+  it('redo restores place action with the same id', () => {
+    manager.place('bed', 1, 0, 2, 0);
+    const id = state.placed[0].id;
+    expect(manager.meshMap.has(id)).toBe(true);
+
+    manager.undo();
+    expect(manager.meshMap.has(id)).toBe(false);
+
+    manager.redo();
+    expect(manager.meshMap.has(id)).toBe(true);
+    expect(state.placed[0].id).toBe(id);
+    expect(state.placed[0].type).toBe('bed');
+  });
 });
