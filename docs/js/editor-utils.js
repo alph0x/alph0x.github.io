@@ -149,12 +149,18 @@ export function calculateMeshOpeningDims(mesh) {
   clone.scale.set(1, 1, 1);
 
   const box = new THREE.Box3();
-  clone.traverse((child) => {
-    if (child.userData?._parallax) return;
-    if (child.isMesh && child.geometry) {
-      box.expandByObject(child);
+
+  function visit(node) {
+    if (node.userData?._parallax) return;
+    if (node.isMesh && node.geometry) {
+      box.expandByObject(node);
     }
-  });
+    for (const child of node.children) {
+      visit(child);
+    }
+  }
+
+  visit(clone);
 
   const size = new THREE.Vector3();
   box.getSize(size);
@@ -176,7 +182,9 @@ export function getCurrentOpenings(placed) {
   return placed
     .filter((p) => p.type === 'door' || p.type === 'window')
     .map((p) => {
-      const dims = p.config?._openingDims || (p.mesh ? calculateMeshOpeningDims(p.mesh) : null);
+      // Always recalculate from the live mesh so stale cached values (e.g. after
+      // calculateMeshOpeningDims bug fixes) do not corrupt wall geometry.
+      const dims = p.mesh ? calculateMeshOpeningDims(p.mesh) : (p.config?._openingDims || null);
       const width = dims?.width ?? (p.type === 'door' ? 1.6 : 2.0);
       const height = dims?.height ?? (p.type === 'door' ? 2.3 : 1.3);
       const bottomOffset = dims?.bottomOffset ?? 0;

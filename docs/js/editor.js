@@ -25,3 +25,5 @@ window.__editorProject = (x, z) => {
   };
 };
 window.__furnitureManager = app.furnitureManager;
+window.__scene = app.scene;
+window.__camera = app.cameraSystem.camera;

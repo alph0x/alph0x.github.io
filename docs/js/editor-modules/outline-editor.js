@@ -4,6 +4,7 @@
  */
 
 import * as THREE from 'three';
+import { getCurrentOpenings } from '../editor-utils.js';
 
 export class OutlineEditor {
   /**
@@ -88,7 +89,7 @@ export class OutlineEditor {
   onDeleteKey() {
     if (this._state.outline.length > 3) {
       this._state.outline.pop();
-      this._roomBuilder.rebuild(this._state.outline, this._state.mat);
+      this._roomBuilder.rebuild(this._state.outline, this._state.mat, getCurrentOpenings(this._state.placed));
       this.rebuild();
     }
   }
@@ -176,7 +177,7 @@ export class OutlineEditor {
 
   _addVertex(edgeIndex, point) {
     this._state.outline.splice(edgeIndex + 1, 0, point);
-    this._roomBuilder.rebuild(this._state.outline, this._state.mat);
+    this._roomBuilder.rebuild(this._state.outline, this._state.mat, getCurrentOpenings(this._state.placed));
     this.rebuild();
   }
 
@@ -185,7 +186,7 @@ export class OutlineEditor {
     newOutline[index] = [x, z];
     if (this._isSelfIntersecting(newOutline)) return;
     this._state.outline = newOutline;
-    this._roomBuilder.rebuild(this._state.outline, this._state.mat);
+    this._roomBuilder.rebuild(this._state.outline, this._state.mat, getCurrentOpenings(this._state.placed));
     this.rebuild();
   }
 
@@ -273,7 +274,7 @@ export class OutlineEditor {
 
   /** Rebuild room geometry and handles. Call on drag end. */
   onDragEnd() {
-    this._roomBuilder.rebuild(this._state.outline, this._state.mat);
+    this._roomBuilder.rebuild(this._state.outline, this._state.mat, getCurrentOpenings(this._state.placed));
     this.rebuild();
   }
 

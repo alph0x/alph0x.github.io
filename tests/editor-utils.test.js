@@ -285,6 +285,19 @@ describe('calculateMeshOpeningDims', () => {
     expect(dims.width).toBeCloseTo(1, 1);
     expect(dims.height).toBeCloseTo(2, 1);
   });
+
+  it('excludes descendants of a parallax group', () => {
+    const group = new THREE.Group();
+    group.add(new THREE.Mesh(new THREE.BoxGeometry(1, 2, 0.1)));
+    const cityscape = new THREE.Group();
+    cityscape.userData._parallax = true;
+    cityscape.add(new THREE.Mesh(new THREE.BoxGeometry(100, 100, 100)));
+    cityscape.add(new THREE.Mesh(new THREE.BoxGeometry(200, 200, 200)));
+    group.add(cityscape);
+    const dims = calculateMeshOpeningDims(group);
+    expect(dims.width).toBeCloseTo(1, 1);
+    expect(dims.height).toBeCloseTo(2, 1);
+  });
 });
 
 // ── getCurrentOpenings ──────────────────────────────────────────
