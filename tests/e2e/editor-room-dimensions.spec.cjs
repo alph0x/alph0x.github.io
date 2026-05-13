@@ -227,8 +227,10 @@ test.describe('Editor Room Dimensions', () => {
   test('exported seed reflects resized outline', async ({ page }) => {
     await enterOutlineMode(page);
 
-    // Make the room noticeably wider
-    await dragWallMidpoint(page, 2.25, 0, -120, 0);
+    // Drag the front wall (midpoint visible even on narrow viewports) outward.
+    // On mobile the sidebar leaves only a slim canvas strip, so vertical side
+    // walls are off-screen; the horizontal front/back walls remain reachable.
+    await dragWallMidpoint(page, 0, 1.75, 0, -120);
     await page.waitForTimeout(200);
 
     // Export
@@ -254,9 +256,9 @@ test.describe('Editor Room Dimensions', () => {
     expect(decoded).not.toBeNull();
     expect(decoded.length).toBe(4);
 
-    // Right edge should be wider than original 2.25
-    const maxX = Math.max(...decoded.map((v) => v[0]));
-    expect(maxX).toBeGreaterThan(2.5);
+    // Front edge should be deeper than original 1.75
+    const maxZ = Math.max(...decoded.map((v) => v[1]));
+    expect(maxZ).toBeGreaterThan(2.0);
 
     const realErrors = filterKnownErrors(page.errors);
     expect(realErrors).toHaveLength(0);
