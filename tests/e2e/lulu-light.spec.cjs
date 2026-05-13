@@ -19,13 +19,18 @@ test.describe('Lulu Light in Game', () => {
   });
 
   test('backLight exists and moves with breathing', async ({ page }) => {
-    await page.goto('/');
-    // Wait for scene to be exposed (renderer creates canvas and appends to body)
-    await page.waitForFunction(() => window.__scene !== undefined, { timeout: 10000 });
-    await page.waitForTimeout(1000);
+    test.setTimeout(60000);
 
-    // Find the pet body and backLight
-    const petInfo = await page.evaluate(() => {
+    await page.goto('/');
+
+    // Wait for full game bootstrap including scene and pet.
+    await page.waitForFunction(
+      () => window.__scene !== undefined && window.__game !== undefined && window.__game.worldState?.pet?.mesh !== null,
+      { timeout: 30000 }
+    );
+
+    // Helper to find pet body and backLight inside the scene
+    const findPetBody = () => page.evaluate(() => {
       const scene = window.__scene;
       function findPet(root) {
         const stack = [root];
@@ -46,33 +51,36 @@ test.describe('Lulu Light in Game', () => {
       return findPet(scene);
     });
 
+    const petInfo = await findPetBody();
     expect(petInfo).not.toBeNull();
     expect(petInfo.lightLocalY).toBeCloseTo(0.09, 2);
 
     const scale1 = petInfo.bodyScaleY;
 
-    // Wait for breathing animation to progress
-    await page.waitForTimeout(600);
-
-    const scale2 = await page.evaluate(() => {
-      const scene = window.__scene;
-      function findBody(root) {
-        const stack = [root];
-        while (stack.length > 0) {
-          const obj = stack.pop();
-          if (obj.name === 'body' && obj.getObjectByName('backLight')) {
-            return obj.scale.y;
+    // Wait for breathing animation to progress using a conditional poll
+    // instead of a fixed sleep.  This tolerates slow / throttled rAF.
+    await page.waitForFunction(
+      (initialScale) => {
+        const scene = window.__scene;
+        function findBody(root) {
+          const stack = [root];
+          while (stack.length > 0) {
+            const obj = stack.pop();
+            if (obj.name === 'body' && obj.getObjectByName('backLight')) {
+              return obj.scale.y;
+            }
+            if (obj.children) stack.push(...obj.children);
           }
-          if (obj.children) stack.push(...obj.children);
+          return null;
         }
-        return null;
-      }
-      return findBody(scene);
-    });
-
-    expect(scale2).not.toBeNull();
-    // Breathing animation should have changed body.scale.y
-    expect(Math.abs(scale2 - scale1)).toBeGreaterThan(0.0003);
+        const scale = findBody(scene);
+        if (scale === null) return false;
+        // Breathing should have diverged from the initial scale
+        return Math.abs(scale - initialScale) > 0.0003;
+      },
+      scale1,
+      { timeout: 10000 }
+    );
 
     // Screenshot for visual reference
     await page.screenshot({ path: 'tests/e2e/screenshots/lulu-light-tracking.png' });
