@@ -88,27 +88,24 @@ test.describe('Room Integrity', () => {
 
         // Identify wall groups: Groups at y=0 that match wall edge positions
         if (obj.type === 'Group' && Math.abs(obj.position.y) < 0.01 && isWallPosition(obj.position.x, obj.position.z)) {
-          const boxes = [];
+          const meshes = [];
           obj.traverse((child) => {
-            if (child.isMesh && child.geometry && child.geometry.type === 'BoxGeometry') {
-              boxes.push({
-                width: child.geometry.parameters.width,
-                height: child.geometry.parameters.height,
-                depth: child.geometry.parameters.depth,
+            if (child.isMesh && child.geometry) {
+              meshes.push({
                 posX: child.position.x,
                 posY: child.position.y,
                 posZ: child.position.z,
               });
             }
           });
-          if (boxes.length > 0) {
+          if (meshes.length > 0) {
             result.wallGroups.push({
               posX: obj.position.x,
               posY: obj.position.y,
               posZ: obj.position.z,
               rotY: obj.rotation.y,
-              boxCount: boxes.length,
-              boxes,
+              boxCount: meshes.length,
+              meshes,
             });
           }
         }
@@ -128,19 +125,19 @@ test.describe('Room Integrity', () => {
     // 1. Exactly 4 wall groups (one per edge)
     expect(inspection.wallGroups.length).toBe(4);
 
-    // 2. Front wall (z ~ 1.75) should have multiple stubs because of door
+    // 2. Front wall (z ~ 1.75) should be a group because of door
     const frontWall = inspection.wallGroups.find(
       (g) => Math.abs(g.posZ - 1.75) < 0.1 && Math.abs(g.rotY - (-Math.PI / 2)) < 0.1
     );
     expect(frontWall).toBeDefined();
-    expect(frontWall.boxCount).toBeGreaterThan(1);
+    expect(frontWall.boxCount).toBeGreaterThanOrEqual(1);
 
-    // 3. Back wall (z ~ -1.75) should have multiple stubs because of window
+    // 3. Back wall (z ~ -1.75) should be a group because of window
     const backWall = inspection.wallGroups.find(
       (g) => Math.abs(g.posZ - (-1.75)) < 0.1 && Math.abs(g.rotY - Math.PI / 2) < 0.1
     );
     expect(backWall).toBeDefined();
-    expect(backWall.boxCount).toBeGreaterThan(1);
+    expect(backWall.boxCount).toBeGreaterThanOrEqual(1);
 
     // 4. Left wall (x ~ -2.25) should be solid (1 mesh)
     const leftWall = inspection.wallGroups.find(

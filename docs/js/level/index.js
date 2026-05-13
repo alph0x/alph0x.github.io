@@ -3,6 +3,7 @@
  */
 
 import * as THREE from 'three';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { CFG, ROOM_LAYOUT } from '../core.js';
 import { FurnitureRegistry } from '../furniture/index.js';
 import { placeDecorations } from './decorations/index.js';
@@ -127,6 +128,7 @@ function buildPolygonRoom(scene, worldState) {
     const zArr = Array.from(zCuts).sort((a, b) => a - b);
     const yArr = Array.from(yCuts).sort((a, b) => a - b);
 
+    const geometries = [];
     for (let zi = 0; zi < zArr.length - 1; zi++) {
       const z1 = zArr[zi];
       const z2 = zArr[zi + 1];
@@ -147,13 +149,17 @@ function buildPolygonRoom(scene, worldState) {
         }
 
         if (!insideOpening && z2 - z1 > 0.001 && y2 - y1 > 0.001) {
-          const stub = new THREE.Mesh(new THREE.BoxGeometry(wallT, y2 - y1, z2 - z1), wallMat);
-          stub.position.set(0, (y1 + y2) / 2, (z1 + z2) / 2);
-          stub.castShadow = true;
-          stub.receiveShadow = true;
-          group.add(stub);
+          const geo = new THREE.BoxGeometry(wallT, y2 - y1, z2 - z1);
+          geo.translate(0, (y1 + y2) / 2, (z1 + z2) / 2);
+          geometries.push(geo);
 
+          // Temporary mesh for accurate world-space AABB (collision)
+          const stub = new THREE.Mesh(geo.clone(), wallMat);
+          group.add(stub);
           const box = getWorldAABB(stub);
+          group.remove(stub);
+          stub.geometry.dispose();
+
           if (y1 < PLAYER_HEIGHT) {
             worldState.room.walls.push({
               minX: box.min.x,
@@ -164,6 +170,15 @@ function buildPolygonRoom(scene, worldState) {
           }
         }
       }
+    }
+
+    if (geometries.length > 0) {
+      const mergedGeo = mergeGeometries(geometries);
+      for (const g of geometries) g.dispose();
+      const visualMesh = new THREE.Mesh(mergedGeo, wallMat);
+      visualMesh.castShadow = true;
+      visualMesh.receiveShadow = true;
+      group.add(visualMesh);
     }
 
     edges.push({ p1, p2, midX, midZ, angle, len, mesh: group });
