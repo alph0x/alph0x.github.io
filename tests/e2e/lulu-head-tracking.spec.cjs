@@ -19,14 +19,23 @@ test.describe('Lulu Head Tracking', () => {
   });
 
   test('head follows camera position correctly', async ({ page }) => {
+    test.setTimeout(60000);
+
     await page.goto('/');
-    await page.waitForFunction(() => window.__scene !== undefined && window.__camera !== undefined && window.__game !== undefined, { timeout: 10000 });
-    await page.waitForTimeout(800);
+
+    // Wait for full game bootstrap including pet model initialisation.
+    // Under parallel load module fetch / WebGL setup can take >10 s.
+    await page.waitForFunction(
+      () => window.__scene !== undefined && window.__camera !== undefined && window.__game !== undefined && window.__game.worldState?.pet?.model !== null,
+      { timeout: 30000 }
+    );
+
+    // Give the first animation frame(s) a chance to run
+    await page.waitForTimeout(500);
 
     // Get Lulu's position and body rotation
     const petInfo = await page.evaluate(() => {
       const pet = window.__game.worldState.pet;
-      if (!pet || !pet.model) return null;
       return {
         x: pet.model.position.x,
         y: pet.model.position.y,
@@ -35,7 +44,6 @@ test.describe('Lulu Head Tracking', () => {
       };
     });
 
-    expect(petInfo).not.toBeNull();
     console.log('Pet info:', petInfo);
 
     // In Three.js, rotation.y is counter-clockwise.
@@ -55,7 +63,16 @@ test.describe('Lulu Head Tracking', () => {
     await page.evaluate((pos) => {
       window.__camera.position.set(pos.x, pos.y, pos.z);
     }, frontPos);
-    await page.waitForTimeout(1000);
+
+    // Wait for head to converge to near-zero (camera directly in front)
+    await page.waitForFunction(
+      () => {
+        const pet = window.__game?.worldState?.pet;
+        if (!pet?.model) return false;
+        return Math.abs(pet.model.headRotation) < 0.15;
+      },
+      { timeout: 8000 }
+    );
 
     const headRotFront = await page.evaluate(() => {
       const pet = window.__game.worldState.pet;
@@ -79,7 +96,15 @@ test.describe('Lulu Head Tracking', () => {
     await page.evaluate((pos) => {
       window.__camera.position.set(pos.x, pos.y, pos.z);
     }, leftPos);
-    await page.waitForTimeout(1000);
+
+    await page.waitForFunction(
+      () => {
+        const pet = window.__game?.worldState?.pet;
+        if (!pet?.model) return false;
+        return pet.model.headRotation > 0.25;
+      },
+      { timeout: 8000 }
+    );
 
     const headRotLeft = await page.evaluate(() => {
       const pet = window.__game.worldState.pet;
@@ -99,7 +124,15 @@ test.describe('Lulu Head Tracking', () => {
     await page.evaluate((pos) => {
       window.__camera.position.set(pos.x, pos.y, pos.z);
     }, rightPos);
-    await page.waitForTimeout(1000);
+
+    await page.waitForFunction(
+      () => {
+        const pet = window.__game?.worldState?.pet;
+        if (!pet?.model) return false;
+        return pet.model.headRotation < -0.3;
+      },
+      { timeout: 8000 }
+    );
 
     const headRotRight = await page.evaluate(() => {
       const pet = window.__game.worldState.pet;
