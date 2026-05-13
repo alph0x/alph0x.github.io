@@ -100,6 +100,33 @@ describe('RoomBuilder', () => {
     expect(visibleCount).toBe(2); // 4 walls - 2 hidden
   });
 
+  it('updateCulling skips walls with openings (Groups) to avoid floating furniture', () => {
+    const outline = [
+      [-2, -1],
+      [2, -1],
+      [2, 1],
+      [-2, 1],
+    ];
+    const openings = [
+      { x: 0, z: -1, width: 1.6, height: 2.3, bottom: 0 }, // door on front wall
+    ];
+    builder.rebuild(outline, { floor: '#1c1917', wall: '#44403c', ceiling: '#1c1917' }, openings);
+
+    const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+    camera.position.set(0, 2, 5); // close to front wall (which has the door)
+    camera.lookAt(0, 0, 0);
+
+    builder.updateCulling(camera, '3d');
+
+    const groups = roomGroup.children.filter((c) => c.type === 'Group');
+    const frontWallGroup = groups.find((g) => g.children.some((c) => c.geometry instanceof THREE.BoxGeometry));
+    expect(frontWallGroup.visible).toBe(true); // wall with opening stays visible
+
+    const solidWalls = roomGroup.children.filter((c) => c.geometry instanceof THREE.BoxGeometry);
+    const hiddenSolid = solidWalls.filter((w) => !w.visible).length;
+    expect(hiddenSolid).toBe(2); // two solid walls are still hidden
+  });
+
   it('updateCulling shows all walls in top mode', () => {
     const outline = [
       [-2, -1],

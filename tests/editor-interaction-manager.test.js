@@ -378,6 +378,41 @@ describe('InteractionManager', () => {
     expect(mockControls.enabled).toBe(true);
   });
 
+  it('uses live controls via getter when controls is a function', () => {
+    const oldControls = { enabled: true };
+    const newControls = { enabled: false };
+    let currentControls = oldControls;
+    mockOutlineEditor.onPointerDown = vi.fn(() => {
+      state.isDragging = true;
+      state.dragTarget = 'edge';
+      return true;
+    });
+    const im2 = new InteractionManager({
+      renderer: im._renderer,
+      camera: im._camera,
+      state,
+      floorPlane: im._floorPlane,
+      furnitureManager: mockFurnitureManager,
+      outlineEditor: mockOutlineEditor,
+      spawnManager: mockSpawnManager,
+      roomBuilder: {},
+      config: { wallH: 2.8 },
+      snap: (v) => v,
+      controls: () => currentControls,
+    });
+    state.activeTool = 'outline';
+    const e = new PointerEvent('pointerdown', { button: 0, clientX: 400, clientY: 300 });
+    im2.onPointerDown(e);
+    expect(oldControls.enabled).toBe(false);
+
+    // Simulate view-mode toggle: swap to new controls instance
+    currentControls = newControls;
+    oldControls.enabled = true;
+    im2.onPointerUp();
+    expect(newControls.enabled).toBe(true);
+    expect(oldControls.enabled).toBe(true); // old was already true, but new got enabled
+  });
+
   it('does not crash when controls is null', () => {
     const im2 = new InteractionManager({
       renderer: im._renderer,

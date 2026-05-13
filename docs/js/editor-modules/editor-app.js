@@ -146,7 +146,7 @@ export class EditorApp {
       roomBuilder: this.roomBuilder,
       config: this.config,
       snap: (v) => editorSnap(v, this.config.snap),
-      controls: this.cameraSystem.controls,
+      controls: () => this.cameraSystem.controls,
       onSpawnPlaced: (type) => {
         this._domRefs[type === 'player' ? 'toolPlayer' : 'toolLulu'].classList.remove('active');
       },
