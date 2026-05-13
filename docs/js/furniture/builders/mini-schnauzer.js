@@ -94,9 +94,6 @@ export function buildMiniSchnauzer(cfg) {
   tail.rotation.z = 0.2;
   g.add(tail);
 
-  // Collar tag
-  g.add(makeBox(makeStd({ color: 0xf59e0b }), [0.02, 0.015, 0.015], [0.1, 0.14, 0.06]));
-
   return { mesh: g };
 }
 
