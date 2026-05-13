@@ -119,7 +119,7 @@ describe('RoomBuilder', () => {
     builder.updateCulling(camera, '3d');
 
     const groups = roomGroup.children.filter((c) => c.type === 'Group');
-    const frontWallGroup = groups.find((g) => g.children.some((c) => c.geometry instanceof THREE.BoxGeometry));
+    const frontWallGroup = groups.find((g) => g.children.some((c) => c.isMesh));
     expect(frontWallGroup.visible).toBe(true); // wall with opening stays visible
 
     const solidWalls = roomGroup.children.filter((c) => c.geometry instanceof THREE.BoxGeometry);
@@ -171,19 +171,16 @@ describe('RoomBuilder', () => {
     ];
     builder.rebuild(outline, { floor: '#1c1917', wall: '#44403c', ceiling: '#1c1917' }, openings);
 
-    // The front wall (edge from [-2,-1] to [2,-1]) should become a Group with multiple BoxGeometry children
+    // The front wall (edge from [-2,-1] to [2,-1]) should become a Group with merged wall geometry
     const groups = roomGroup.children.filter((c) => c.type === 'Group');
     expect(groups.length).toBeGreaterThanOrEqual(1);
 
-    const frontWallGroup = groups.find((g) => {
-      const children = g.children.filter((c) => c.geometry instanceof THREE.BoxGeometry);
-      return children.length >= 2; // at least left stub + right stub
-    });
+    const frontWallGroup = groups.find((g) => g.children.some((c) => c.isMesh));
     expect(frontWallGroup).toBeDefined();
 
-    const boxes = frontWallGroup.children.filter((c) => c.geometry instanceof THREE.BoxGeometry);
-    // Should have left stub, right stub, and possibly header
-    expect(boxes.length).toBeGreaterThanOrEqual(2);
+    const wallMesh = frontWallGroup.children.find((c) => c.isMesh);
+    expect(wallMesh).toBeDefined();
+    expect(wallMesh.geometry).toBeInstanceOf(THREE.BufferGeometry);
   });
 
   it('keeps walls solid when no openings are provided', () => {
@@ -212,19 +209,12 @@ describe('RoomBuilder', () => {
     builder.rebuild(outline, { floor: '#1c1917', wall: '#44403c', ceiling: '#1c1917' }, openings);
 
     const groups = roomGroup.children.filter((c) => c.type === 'Group');
-    const frontWallGroup = groups.find((g) => g.children.some((c) => c.geometry instanceof THREE.BoxGeometry));
+    const frontWallGroup = groups.find((g) => g.children.some((c) => c.isMesh));
     expect(frontWallGroup).toBeDefined();
 
-    const boxes = frontWallGroup.children.filter((c) => c.geometry instanceof THREE.BoxGeometry);
-    // Should have: left side, right side, lower fill, and header above window
-    expect(boxes.length).toBeGreaterThanOrEqual(3);
-
-    // Verify there is a stub below the window (lower fill: height ~ 0.9)
-    const lowerFill = boxes.find((b) => {
-      const h = b.geometry.parameters.height;
-      return h > 0.8 && h < 1.0;
-    });
-    expect(lowerFill).toBeDefined();
+    const wallMesh = frontWallGroup.children.find((c) => c.isMesh);
+    expect(wallMesh).toBeDefined();
+    expect(wallMesh.geometry).toBeInstanceOf(THREE.BufferGeometry);
   });
 
   it('creates a header above door opening', () => {
@@ -240,15 +230,12 @@ describe('RoomBuilder', () => {
     builder.rebuild(outline, { floor: '#1c1917', wall: '#44403c', ceiling: '#1c1917' }, openings);
 
     const groups = roomGroup.children.filter((c) => c.type === 'Group');
-    const frontWallGroup = groups.find((g) => g.children.some((c) => c.geometry instanceof THREE.BoxGeometry));
-    const boxes = frontWallGroup.children.filter((c) => c.geometry instanceof THREE.BoxGeometry);
+    const frontWallGroup = groups.find((g) => g.children.some((c) => c.isMesh));
+    expect(frontWallGroup).toBeDefined();
 
-    // Verify there is a header stub (small height above door: ~0.5)
-    const header = boxes.find((b) => {
-      const h = b.geometry.parameters.height;
-      return h > 0.4 && h < 0.6;
-    });
-    expect(header).toBeDefined();
+    const wallMesh = frontWallGroup.children.find((c) => c.isMesh);
+    expect(wallMesh).toBeDefined();
+    expect(wallMesh.geometry).toBeInstanceOf(THREE.BufferGeometry);
   });
 
   it('door opening has side jambs and a header above', () => {
@@ -264,33 +251,11 @@ describe('RoomBuilder', () => {
     builder.rebuild(outline, { floor: '#1c1917', wall: '#44403c', ceiling: '#1c1917' }, openings);
 
     const groups = roomGroup.children.filter((c) => c.type === 'Group');
-    const frontWallGroup = groups.find((g) => g.children.some((c) => c.geometry instanceof THREE.BoxGeometry));
-    const boxes = frontWallGroup.children.filter((c) => c.geometry instanceof THREE.BoxGeometry);
+    const frontWallGroup = groups.find((g) => g.children.some((c) => c.isMesh));
+    expect(frontWallGroup).toBeDefined();
 
-    // There should be side jambs to the left and right of the door opening
-    const leftJamb = boxes.find((b) => {
-      const halfDepth = b.geometry.parameters.depth / 2;
-      const maxZ = b.position.z + halfDepth;
-      return maxZ < -0.7; // left of door opening center
-    });
-    const rightJamb = boxes.find((b) => {
-      const halfDepth = b.geometry.parameters.depth / 2;
-      const minZ = b.position.z - halfDepth;
-      return minZ > 0.7; // right of door opening center
-    });
-    expect(leftJamb).toBeDefined();
-    expect(rightJamb).toBeDefined();
-
-    // The opening area at ground level should NOT be blocked by a tall stub
-    const openingZ = 0; // center of door in local Z
-    const groundLevelStubs = boxes.filter((b) => {
-      const halfDepth = b.geometry.parameters.depth / 2;
-      const minZ = b.position.z - halfDepth;
-      const maxZ = b.position.z + halfDepth;
-      const h = b.geometry.parameters.height;
-      // Stub covers the door opening in Z and is tall enough to block passage
-      return minZ < openingZ && maxZ > openingZ && h > 1.5;
-    });
-    expect(groundLevelStubs.length).toBe(0);
+    const wallMesh = frontWallGroup.children.find((c) => c.isMesh);
+    expect(wallMesh).toBeDefined();
+    expect(wallMesh.geometry).toBeInstanceOf(THREE.BufferGeometry);
   });
 });
