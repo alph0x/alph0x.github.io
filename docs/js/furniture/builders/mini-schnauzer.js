@@ -97,12 +97,6 @@ export function buildMiniSchnauzer(cfg) {
   // Collar tag
   g.add(makeBox(makeStd({ color: 0xf59e0b }), [0.02, 0.015, 0.015], [0.1, 0.14, 0.06]));
 
-  // Warm accent light — child of body so it rides the breathing animation
-  const light = new THREE.PointLight(0xffaa55, 0.4, 2, 1);
-  light.name = 'backLight';
-  light.position.set(0, 0.09, 0);
-  body.add(light);
-
   return { mesh: g };
 }
 
