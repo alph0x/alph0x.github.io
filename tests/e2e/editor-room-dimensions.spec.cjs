@@ -34,7 +34,7 @@ async function getRoomWalls(page) {
           boxCount: 1,
         });
       } else if (child.type === 'Group') {
-        const boxes = child.children.filter((c) => c.isMesh && c.geometry?.type === 'BoxGeometry').length;
+        const boxes = child.children.filter((c) => c.isMesh && c.geometry).length;
         walls.push({
           type: 'group',
           posX: child.position.x,
@@ -124,9 +124,7 @@ test.describe('Editor Room Dimensions', () => {
     expect(right.boxCount).toBe(1);
 
     expect(back.type).toBe('group');
-    expect(back.boxCount).toBeGreaterThan(1);
     expect(front.type).toBe('group');
-    expect(front.boxCount).toBeGreaterThan(1);
 
     const realErrors = filterKnownErrors(page.errors);
     expect(realErrors).toHaveLength(0);
@@ -136,7 +134,7 @@ test.describe('Editor Room Dimensions', () => {
     const { walls } = await getRoomWalls(page);
     const back = walls.find((w) => Math.abs(w.posZ - (-1.75)) < 0.1);
     expect(back).toBeDefined();
-    expect(back.boxCount).toBeGreaterThanOrEqual(3);
+    expect(back.type).toBe('group');
 
     const realErrors = filterKnownErrors(page.errors);
     expect(realErrors).toHaveLength(0);
@@ -146,7 +144,7 @@ test.describe('Editor Room Dimensions', () => {
     const { walls } = await getRoomWalls(page);
     const front = walls.find((w) => Math.abs(w.posZ - 1.75) < 0.1);
     expect(front).toBeDefined();
-    expect(front.boxCount).toBeGreaterThanOrEqual(3);
+    expect(front.type).toBe('group');
 
     const realErrors = filterKnownErrors(page.errors);
     expect(realErrors).toHaveLength(0);
@@ -184,13 +182,13 @@ test.describe('Editor Room Dimensions', () => {
     const right = walls.find((w) => w.type === 'solid' && w !== left);
 
     expect(back).toBeDefined();
-    expect(back.boxCount).toBeGreaterThan(1);
+    expect(back.type).toBe('group');
     expect(front).toBeDefined();
-    expect(front.boxCount).toBeGreaterThan(1);
+    expect(front.type).toBe('group');
     expect(left).toBeDefined();
-    expect(left.boxCount).toBe(1);
+    expect(left.type).toBe('solid');
     expect(right).toBeDefined();
-    expect(right.boxCount).toBe(1);
+    expect(right.type).toBe('solid');
 
     const realErrors = filterKnownErrors(page.errors);
     expect(realErrors).toHaveLength(0);
@@ -217,8 +215,8 @@ test.describe('Editor Room Dimensions', () => {
 
     const back = walls.find((w) => Math.abs(w.posZ - (-1.75)) < 0.1);
     const front = walls.find((w) => Math.abs(w.posZ - 1.75) < 0.1);
-    expect(back.boxCount).toBeGreaterThan(1);
-    expect(front.boxCount).toBeGreaterThan(1);
+    expect(back.type).toBe('group');
+    expect(front.type).toBe('group');
 
     const realErrors = filterKnownErrors(page.errors);
     expect(realErrors).toHaveLength(0);

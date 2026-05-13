@@ -4,6 +4,7 @@
  */
 
 import * as THREE from 'three';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { buildPolygonShape, hexToInt, getEdgeOpenings } from '../editor-utils.js';
 
 export class RoomBuilder {
@@ -146,6 +147,7 @@ export class RoomBuilder {
     const group = new THREE.Group();
     group.position.set(midX, 0, midZ);
     group.rotation.y = angle;
+    const geometries = [];
 
     // 2D subdivision: collect Z and Y cuts, then emit cells that are NOT inside any opening
     const zCuts = new Set([-len / 2, len / 2]);
@@ -180,14 +182,18 @@ export class RoomBuilder {
         }
 
         if (!insideOpening && z2 - z1 > 0.001 && y2 - y1 > 0.001) {
-          const stub = new THREE.Mesh(
-            new THREE.BoxGeometry(wallT, y2 - y1, z2 - z1),
-            material
-          );
-          stub.position.set(0, (y1 + y2) / 2, (z1 + z2) / 2);
-          group.add(stub);
+          const geo = new THREE.BoxGeometry(wallT, y2 - y1, z2 - z1);
+          geo.translate(0, (y1 + y2) / 2, (z1 + z2) / 2);
+          geometries.push(geo);
         }
       }
+    }
+
+    if (geometries.length > 0) {
+      const mergedGeo = mergeGeometries(geometries);
+      for (const g of geometries) g.dispose();
+      const mesh = new THREE.Mesh(mergedGeo, material);
+      group.add(mesh);
     }
 
     return group;
