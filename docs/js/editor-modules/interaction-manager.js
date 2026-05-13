@@ -31,7 +31,13 @@ export class InteractionManager {
     this._roomBuilder = deps.roomBuilder;
     this._config = deps.config;
     this._snap = deps.snap;
-    this._controls = deps.controls || null;
+    if (typeof deps.controls === 'function') {
+      this._getControls = deps.controls;
+      this._controls = null;
+    } else {
+      this._getControls = null;
+      this._controls = deps.controls || null;
+    }
     this._onSpawnPlaced = deps.onSpawnPlaced || (() => {});
     this._onFurniturePlaced = deps.onFurniturePlaced || (() => {});
     this._onDragMove = deps.onDragMove || (() => {});
@@ -194,12 +200,18 @@ export class InteractionManager {
 
   // ── Private controls helpers ────────────────────────────────────
 
+  get _liveControls() {
+    return this._getControls ? this._getControls() : this._controls;
+  }
+
   _disableControls() {
-    if (this._controls) this._controls.enabled = false;
+    const controls = this._liveControls;
+    if (controls) controls.enabled = false;
   }
 
   _enableControls() {
-    if (this._controls) this._controls.enabled = true;
+    const controls = this._liveControls;
+    if (controls) controls.enabled = true;
   }
 
   // ── Private raycasting ──────────────────────────────────────────

@@ -42,8 +42,16 @@ export class RoomBuilder {
       const sorted = [...this._wallMeshes].sort(
         (a, b) => a.mid.distanceToSquared(camPos) - b.mid.distanceToSquared(camPos)
       );
-      sorted[0].mesh.visible = false;
-      sorted[1].mesh.visible = false;
+      let hidden = 0;
+      for (const w of sorted) {
+        if (hidden >= 2) break;
+        // Don't hide walls with openings (Groups) because their furniture
+        // (doors/windows) would float in mid-air.
+        if (w.mesh.type === 'Mesh') {
+          w.mesh.visible = false;
+          hidden++;
+        }
+      }
     } else if (this._wallMeshes.length > 0) {
       for (const w of this._wallMeshes) {
         w.mesh.visible = true;
