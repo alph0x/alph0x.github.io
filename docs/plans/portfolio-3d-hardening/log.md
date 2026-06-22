@@ -91,3 +91,9 @@ Plan finalized at 25 points across Foundation, Cleanup, Core, Product, and Verif
 - Unified poster/fairyLights into regular furniture array in seed serialization.
 - Removed redundant `setup-canvas-mock.js` imports from 25 test files.
 - All 447 tests pass.
+
+## 2026-06-22 — Foundation checkpoint
+
+- Points 1–4 complete and committed.
+- Point 5 (TypeScript full migration) started but paused: mechanical rename of 87 files is straightforward, but resolving ~1,900 strict-mode type errors requires a dedicated session. Board updated to 🟡 in progress.
+- Next: finish Point 5, then proceed to Cleanup/Core/Product phases.
