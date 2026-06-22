@@ -3,7 +3,14 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { askAlphGPT } from '../docs/js/systems/alphgpt.js';
+import {
+  askAlphGPT,
+  enterTerminalMode,
+  exitTerminalMode,
+  isTerminalMode,
+  getTerminalCommands,
+  processTerminalCommand,
+} from '../docs/js/systems/alphgpt.js';
 
 describe('askAlphGPT', () => {
   it('returns a greeting response for hello', () => {
@@ -65,5 +72,50 @@ describe('askAlphGPT', () => {
     const result = askAlphGPT('help');
     expect(result.text).toContain('skills');
     expect(result.intent).toBe('help');
+  });
+});
+
+describe('terminal mode', () => {
+  beforeEach(() => {
+    exitTerminalMode();
+  });
+
+  it('enters and exits terminal mode', () => {
+    expect(isTerminalMode()).toBe(false);
+    enterTerminalMode();
+    expect(isTerminalMode()).toBe(true);
+    exitTerminalMode();
+    expect(isTerminalMode()).toBe(false);
+  });
+
+  it('records command history', () => {
+    processTerminalCommand('hello');
+    processTerminalCommand('help');
+    expect(getTerminalCommands()).toEqual(['hello', 'help']);
+  });
+
+  it('returns help for help command', () => {
+    const result = processTerminalCommand('help');
+    expect(result.type).toBe('response');
+    expect(result.text).toContain('help');
+    expect(result.text).toContain('clear');
+    expect(result.text).toContain('exit');
+  });
+
+  it('returns clear action for clear command', () => {
+    const result = processTerminalCommand('clear');
+    expect(result.type).toBe('clear');
+  });
+
+  it('returns exit action for exit command', () => {
+    const result = processTerminalCommand('exit');
+    expect(result.type).toBe('exit');
+  });
+
+  it('delegates unknown commands to askAlphGPT', () => {
+    const result = processTerminalCommand('who is alfredo?');
+    expect(result.type).toBe('response');
+    expect(result.text).toContain('BSc');
+    expect(result.intent).toBe('who');
   });
 });

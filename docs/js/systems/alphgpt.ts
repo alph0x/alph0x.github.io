@@ -166,3 +166,70 @@ export function askAlphGPT(
 
   return { text: pickResponse(bestIntent), intent: bestIntent };
 }
+
+export type TerminalCommandType = 'response' | 'clear' | 'exit';
+
+let terminalMode = false;
+const terminalHistory: string[] = [];
+let terminalCursorVisible = true;
+let cursorInterval: number | null = null;
+
+export function isTerminalMode(): boolean {
+  return terminalMode;
+}
+
+export function enterTerminalMode(): void {
+  terminalMode = true;
+  terminalCursorVisible = true;
+  if (cursorInterval !== null) {
+    clearInterval(cursorInterval);
+  }
+  cursorInterval = window.setInterval(() => {
+    terminalCursorVisible = !terminalCursorVisible;
+  }, 530);
+}
+
+export function exitTerminalMode(): void {
+  terminalMode = false;
+  terminalCursorVisible = true;
+  if (cursorInterval !== null) {
+    clearInterval(cursorInterval);
+    cursorInterval = null;
+  }
+}
+
+export function isTerminalCursorVisible(): boolean {
+  return terminalCursorVisible;
+}
+
+export function pushTerminalCommand(command: string): void {
+  terminalHistory.push(command);
+}
+
+export function getTerminalCommands(): readonly string[] {
+  return terminalHistory;
+}
+
+export function processTerminalCommand(
+  input: string,
+  lastIntent: string | null = null
+): { type: TerminalCommandType; text: string; intent: string | null } {
+  const text = input.trim();
+  pushTerminalCommand(text);
+  const lower = text.toLowerCase();
+  if (lower === 'help') {
+    return {
+      type: 'response',
+      text: 'Available terminal commands:\n  help  — show this message\n  clear — clear the screen\n  exit  — close terminal\nOr ask about Alfredo.',
+      intent: 'help',
+    };
+  }
+  if (lower === 'clear') {
+    return { type: 'clear', text: '', intent: null };
+  }
+  if (lower === 'exit') {
+    return { type: 'exit', text: '', intent: null };
+  }
+  const result = askAlphGPT(text, lastIntent);
+  return { type: 'response', text: result.text, intent: result.intent };
+}
