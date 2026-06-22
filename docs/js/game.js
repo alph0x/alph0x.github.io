@@ -42,6 +42,12 @@ export class Game {
     document.querySelectorAll('.panel-close').forEach((btn) => {
       btn.addEventListener('click', () => this.closePanels());
     });
+    document.addEventListener('click', (e) => {
+      if (!this.worldState.ui.isPanelOpen) return;
+      if (e.target.closest('.info-panel')) return;
+      if (e.target.tagName === 'CANVAS') return;
+      this.closePanels();
+    });
   }
 
   onResize() {

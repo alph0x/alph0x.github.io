@@ -44,12 +44,7 @@
     .hud-block { display: flex; flex-direction: column; gap: 4px; min-width: 80px; }
     .hud-label { color: #57534e; font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; }
     .hud-value { font-size: 14px; letter-spacing: 0.04em; }
-    .hud-green { color: #10b981; text-shadow: 0 0 8px rgba(16,185,129,0.5); }
-    .hud-yellow { color: #f59e0b; text-shadow: 0 0 8px rgba(245,158,11,0.5); }
-    .hud-cyan { color: #06b6d4; text-shadow: 0 0 8px rgba(6,182,212,0.5); }
     .hud-pink { color: #ec4899; text-shadow: 0 0 8px rgba(236,72,153,0.5); }
-    .hud-bar { width: 100px; height: 10px; background: #1c1917; border: 1px solid #44403c; position: relative; }
-    .hud-bar-inner { height: 100%; background: repeating-linear-gradient(90deg, var(--c) 0px, var(--c) 4px, transparent 4px, transparent 6px); }
 
     /* ── PROMPT ──────────────────────────────────────── */
     #prompt {
@@ -290,6 +285,20 @@
       }
       #crosshair { display: none !important; }
     }
+
+    /* ── FOCUS VISIBLE ───────────────────────────────── */
+    :focus-visible { outline: 2px solid #f59e0b; outline-offset: 2px; }
+    button:focus-visible, input:focus-visible, a:focus-visible { outline-color: #f59e0b; }
+
+    /* ── REDUCED MOTION ──────────────────────────────── */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      #crt-overlay { display: none; }
+    }
   </style>
   <script type="importmap">
   {
@@ -316,17 +325,6 @@
     <div class="hud-block">
       <span class="hud-label">Level</span>
       <span class="hud-value hud-green">12+</span>
-      <div class="hud-bar"><div class="hud-bar-inner" style="--c: #10b981; width: 100%;"></div></div>
-    </div>
-    <div class="hud-block">
-      <span class="hud-label">HP</span>
-      <span class="hud-value hud-yellow">100%</span>
-      <div class="hud-bar"><div class="hud-bar-inner" style="--c: #f59e0b; width: 100%;"></div></div>
-    </div>
-    <div class="hud-block">
-      <span class="hud-label">MP</span>
-      <span class="hud-value hud-cyan">MAX</span>
-      <div class="hud-bar"><div class="hud-bar-inner" style="--c: #06b6d4; width: 100%;"></div></div>
     </div>
     <div style="margin-left: auto; display: flex; gap: 16px; align-items: center;">
       <div class="hud-block" style="text-align: right; min-width: auto;">
@@ -342,7 +340,7 @@
 
   <!-- Loading -->
   <div id="loading">
-    <div>LOADING SAVE FILE...</div>
+    <div>LOADING...</div>
     <div id="loading-bar"><div id="loading-bar-fill"></div></div>
   </div>
 
