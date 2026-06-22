@@ -177,7 +177,7 @@
     /* ── MOBILE RESUME (static fallback) ─────────────── */
     #mobile-resume { display: none; }
     @media (max-width: 768px) and (orientation: portrait), (hover: none) and (pointer: coarse) and (orientation: portrait) {
-      #game-container, #loading, #start-screen, #hud, #crosshair, #prompt, .info-panel { display: none !important; }
+      #game-container, #loading, #start-screen, #hud, #crosshair, #prompt, .info-panel, #legend { display: none !important; }
       #mobile-resume { display: block !important; background: #0c0a09; color: #e7e5e4; font-family: 'Share Tech Mono', monospace; padding: 20px; }
       #mobile-resume .m-header { text-align: center; margin-bottom: 30px; }
       #mobile-resume .m-header h1 { font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 2.2rem; text-transform: uppercase; line-height: 0.9; text-shadow: 2px 2px 0 #ec4899; }
@@ -298,6 +298,38 @@
         transition-duration: 0.01ms !important;
       }
       #crt-overlay { display: none; }
+    }
+    /* ── LEGEND OVERLAY ──────────────────────────────── */
+    .legend-overlay {
+      position: fixed; top: 50%; left: 50%;
+      transform: translate(-50%, -50%) scale(0.95);
+      z-index: 3500; width: 90%; max-width: 420px;
+      background: rgba(12,10,9,0.97); border: 2px solid #292524;
+      box-shadow: 0 0 40px rgba(0,0,0,0.9), inset 0 0 60px rgba(0,0,0,0.5);
+      padding: 24px; opacity: 0; pointer-events: none; transition: all 0.3s;
+      font-family: 'Share Tech Mono', monospace; color: #e7e5e4;
+    }
+    .legend-overlay.active { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
+    .legend-overlay .legend-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid #1c1917;
+    }
+    .legend-overlay h2 {
+      font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 18px;
+      text-transform: uppercase; letter-spacing: 0.04em; color: #f59e0b;
+    }
+    .legend-overlay .legend-close {
+      font-family: 'Press Start 2P', monospace; font-size: 8px;
+      color: #ec4899; background: none; border: 2px solid #ec4899;
+      padding: 6px 12px; cursor: pointer; text-transform: uppercase;
+    }
+    .legend-overlay .legend-close:hover { background: #ec4899; color: #e7e5e4; }
+    .legend-overlay .legend-grid { display: grid; gap: 10px; }
+    .legend-overlay .legend-row { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+    .legend-overlay .legend-row span { color: #a8a29e; }
+    .legend-overlay kbd {
+      background: #292524; border-radius: 3px; padding: 2px 6px;
+      font-family: monospace; font-size: 12px; color: #e7e5e4;
     }
   </style>
   <script type="importmap">
@@ -701,6 +733,20 @@
     </div>
   </div>
 
+  <!-- Legend overlay -->
+  <div id="legend" class="legend-overlay">
+    <div class="legend-header">
+      <h2>Keyboard Legend</h2>
+      <button class="legend-close" onclick="document.getElementById('legend').classList.remove('active')">[ CLOSE ]</button>
+    </div>
+    <div class="legend-grid">
+      <div class="legend-row"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> / <kbd>Arrows</kbd> <span>Move</span></div>
+      <div class="legend-row"><kbd>Mouse</kbd> <span>Look around</span></div>
+      <div class="legend-row"><kbd>LMB</kbd> / <kbd>E</kbd> <span>Interact</span></div>
+      <div class="legend-row"><kbd>Esc</kbd> <span>Close panels / legend</span></div>
+      <div class="legend-row"><kbd>H</kbd> / <kbd>?</kbd> <span>Toggle this legend</span></div>
+    </div>
+  </div>
   <div id="error-display" style="position:fixed;bottom:20px;left:20px;right:20px;z-index:9999;color:#ff4444;font-family:'Share Tech Mono',monospace;font-size:12px;white-space:pre-wrap;max-height:200px;overflow:auto;background:rgba(0,0,0,0.85);padding:12px;display:none;border:1px solid #ff4444;"></div>
   <script>
     (function() {

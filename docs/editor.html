@@ -86,6 +86,30 @@
       pointer-events: none; z-index: 2;
     }
     #preview-wrap canvas { width: 100%; height: 100%; display: block; }
+    /* ── LEGEND OVERLAY ──────────────────────────────── */
+    .legend-overlay {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%) scale(0.95);
+      z-index: 100; width: 90%; max-width: 420px;
+      background: rgba(12,10,9,0.97); border: 1px solid #292524; border-radius: 6px;
+      box-shadow: 0 0 40px rgba(0,0,0,0.9);
+      padding: 20px; opacity: 0; pointer-events: none; transition: all 0.2s;
+      font-size: 13px; color: #e7e5e4; line-height: 1.6;
+    }
+    .legend-overlay.active { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
+    .legend-overlay .legend-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid #292524;
+    }
+    .legend-overlay h2 { font-size: 14px; font-weight: 600; text-transform: uppercase; color: #a8a29e; letter-spacing: 0.05em; }
+    .legend-overlay .legend-close {
+      background: none; border: 1px solid #7f1d1d; color: #fca5a5;
+      padding: 4px 10px; border-radius: 4px; font-size: 11px; cursor: pointer;
+    }
+    .legend-overlay .legend-close:hover { background: #450a0a; }
+    .legend-overlay .legend-grid { display: grid; gap: 8px; }
+    .legend-overlay .legend-row { display: flex; align-items: center; gap: 8px; }
+    .legend-overlay .legend-row span { color: #a8a29e; }
   </style>
 </head>
 <body>
@@ -216,6 +240,23 @@
       <kbd>Shift+LMB</kbd> add vertex (outline mode)
     </div>
     <div class="selection-info" id="selectionInfo"></div>
+    <!-- Legend overlay -->
+    <div id="legend" class="legend-overlay">
+      <div class="legend-header">
+        <h2>Keyboard Legend</h2>
+        <button class="legend-close" onclick="document.getElementById('legend').classList.remove('active')">[ CLOSE ]</button>
+      </div>
+      <div class="legend-grid">
+        <div class="legend-row"><kbd>LMB</kbd> / <kbd>Drag</kbd> <span>Place / select / move</span></div>
+        <div class="legend-row"><kbd>R</kbd> <span>Rotate selected +45°</span></div>
+        <div class="legend-row"><kbd>Del</kbd> / <kbd>Backspace</kbd> <span>Remove selected</span></div>
+        <div class="legend-row"><kbd>Scroll</kbd> <span>Zoom</span></div>
+        <div class="legend-row"><kbd>Right-drag</kbd> <span>Pan</span></div>
+        <div class="legend-row"><kbd>Shift+LMB</kbd> <span>Add vertex (outline mode)</span></div>
+        <div class="legend-row"><kbd>Ctrl+Z</kbd> / <kbd>Ctrl+Y</kbd> <span>Undo / Redo</span></div>
+        <div class="legend-row"><kbd>Esc</kbd> / <kbd>H</kbd> / <kbd>?</kbd> <span>Close / toggle legend</span></div>
+      </div>
+    </div>
   </div>
 
   <script>

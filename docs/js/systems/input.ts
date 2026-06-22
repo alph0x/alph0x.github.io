@@ -31,8 +31,45 @@ export class InputSystem {
     this.controls = game.controls;
   }
 
+  private _isTypingTarget(e: KeyboardEvent): boolean {
+    const target = e.target as HTMLElement | null;
+    if (!target) return false;
+    return (
+      target.tagName === 'INPUT' ||
+      target.tagName === 'TEXTAREA' ||
+      target.tagName === 'SELECT' ||
+      target.isContentEditable
+    );
+  }
+
+  private _toggleLegend(): void {
+    const legend = document.getElementById('legend');
+    if (!legend) return;
+    if (legend.classList.contains('active')) {
+      this._closeLegend();
+    } else {
+      legend.classList.add('active');
+      this.controls.unlock();
+    }
+  }
+
+  private _closeLegend(): void {
+    const legend = document.getElementById('legend');
+    if (legend) legend.classList.remove('active');
+    if (!this.game.worldState.ui.isPanelOpen) {
+      try {
+        this.controls.lock();
+      } catch {
+        /* pointer lock may not be available */
+      }
+    }
+  }
+
   bind(): void {
     this._onKeyDown = (e) => {
+      if (this._isTypingTarget(e)) return;
+      const legendActive = document.getElementById('legend')?.classList.contains('active');
+      if (legendActive && e.code !== 'Escape' && e.code !== 'KeyH' && e.code !== 'Slash') return;
       switch (e.code) {
         case 'KeyW':
         case 'ArrowUp':
@@ -53,8 +90,16 @@ export class InputSystem {
         case 'KeyE':
           this.game.interact();
           break;
+        case 'KeyH':
+        case 'Slash':
+          this._toggleLegend();
+          break;
         case 'Escape':
-          this.game.closePanels();
+          if (document.getElementById('legend')?.classList.contains('active')) {
+            this._closeLegend();
+          } else {
+            this.game.closePanels();
+          }
           break;
       }
     };
@@ -82,8 +127,8 @@ export class InputSystem {
 
     document.addEventListener('keydown', this._onKeyDown);
     document.addEventListener('keyup', this._onKeyUp);
-  }
 
+  }
   unbind(): void {
     document.removeEventListener('keydown', this._onKeyDown);
     document.removeEventListener('keyup', this._onKeyUp);

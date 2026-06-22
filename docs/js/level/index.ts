@@ -128,7 +128,7 @@ export function buildLevel(scene: THREE.Scene, worldState: WorldState): void {
     (mesh as any).position.set(f.position[0], f.position[1], f.position[2] as any);
     (mesh as any).rotation.y = f.rotation ?? 0;
     scene.add(mesh as any);
-    worldState.room.interactables.push({ mesh: mesh as any, type: f.type, panelId: f.panelId });
+    worldState.room.interactables.push({ mesh: mesh as any, type: f.type, panelId: f.panelId, name: f.name ?? f.type });
     if (f.type === 'miniSchnauzer') petMesh = mesh as THREE.Group;
 
     // Collision: extract AABB from placed mesh

@@ -13,7 +13,10 @@ interface PointerLockLike {
 interface Interactable {
   mesh: THREE.Object3D;
   panelId: string;
+  name: string;
+  type: string;
 }
+
 
 export class InteractionSystem {
   camera: THREE.Camera;
@@ -85,10 +88,15 @@ export class InteractionSystem {
     const hits = this.raycaster.intersectObjects(interactables.map((i) => i.mesh), true);
 
     if (hits.length > 0 && hits[0].distance < 5) {
-      prompt.textContent = `[CLICK OR E] ${hits[0].object.userData.label || 'INTERACT'}`;
-      prompt.classList.add('active');
-    } else {
-      prompt.classList.remove('active');
+      const obj = interactables.find(
+        (i) => i.mesh === hits[0].object || i.mesh === hits[0].object.parent
+      );
+      if (obj) {
+        prompt.textContent = `[E] ${obj.name || obj.type}`;
+        prompt.classList.add('active');
+        return;
+      }
     }
+    prompt.classList.remove('active');
   }
 }

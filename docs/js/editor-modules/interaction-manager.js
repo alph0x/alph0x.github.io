@@ -187,6 +187,17 @@ export class InteractionManager {
       this._furnitureManager.redo();
       return;
     }
+    if (e.code === 'Escape' || e.key === 'Escape') {
+      this._closeLegend();
+      return;
+    }
+    if (this._isTypingTarget(e)) return;
+    const legend = document.getElementById('legend');
+    if (legend?.classList.contains('active') && e.code !== 'Escape' && e.code !== 'KeyH' && e.code !== 'Slash') return;
+    if (e.code === 'KeyH' || e.code === 'Slash') {
+      this._toggleLegend();
+      return;
+    }
     if (e.key === 'Delete' || e.key === 'Backspace') {
       if (this._state.activeTool === 'outline') {
         this._outlineEditor.onDeleteKey();
@@ -196,6 +207,27 @@ export class InteractionManager {
     } else if (e.key === 'r' || e.key === 'R') {
       this._furnitureManager.rotateSelected(45);
     }
+  }
+
+  _isTypingTarget(e) {
+    const target = e.target;
+    return target && (
+      target.tagName === 'INPUT' ||
+      target.tagName === 'TEXTAREA' ||
+      target.tagName === 'SELECT' ||
+      target.isContentEditable
+    );
+  }
+
+  _toggleLegend() {
+    const legend = document.getElementById('legend');
+    if (!legend) return;
+    legend.classList.toggle('active');
+  }
+
+  _closeLegend() {
+    const legend = document.getElementById('legend');
+    if (legend) legend.classList.remove('active');
   }
 
   // ── Private controls helpers ────────────────────────────────────
