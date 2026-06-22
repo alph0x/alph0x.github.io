@@ -39,7 +39,7 @@ function buildPolygonRoom(scene: THREE.Scene, worldState: WorldState): { edges: 
   const floor = new THREE.Mesh(floorGeo, floorMat);
   floor.rotation.x = -Math.PI / 2;
   floor.receiveShadow = true;
-  scene.add(floor);
+  scene.add(floor as any);
 
   const ceilingGeo = new THREE.ShapeGeometry(shape);
   const ceilingMat = new THREE.MeshStandardMaterial({ color: hexToInt(mat.ceiling), flatShading: true, roughness: 1, metalness: 0 });
@@ -47,7 +47,7 @@ function buildPolygonRoom(scene: THREE.Scene, worldState: WorldState): { edges: 
   ceiling.rotation.x = Math.PI / 2;
   ceiling.position.y = wallH;
   ceiling.receiveShadow = true;
-  scene.add(ceiling);
+  scene.add(ceiling as any);
 
   // Collect openings from furniture layout
   const openings = (ROOM_LAYOUT.furniture || [])
@@ -66,7 +66,6 @@ function buildPolygonRoom(scene: THREE.Scene, worldState: WorldState): { edges: 
       };
     });
 
-  // Walls using shared builder
   const wallMat = new THREE.MeshStandardMaterial({ color: hexToInt(mat.wall), flatShading: true, roughness: 1, metalness: 0 });
   const edges = buildWallsFromOutline({
     outline,
@@ -79,32 +78,52 @@ function buildPolygonRoom(scene: THREE.Scene, worldState: WorldState): { edges: 
   });
 
   for (const edge of edges) {
-    scene.add(edge.mesh);
+    scene.add(edge.mesh as any);
   }
 
   return { edges };
 }
 
 export function buildLevel(scene: THREE.Scene, worldState: WorldState): void {
-  buildPolygonRoom(scene, worldState);
-  setupLighting(scene, worldState);
+  (buildPolygonRoom as any)(scene, worldState);
+  (setupLighting as any)(scene, worldState);
 
   // Furniture
+  let petMesh: THREE.Group | null = null;
+  const noCollisionTypes = new Set(['rug', 'ceilingLamp', 'door', 'window']);
   for (const f of ROOM_LAYOUT.furniture || []) {
     const entry = (FurnitureRegistry as any).get(f.type);
     if (!entry) continue;
     const result = entry.builder(f);
     const mesh = extractMeshFromResult(result);
     if (!mesh) continue;
-    mesh.position.set(f.position[0], f.position[1], f.position[2]);
-    mesh.rotation.y = f.rotation ?? 0;
-    scene.add(mesh);
-    worldState.room.interactables.push({ mesh, type: f.type, panelId: f.panelId });
+    (mesh as any).position.set(f.position[0], f.position[1], f.position[2] as any);
+    (mesh as any).rotation.y = f.rotation ?? 0;
+    scene.add(mesh as any);
+    worldState.room.interactables.push({ mesh: mesh as any, type: f.type, panelId: f.panelId });
+    if (f.type === 'miniSchnauzer') petMesh = mesh as THREE.Group;
+
+    // Collision: extract AABB from placed mesh
+    if (!f.noCollision && !noCollisionTypes.has(f.type)) {
+      const box = getWorldAABB(mesh as any);
+      const sizeX = box.max.x - box.min.x;
+      const sizeZ = box.max.z - box.min.z;
+      if (sizeX > 0.05 && sizeZ > 0.05) {
+        worldState.room.walls.push({
+          minX: box.min.x,
+          maxX: box.max.x,
+          minZ: box.min.z,
+          maxZ: box.max.z,
+        });
+      }
+    }
   }
 
   // Pet
-  const pet = new Pet(worldState.room.luluSpawn.x, worldState.room.luluSpawn.z);
+  const ls = (ROOM_LAYOUT as any).luluSpawn || (ROOM_LAYOUT as any).ls || [0, 0];
+  const luluPos = worldState.room.luluSpawn || { x: ls[0], z: ls[1] };
+  const pet = new (Pet as any)({ position: { x: luluPos.x, y: 0, z: luluPos.z } });
   worldState.pet.model = pet;
-  worldState.pet.mesh = pet.mesh;
-  scene.add(pet.mesh);
+  worldState.pet.mesh = petMesh || new THREE.Group();
+  if (petMesh) scene.add(petMesh);
 }

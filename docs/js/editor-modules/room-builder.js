@@ -111,7 +111,7 @@ export class RoomBuilder {
 
   _buildWalls(outline, wallColorHex, openings) {
     this._wallMaterial = new THREE.MeshStandardMaterial({ color: hexToInt(wallColorHex), flatShading: true, roughness: 1, metalness: 0 });
-    const { edges } = buildWallsFromOutline({
+    const edges = buildWallsFromOutline({
       outline,
       wallH: this._config.wallH,
       wallT: this._config.wallT,

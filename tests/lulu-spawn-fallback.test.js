@@ -3,33 +3,15 @@
  * miniSchnauzer furniture item is present.
  */
 
-
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import * as THREE from 'three';
-
-// Mock core.js to provide a layout without miniSchnauzer but with luluSpawn
-vi.mock('../docs/js/core.js', async () => {
-  const actual = await vi.importActual('../docs/js/core.js');
-  return {
-    ...actual,
-    ROOM_LAYOUT: {
-      ...actual.ROOM_LAYOUT,
-      furniture: actual.ROOM_LAYOUT.furniture.filter((f) => f.type !== 'miniSchnauzer'),
-      luluSpawn: [-0.5, -0.5],
-    },
-  };
-});
-
 import { buildLevel } from '../docs/js/level/index.js';
+import { createWorldState } from '../docs/js/domain/world-state.js';
 
 describe('buildLevel luluSpawn fallback', () => {
   it('spawns pet from luluSpawn when no miniSchnauzer furniture exists', () => {
-    const worldState = {
-      room: { walls: [], interactables: [] },
-      pet: { mesh: null, model: null },
-      effects: { implants: [], particles: [] },
-      input: {}, ui: {}, meta: {},
-    };
+    const worldState = createWorldState({ playerSpawn: [0.5, 0.5], playerHeight: 1.7 });
+    worldState.room.luluSpawn = { x: -0.5, z: -0.5 };
     const scene = new THREE.Scene();
     buildLevel(scene, worldState);
 

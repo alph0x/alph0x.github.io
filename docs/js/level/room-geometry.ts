@@ -23,7 +23,7 @@ export interface WallEdge {
   midZ: number;
   angle: number;
   len: number;
-  mesh: THREE.Group;
+  mesh: THREE.Mesh | THREE.Group;
 }
 
 export interface BuildWallsOptions {
@@ -66,23 +66,19 @@ export function buildWallsFromOutline(options: BuildWallsOptions): WallEdge[] {
 
     const edgeOpenings = getEdgeOpenings(openings, p1, p2, wallT);
 
-    const group = new THREE.Group();
-    group.position.set(midX, 0, midZ);
-    group.rotation.y = angle;
-
     if (!edgeOpenings || edgeOpenings.length === 0) {
       const mesh = new THREE.Mesh(new THREE.BoxGeometry(wallT, wallH, len), material);
-      mesh.position.set(0, wallH / 2, 0);
+      mesh.position.set(midX, wallH / 2, midZ);
+      mesh.rotation.y = angle;
       mesh.castShadow = true;
       mesh.receiveShadow = true;
-      group.add(mesh);
 
       if (collisionWalls) {
         const box = getWorldAABB(mesh);
         collisionWalls.push({ minX: box.min.x, maxX: box.max.x, minZ: box.min.z, maxZ: box.max.z });
       }
 
-      edges.push({ p1, p2, midX, midZ, angle, len, mesh: group });
+      edges.push({ p1, p2, midX, midZ, angle, len, mesh });
       continue;
     }
 
@@ -98,6 +94,10 @@ export function buildWallsFromOutline(options: BuildWallsOptions): WallEdge[] {
     }
     const zArr = Array.from(zCuts).sort((a, b) => a - b);
     const yArr = Array.from(yCuts).sort((a, b) => a - b);
+
+    const group = new THREE.Group();
+    group.position.set(midX, 0, midZ);
+    group.rotation.y = angle;
 
     const geometries: THREE.BufferGeometry[] = [];
     for (let zi = 0; zi < zArr.length - 1; zi++) {
