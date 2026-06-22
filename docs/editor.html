@@ -205,7 +205,7 @@
       </div>
     </div>
 
-    <div class="panel">
+    <div class="panel" id="exportPanel">
       <h2>Export Layout</h2>
       <button id="btnExport" style="width:100%; margin-bottom:8px; background:#1c1917; border:1px solid #44403c; color:#d6d3d1; padding:8px; border-radius:4px; font-size:11px; cursor:pointer;">Generate Seed</button>
       <textarea class="export-area" id="exportOutput" readonly placeholder="Click Generate to see output..."></textarea>
@@ -225,7 +225,18 @@
           <button id="btnLoadSlot3" class="slot-btn" style="flex:1; background:#1c1917; border:1px solid #44403c; color:#d6d3d1; padding:6px; border-radius:4px; font-size:10px; cursor:pointer;">Load 3</button>
         </div>
       </div>
-  </div>
+      <div style="margin-top:12px; border-top:1px solid #44403c; padding-top:8px;">
+        <h3 style="margin:0 0 6px; font-size:11px; text-transform:uppercase; color:#78716c;">Grid Snap</h3>
+        <label style="display:flex; align-items:center; gap:8px; font-size:11px; color:#d6d3d1;">
+          <input type="checkbox" id="snapToggle" checked>
+          Enable Snap
+        </label>
+        <label style="display:block; margin-top:6px; font-size:11px; color:#78716c;">
+          Grid Size
+          <input type="number" id="snapSize" value="0.05" step="0.01" min="0.01" max="1" style="width:100%; margin-top:4px; background:#1c1917; border:1px solid #44403c; color:#d6d3d1; padding:6px; border-radius:4px; font-size:11px;">
+        </label>
+      </div>
+    </div>
 
   <div id="canvas-wrap">
     <div id="error-display" style="display:none; position:absolute; bottom:12px; right:180px; background:#7f1d1d; border:1px solid #450a0a; color:#fff; padding:10px 14px; border-radius:6px; font-size:12px; max-width:400px; z-index:100; font-family:monospace;"></div>

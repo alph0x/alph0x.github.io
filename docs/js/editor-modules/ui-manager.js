@@ -23,6 +23,7 @@ export class EditorUIManager {
     this._bindExport();
     this._bindCopyLink();
     this._bindSaveSlots();
+    this._bindSnap();
   }
 
   deactivateAllTools() {
@@ -193,14 +194,26 @@ export class EditorUIManager {
     }
   }
 
+  _bindSnap() {
+    this._dom.snapToggle?.addEventListener('change', (e) => {
+      this._deps.onSnapToggle?.(e.target.checked);
+    });
+    this._dom.snapSize?.addEventListener('input', (e) => {
+      const v = parseFloat(e.target.value);
+      if (!isNaN(v) && v > 0) this._deps.onSnapSize?.(v);
+    });
+  }
+
   _bindToolToggle(btn, toolName, onToggle) {
     btn.addEventListener('click', () => {
-      const wasActive = this._state.activeTool === toolName;
-      this.deactivateAllTools();
-      if (!wasActive) {
+      if (this._state.activeTool === toolName) {
+        this._state.activeTool = null;
+        btn.classList.remove('active');
+      } else {
+        this.deactivateAllTools();
         this._state.activeTool = toolName;
         btn.classList.add('active');
-        if (onToggle) onToggle();
+        onToggle?.();
       }
     });
   }

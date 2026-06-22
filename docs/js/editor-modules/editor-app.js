@@ -128,6 +128,11 @@ export class EditorApp {
         onViewModeToggle: () => this._toggleViewMode(),
         onResetRect: () => this._resetRoom(),
         onExport: () => this.exportLayout(),
+        onCopyLink: () => this._copyShareableLink(),
+        onSaveSlot: (slot) => this._saveSlot(slot),
+        onLoadSlot: (slot) => this._loadSlot(slot),
+        onSnapToggle: (enabled) => this._setSnapEnabled(enabled),
+        onSnapSize: (size) => this._setSnapSize(size),
       },
     });
     this.uiManager.bindAll();
@@ -272,6 +277,16 @@ export class EditorApp {
     } else {
       this._domRefs.exportOutput.value = `Slot ${slot} is empty`;
     }
+  }
+
+  _setSnapEnabled(enabled) {
+    this.state.snapEnabled = enabled;
+    localStorage.setItem('editor-snap-enabled', String(enabled));
+  }
+
+  _setSnapSize(size) {
+    this.state.snapSize = size;
+    localStorage.setItem('editor-snap-size', String(size));
   }
 
   // ── Loop ──────────────────────────────────────────────────────

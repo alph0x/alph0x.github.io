@@ -31,7 +31,7 @@ const REQUIRED_IDS = [
   'error-display',
 ];
 
-const OPTIONAL_IDS = ['selX', 'selZ', 'selY', 'selYRange', 'selRot', 'selName', 'btnCopyLink', 'btnSaveSlot1', 'btnLoadSlot1', 'btnSaveSlot2', 'btnLoadSlot2', 'btnSaveSlot3', 'btnLoadSlot3'];
+const OPTIONAL_IDS = ['selX', 'selZ', 'selY', 'selYRange', 'selRot', 'selName', 'btnCopyLink', 'btnSaveSlot1', 'btnLoadSlot1', 'btnSaveSlot2', 'btnLoadSlot2', 'btnSaveSlot3', 'btnLoadSlot3', 'snapToggle', 'snapSize'];
 
 export function getEditorDomRefs() {
   const refs = {};
