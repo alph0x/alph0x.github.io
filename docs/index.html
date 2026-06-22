@@ -391,8 +391,14 @@
       <span>[CLICK] INTERACT</span>
       <span>[E] INTERACT</span>
     </div>
-    <button id="start-btn">ENTER</button>
+    <div style="display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;">
+      <button id="start-btn">ENTER</button>
+      <button id="tour-btn" style="font-family: 'Press Start 2P', monospace; font-size: 12px; color: #f59e0b; background: transparent; border: 2px solid #f59e0b; padding: 16px 40px; cursor: pointer; text-transform: uppercase; transition: all 0.2s;">TAKE A TOUR</button>
+    </div>
   </div>
+
+  <!-- Tour Skip Overlay -->
+  <button id="tour-skip" style="display: none; position: fixed; top: 20px; right: 20px; z-index: 5001; font-family: 'Press Start 2P', monospace; font-size: 10px; color: #0c0a09; background: #ec4899; border: none; padding: 12px 20px; cursor: pointer; text-transform: uppercase;">SKIP TOUR [ESC]</button>
 
   <!-- ── INFO PANELS ────────────────────────────────── -->
 

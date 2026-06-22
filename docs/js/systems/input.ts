@@ -14,6 +14,7 @@ interface GameLike {
   controls: PointerLockLike;
   interact(): void;
   closePanels(): void;
+  skipTour?(): void;
 }
 
 export class InputSystem {
@@ -97,6 +98,8 @@ export class InputSystem {
         case 'Escape':
           if (document.getElementById('legend')?.classList.contains('active')) {
             this._closeLegend();
+          } else if (this.game.skipTour && this.game.skipTour()) {
+            // handled active tour
           } else {
             this.game.closePanels();
           }
