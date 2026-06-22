@@ -5,7 +5,12 @@
  * Designed to feel like a retro terminal AI.
  */
 
-const KNOWLEDGE_BASE = {
+interface IntentEntry {
+  keywords: string[];
+  responses: string[];
+}
+
+const KNOWLEDGE_BASE: Record<string, IntentEntry> = {
   greeting: {
     keywords: ['hello', 'hi', 'hey', 'hola', 'sup', 'yo'],
     responses: [
@@ -73,13 +78,13 @@ const KNOWLEDGE_BASE = {
   },
 };
 
-const FALLBACK_RESPONSES = [
+const FALLBACK_RESPONSES: string[] = [
   "I'm not sure I understood that. Try asking about Alfredo's skills, experience, projects, or how to contact him.",
   "Hmm, my neural nets are still training on that topic. Ask me about his tech stack, work history, or say 'help' for options.",
   "That's beyond my current dataset. I know a lot about Alfredo's engineering career though — want to hear about it?",
 ];
 
-function tokenize(text) {
+function tokenize(text: string): string[] {
   return text
     .toLowerCase()
     .replace(/[^a-z0-9\s]/g, ' ')
@@ -87,9 +92,15 @@ function tokenize(text) {
     .filter((t) => t.length > 1);
 }
 
-const GENERIC_WORDS = new Set(['who', 'is', 'are', 'about', 'me', 'your', 'the', 'a', 'an', 'my', 'i', 'you', 'he', 'she', 'it', 'this', 'that', 'what', 'how', 'where', 'when', 'why', 'can', 'do', 'does', 'did', 'have', 'has', 'had', 'be', 'been', 'being', 'am', 'was', 'were', 'will', 'would', 'could', 'should', 'may', 'might']);
+const GENERIC_WORDS: Record<string, true> = {
+  who: true, is: true, are: true, about: true, me: true, your: true, the: true, a: true, an: true,
+  my: true, i: true, you: true, he: true, she: true, it: true, this: true, that: true,
+  what: true, how: true, where: true, when: true, why: true, can: true, do: true, does: true,
+  did: true, have: true, has: true, had: true, be: true, been: true, being: true, am: true,
+  was: true, were: true, will: true, would: true, could: true, should: true, may: true, might: true,
+};
 
-function scoreIntent(tokens, keywords) {
+function scoreIntent(tokens: string[], keywords: string[]): { score: number; matches: number } {
   const text = tokens.join('');
   let score = 0;
   let matches = 0;
@@ -103,7 +114,7 @@ function scoreIntent(tokens, keywords) {
         matched = true;
       }
     } else if (tokens.includes(kw)) {
-      score += GENERIC_WORDS.has(kw) ? 1 : 3;
+      score += GENERIC_WORDS[kw] ? 1 : 3;
       matched = true;
     }
     if (matched) matches++;
@@ -111,27 +122,26 @@ function scoreIntent(tokens, keywords) {
   return { score, matches };
 }
 
-function pickResponse(intent) {
+function pickResponse(intent: string): string {
   const entry = KNOWLEDGE_BASE[intent];
+  if (!entry) return pickFallback();
   const idx = Math.floor(Math.random() * entry.responses.length);
   return entry.responses[idx];
 }
 
-function pickFallback() {
+function pickFallback(): string {
   const idx = Math.floor(Math.random() * FALLBACK_RESPONSES.length);
   return FALLBACK_RESPONSES[idx];
 }
 
-/**
- * @param {string} userText — raw user input
- * @param {string|null} lastIntent — previous recognized intent (for context)
- * @returns {{ text: string, intent: string|null }}
- */
-export function askAlphGPT(userText, lastIntent = null) {
+export function askAlphGPT(
+  userText: string,
+  lastIntent: string | null = null
+): { text: string; intent: string | null } {
   const tokens = tokenize(userText);
   if (tokens.length === 0) return { text: pickFallback(), intent: null };
 
-  let bestIntent = null;
+  let bestIntent: string | null = null;
   let bestScore = 0;
   let bestMatches = 0;
 
@@ -150,7 +160,7 @@ export function askAlphGPT(userText, lastIntent = null) {
     bestScore = 1;
   }
 
-  if (bestScore === 0) {
+  if (bestScore === 0 || !bestIntent) {
     return { text: pickFallback(), intent: null };
   }
 

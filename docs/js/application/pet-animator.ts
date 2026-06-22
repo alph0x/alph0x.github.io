@@ -5,19 +5,14 @@
  *      All functions are deterministic and testable without mocks.
  */
 
+import type { Pet, Vec3 } from '../domain/pet.js';
+
 const MAX_HEAD_TURN = 0.5;
 const SMOOTH_FACTOR = 0.12;
 const EXCITE_DISTANCE = 1.0;
 const LOSE_INTEREST_DISTANCE = 2.5;
 
-/**
- * Main entry. Mutates `pet` with new animation state.
- *
- * @param {Pet} pet
- * @param {{x:number,y:number,z:number}} playerPosition
- * @param {number} timeS — elapsed time in seconds
- */
-export function updatePetAnimation(pet, playerPosition, timeS) {
+export function updatePetAnimation(pet: Pet, playerPosition: Vec3, timeS: number): void {
   const dx = playerPosition.x - pet.position.x;
   const dz = playerPosition.z - pet.position.z;
   pet.distToPlayer = Math.sqrt(dx * dx + dz * dz);
@@ -31,14 +26,14 @@ export function updatePetAnimation(pet, playerPosition, timeS) {
 
 /* ── Breathing ─────────────────────────────────────────────────────── */
 
-function updateBreathing(pet, timeS) {
+function updateBreathing(pet: Pet, timeS: number): void {
   const breathAmp = pet.isExcited ? 0.025 : 0.015;
   pet.breathScale = 1 + Math.sin(timeS * 2) * breathAmp;
 }
 
 /* ── Tail ──────────────────────────────────────────────────────────── */
 
-function updateTail(pet, timeS) {
+function updateTail(pet: Pet, timeS: number): void {
   const speed = pet.isExcited ? 12 : 7;
   const ampZ = pet.isExcited ? 0.15 : 0.08;
   const ampY = pet.isExcited ? 0.12 : 0.06;
@@ -48,7 +43,7 @@ function updateTail(pet, timeS) {
 
 /* ── Ears ──────────────────────────────────────────────────────────── */
 
-function updateEars(pet, timeS) {
+function updateEars(pet: Pet, timeS: number): void {
   if (pet.isExcited) {
     pet.earLRotationZ = -0.05 + Math.sin(timeS * 3) * 0.03;
     pet.earRRotationZ = -0.05 - Math.sin(timeS * 3) * 0.03;
@@ -61,7 +56,7 @@ function updateEars(pet, timeS) {
 
 /* ── Head look ─────────────────────────────────────────────────────── */
 
-function updateHead(pet, playerPosition) {
+function updateHead(pet: Pet, playerPosition: Vec3): void {
   if (pet.distToPlayer > LOSE_INTEREST_DISTANCE) {
     // Return to neutral when player is far away
     pet.headRotation += (0 - pet.headRotation) * SMOOTH_FACTOR;
@@ -85,7 +80,7 @@ function updateHead(pet, playerPosition) {
   const rightZ = -Math.cos(pet.bodyRotation);
   const dotRight = dx * rightX + dz * rightZ;
 
-  let clamped;
+  let clamped: number;
   if (Math.abs(targetY) > Math.PI - MAX_HEAD_TURN) {
     // Player is behind the pet — pick the side they are actually on
     clamped = dotRight > 0 ? -MAX_HEAD_TURN : MAX_HEAD_TURN;

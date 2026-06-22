@@ -3,7 +3,7 @@
  * stable even when the runtime layout changes.
  */
 
-import { serializeLayout } from '../docs/js/seed.js';
+import { serializeLayout } from '../docs/js/seed.ts';
 
 export const MOCK_OUTLINE = [
   [-2.25, -1.75],

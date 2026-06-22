@@ -1,9 +1,10 @@
 import * as THREE from 'three';
 import { makeBox, makeLight } from '../primitives.js';
 
-export function buildCityscape(cfg) {
+export function buildCityscape(cfg: { position: number[] }): THREE.Group {
+  const [cx, , cz] = cfg.position as [number, number, number];
   const cityGroup = new THREE.Group();
-  cityGroup.position.set(cfg.position[0], 0, cfg.position[2] - 10);
+  cityGroup.position.set(cx, 0, cz - 10);
   const bldgColors = [0x1a1a1e, 0x111114, 0x0d0d12, 0x151518, 0x1a1518];
   const winColors = [0xec4899, 0x06b6d4, 0xf59e0b, 0x7c3aed, 0x10b981, 0xffffff];
   for (let i = 0; i < 30; i++) {

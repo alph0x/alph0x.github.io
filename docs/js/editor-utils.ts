@@ -5,22 +5,24 @@
 
 import * as THREE from 'three';
 
-export function snap(v, gridSize = 0.05) {
+export function snap(v: number, gridSize = 0.05): number {
   return Math.round(v / gridSize) * gridSize;
 }
 
-export function hexToInt(hex) {
+export function hexToInt(hex: string): number {
   return parseInt(hex.replace('#', ''), 16);
 }
 
-export function extractMeshFromResult(result) {
-  if (result && result.mesh) return result.mesh;
+export function extractMeshFromResult(
+  result: THREE.Mesh | THREE.Group | [THREE.Mesh | THREE.Group, unknown] | { mesh?: THREE.Mesh | THREE.Group } | null | undefined
+): THREE.Mesh | THREE.Group | null {
+  if (result && typeof result === 'object' && 'mesh' in result && result.mesh) return result.mesh;
   if (Array.isArray(result) && result[0]) return result[0];
   if (result instanceof THREE.Mesh || result instanceof THREE.Group) return result;
   return null;
 }
 
-export function buildPolygonShape(outline) {
+export function buildPolygonShape(outline: [number, number][]): THREE.Shape {
   const shape = new THREE.Shape();
   shape.moveTo(outline[0][0], outline[0][1]);
   for (let i = 1; i < outline.length; i++) {
@@ -30,8 +32,11 @@ export function buildPolygonShape(outline) {
   return shape;
 }
 
-export function getClosestEdgePoint(point, outline) {
-  let best = null;
+export function getClosestEdgePoint(
+  point: THREE.Vector3,
+  outline: [number, number][]
+): { index: number; point: [number, number] } | null {
+  let best: { index: number; point: [number, number] } | null = null;
   let bestDist = Infinity;
   for (let i = 0; i < outline.length; i++) {
     const p1 = new THREE.Vector3(outline[i][0], 0, outline[i][1]);
@@ -52,7 +57,7 @@ export function getClosestEdgePoint(point, outline) {
   return best && bestDist < 0.5 ? best : null;
 }
 
-export function fitMeshToPreview(mesh, targetSize = 1.2) {
+export function fitMeshToPreview(mesh: THREE.Mesh | THREE.Group, targetSize = 1.2): void {
   const box = new THREE.Box3().setFromObject(mesh);
   const center = new THREE.Vector3();
   box.getCenter(center);
@@ -66,26 +71,40 @@ export function fitMeshToPreview(mesh, targetSize = 1.2) {
   mesh.position.y += (size.y * scale) / 2;
 }
 
-export function normalizeRotation(rad) {
+export function normalizeRotation(rad: number): number {
   const twoPi = Math.PI * 2;
   return ((rad % twoPi) + twoPi) % twoPi;
 }
 
+interface Opening {
+  x: number;
+  z: number;
+  width: number;
+  height: number;
+  bottom: number;
+  t?: number;
+}
+
 /**
  * Map architectural openings (doors/windows) to a specific wall edge.
- * @param {Array<{x:number,z:number,width:number,height:number,bottom:number}>} openings
- * @param {Array<number>} p1 — edge start [x, z]
- * @param {Array<number>} p2 — edge end [x, z]
- * @param {number} wallT — wall thickness
- * @returns {Array<{t:number,width:number,height:number,bottom:number}>} openings projected onto the edge, sorted by distance from p1.
+ * @param openings — list of openings
+ * @param p1 — edge start [x, z]
+ * @param p2 — edge end [x, z]
+ * @param wallT — wall thickness
+ * @returns openings projected onto the edge, sorted by distance from p1.
  */
-export function getEdgeOpenings(openings, p1, p2, wallT) {
+export function getEdgeOpenings(
+  openings: Opening[],
+  p1: [number, number],
+  p2: [number, number],
+  wallT: number
+): Opening[] {
   const dx = p2[0] - p1[0];
   const dz = p2[1] - p1[1];
   const len = Math.sqrt(dx * dx + dz * dz);
   if (len < 0.01) return [];
 
-  const result = [];
+  const result: Opening[] = [];
   for (const o of openings) {
     const px = o.x - p1[0];
     const pz = o.z - p1[1];
@@ -97,18 +116,18 @@ export function getEdgeOpenings(openings, p1, p2, wallT) {
       result.push({ ...o, t: Math.max(0, Math.min(len, t)) });
     }
   }
-  return result.sort((a, b) => a.t - b.t);
+  return result.sort((a, b) => (a.t ?? 0) - (b.t ?? 0));
 }
 
 // ── Polygon validation ──────────────────────────────────────────
 
-function orientation(p, q, r) {
+function orientation(p: [number, number], q: [number, number], r: [number, number]): number {
   const val = (q[1] - p[1]) * (r[0] - q[0]) - (q[0] - p[0]) * (r[1] - q[1]);
   if (Math.abs(val) < 1e-9) return 0;
   return val > 0 ? 1 : 2;
 }
 
-function onSegment(p, q, r) {
+function onSegment(p: [number, number], q: [number, number], r: [number, number]): boolean {
   return (
     q[0] <= Math.max(p[0], r[0]) + 1e-9 &&
     q[0] >= Math.min(p[0], r[0]) - 1e-9 &&
@@ -117,7 +136,12 @@ function onSegment(p, q, r) {
   );
 }
 
-function segmentsIntersect(p1, p2, p3, p4) {
+function segmentsIntersect(
+  p1: [number, number],
+  p2: [number, number],
+  p3: [number, number],
+  p4: [number, number]
+): boolean {
   const o1 = orientation(p1, p2, p3);
   const o2 = orientation(p1, p2, p4);
   const o3 = orientation(p3, p4, p1);
@@ -133,16 +157,18 @@ function segmentsIntersect(p1, p2, p3, p4) {
   return false;
 }
 
-/**
- * Extract architectural openings (doors/windows) from placed furniture list.
- * Pure function — no side effects.
- */
+interface OpeningDims {
+  width: number;
+  height: number;
+  bottomOffset: number;
+}
+
 /**
  * Calculate the structural bounding box of a furniture mesh for wall-opening purposes.
  * Excludes decorative/parallax children (e.g. cityscape backdrops).
  * Operates on a zeroed clone so rotation/position of the wrapper don't distort sizes.
  */
-export function calculateMeshOpeningDims(mesh) {
+export function calculateMeshOpeningDims(mesh: THREE.Mesh | THREE.Group): OpeningDims {
   const clone = mesh.clone();
   clone.position.set(0, 0, 0);
   clone.rotation.set(0, 0, 0);
@@ -150,9 +176,9 @@ export function calculateMeshOpeningDims(mesh) {
 
   const box = new THREE.Box3();
 
-  function visit(node) {
+  function visit(node: THREE.Object3D): void {
     if (node.userData?._parallax) return;
-    if (node.isMesh && node.geometry) {
+    if ((node as THREE.Mesh).isMesh && (node as THREE.Mesh).geometry) {
       box.expandByObject(node);
     }
     for (const child of node.children) {
@@ -172,19 +198,28 @@ export function calculateMeshOpeningDims(mesh) {
   };
 }
 
+interface PlacedItem {
+  type: string;
+  mesh?: THREE.Mesh | THREE.Group;
+  config: {
+    position: [number, number, number];
+    _openingDims?: OpeningDims;
+  };
+}
+
 /**
  * Extract architectural openings (doors/windows) from placed furniture list.
  * Dimensions are read from the cached _openingDims config when available;
  * otherwise computed dynamically from the mesh bounding box.
  * Pure function — no side effects.
  */
-export function getCurrentOpenings(placed) {
+export function getCurrentOpenings(placed: PlacedItem[]): Opening[] {
   return placed
     .filter((p) => p.type === 'door' || p.type === 'window')
     .map((p) => {
       // Always recalculate from the live mesh so stale cached values (e.g. after
       // calculateMeshOpeningDims bug fixes) do not corrupt wall geometry.
-      const dims = p.mesh ? calculateMeshOpeningDims(p.mesh) : (p.config?._openingDims || null);
+      const dims: OpeningDims | null = p.mesh ? calculateMeshOpeningDims(p.mesh) : (p.config._openingDims ?? null);
       const width = dims?.width ?? (p.type === 'door' ? 1.6 : 2.0);
       const height = dims?.height ?? (p.type === 'door' ? 2.3 : 1.3);
       const bottomOffset = dims?.bottomOffset ?? 0;
@@ -202,7 +237,7 @@ export function getCurrentOpenings(placed) {
  * Count how many edges of an outline are axis-parallel (horizontal or vertical).
  * Pure function — no side effects.
  */
-export function countAxisParallel(outline, epsilon = 0.01) {
+export function countAxisParallel(outline: [number, number][], epsilon = 0.01): number {
   let count = 0;
   for (let i = 0; i < outline.length; i++) {
     const p1 = outline[i];
@@ -218,7 +253,7 @@ export function countAxisParallel(outline, epsilon = 0.01) {
  * Calculate room width, depth, and edge count from an outline.
  * Pure function — no side effects.
  */
-export function calculateRoomDimensions(outline) {
+export function calculateRoomDimensions(outline: [number, number][]): { width: number; depth: number; totalEdges: number } {
   const xs = outline.map((v) => v[0]);
   const zs = outline.map((v) => v[1]);
   const width = Math.max(...xs) - Math.min(...xs);
@@ -234,7 +269,7 @@ export function calculateRoomDimensions(outline) {
  * Format export string from a serialized seed.
  * Pure function — no side effects.
  */
-export function formatExportOutput(seed) {
+export function formatExportOutput(seed: string): string {
   return [
     `// ── Seed (copy this into core.js as DEFAULT_SEED) ─────────────`,
     `export const DEFAULT_SEED = '${seed}';`,
@@ -245,7 +280,7 @@ export function formatExportOutput(seed) {
   ].join('\n');
 }
 
-export function isSelfIntersecting(outline) {
+export function isSelfIntersecting(outline: [number, number][]): boolean {
   const n = outline.length;
   if (n < 4) return false;
   for (let i = 0; i < n; i++) {

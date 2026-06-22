@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { CFG } from '../core.js';
 
-export function createSceneAndCamera() {
+export function createSceneAndCamera(): { scene: THREE.Scene; camera: THREE.Camera } {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x1a1a2e);
   scene.fog = new THREE.FogExp2(0x1a1a2e, 0.015);
@@ -12,7 +12,7 @@ export function createSceneAndCamera() {
   return { scene, camera };
 }
 
-export function createWebGLRenderer() {
+export function createWebGLRenderer(): THREE.WebGLRenderer {
   const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'low-power' });
   renderer.setClearColor(0x1a1a2e);
   renderer.setSize(window.innerWidth, window.innerHeight, false);

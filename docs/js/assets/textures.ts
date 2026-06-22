@@ -1,9 +1,13 @@
 import * as THREE from 'three';
 
-function makeTexture(w, h, drawFn) {
+function makeTexture(
+  w: number,
+  h: number,
+  drawFn: (ctx: CanvasRenderingContext2D, w: number, h: number) => void
+): THREE.CanvasTexture {
   const c = document.createElement('canvas');
   c.width = w; c.height = h;
-  const ctx = c.getContext('2d');
+  const ctx = c.getContext('2d')!;
   drawFn(ctx, w, h);
   const tex = new THREE.CanvasTexture(c);
   tex.magFilter = THREE.NearestFilter;
@@ -54,4 +58,3 @@ export const texWood = makeTexture(64, 64, (ctx, w, h) => {
   ctx.strokeStyle = 'rgba(0,0,0,0.3)';
   for (let i = 0; i < 8; i++) { ctx.beginPath(); ctx.moveTo(0, (Math.random() * h) | 0); ctx.lineTo(w, (Math.random() * h) | 0); ctx.stroke(); }
 });
-

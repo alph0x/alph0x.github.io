@@ -7,17 +7,16 @@
  */
 
 import { CFG, computeMovementVector, resolveMove } from '../core.js';
+import type { Player } from '../domain/player.js';
+import type { Wall } from '../core.js';
 
-/**
- * Main entry. Mutates `player.position` and `player.isMoving`.
- *
- * @param {Player} player
- * @param {{moveForward:boolean,moveBackward:boolean,moveLeft:boolean,moveRight:boolean}} input
- * @param {{x:number,z:number}} cameraForward — normalized forward vector on XZ plane
- * @param {Array<{minX:number,maxX:number,minZ:number,maxZ:number}>} walls
- * @param {number} delta — time step in seconds
- */
-export function updatePlayerMovement(player, input, cameraForward, walls, delta) {
+export function updatePlayerMovement(
+  player: Player,
+  input: { moveForward: boolean; moveBackward: boolean; moveLeft: boolean; moveRight: boolean },
+  cameraForward: { x: number; z: number },
+  walls: Wall[],
+  delta: number
+): void {
   const isDiagonal = (input.moveForward && (input.moveLeft || input.moveRight)) ||
                      (input.moveBackward && (input.moveLeft || input.moveRight));
   const speed = isDiagonal ? CFG.runSpeed * 0.85 : CFG.speed;
@@ -27,9 +26,8 @@ export function updatePlayerMovement(player, input, cameraForward, walls, delta)
     input.moveBackward,
     input.moveLeft,
     input.moveRight,
-    cameraForward
+    { x: cameraForward.x, y: 0, z: cameraForward.z }
   );
-
   const dx = moveDir.x * speed * delta;
   const dz = moveDir.z * speed * delta;
 

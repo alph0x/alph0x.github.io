@@ -6,7 +6,7 @@ import * as THREE from 'three';
 import { COLORS } from '../core.js';
 import { makeLight } from '../primitives.js';
 
-export function setupLighting(scene) {
+export function setupLighting(scene: THREE.Scene): void {
   // PSX: very high ambient so flat-shaded Lambert materials stay visible
   scene.add(new THREE.AmbientLight(0x8080a0, 3.0));
   scene.add(new THREE.HemisphereLight(0x90a0c0, 0x505070, 2.0));

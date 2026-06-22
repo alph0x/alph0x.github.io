@@ -6,6 +6,7 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { buildPolygonShape, hexToInt, getEdgeOpenings } from '../editor-utils.js';
+import { buildWallsFromOutline } from '../level/room-geometry.js';
 
 export class RoomBuilder {
   /**
@@ -110,92 +111,21 @@ export class RoomBuilder {
 
   _buildWalls(outline, wallColorHex, openings) {
     this._wallMaterial = new THREE.MeshStandardMaterial({ color: hexToInt(wallColorHex), flatShading: true, roughness: 1, metalness: 0 });
-    for (let i = 0; i < outline.length; i++) {
-      const p1 = outline[i];
-      const p2 = outline[(i + 1) % outline.length];
-      const edgeOpenings = getEdgeOpenings(openings, p1, p2, this._config.wallT);
-      const wallMesh = this._buildWallSegment(p1, p2, this._wallMaterial, edgeOpenings);
-      if (wallMesh) {
-        this._roomGroup.add(wallMesh);
-        this._wallMeshes.push({ mesh: wallMesh, mid: wallMesh.position.clone() });
-      }
+    const { edges } = buildWallsFromOutline({
+      outline,
+      wallH: this._config.wallH,
+      wallT: this._config.wallT,
+      material: this._wallMaterial,
+      openings,
+    });
+    for (const edge of edges) {
+      this._roomGroup.add(edge.mesh);
+      this._wallMeshes.push({ mesh: edge.mesh, mid: edge.mesh.position.clone() });
     }
   }
 
   _buildWallSegment(p1, p2, material, edgeOpenings) {
-    const dx = p2[0] - p1[0];
-    const dz = p2[1] - p1[1];
-    const len = Math.sqrt(dx * dx + dz * dz);
-    if (len < 0.01) return null;
-
-    const midX = (p1[0] + p2[0]) / 2;
-    const midZ = (p1[1] + p2[1]) / 2;
-    const angle = Math.atan2(dx, dz);
-    const wallH = this._config.wallH;
-    const wallT = this._config.wallT;
-
-    if (!edgeOpenings || edgeOpenings.length === 0) {
-      const mesh = new THREE.Mesh(
-        new THREE.BoxGeometry(wallT, wallH, len),
-        material
-      );
-      mesh.position.set(midX, wallH / 2, midZ);
-      mesh.rotation.y = angle;
-      return mesh;
-    }
-
-    const group = new THREE.Group();
-    group.position.set(midX, 0, midZ);
-    group.rotation.y = angle;
-    const geometries = [];
-
-    // 2D subdivision: collect Z and Y cuts, then emit cells that are NOT inside any opening
-    const zCuts = new Set([-len / 2, len / 2]);
-    const yCuts = new Set([0, wallH]);
-    for (const o of edgeOpenings) {
-      const zLocal = o.t - len / 2;
-      zCuts.add(zLocal - o.width / 2);
-      zCuts.add(zLocal + o.width / 2);
-      yCuts.add(o.bottom);
-      yCuts.add(o.bottom + o.height);
-    }
-    const zArr = Array.from(zCuts).sort((a, b) => a - b);
-    const yArr = Array.from(yCuts).sort((a, b) => a - b);
-
-    for (let zi = 0; zi < zArr.length - 1; zi++) {
-      const z1 = zArr[zi];
-      const z2 = zArr[zi + 1];
-      const zMid = (z1 + z2) / 2;
-      for (let yi = 0; yi < yArr.length - 1; yi++) {
-        const y1 = yArr[yi];
-        const y2 = yArr[yi + 1];
-        const yMid = (y1 + y2) / 2;
-
-        let insideOpening = false;
-        for (const o of edgeOpenings) {
-          const zLocal = o.t - len / 2;
-          if (zMid >= zLocal - o.width / 2 && zMid <= zLocal + o.width / 2 &&
-              yMid >= o.bottom && yMid <= o.bottom + o.height) {
-            insideOpening = true;
-            break;
-          }
-        }
-
-        if (!insideOpening && z2 - z1 > 0.001 && y2 - y1 > 0.001) {
-          const geo = new THREE.BoxGeometry(wallT, y2 - y1, z2 - z1);
-          geo.translate(0, (y1 + y2) / 2, (z1 + z2) / 2);
-          geometries.push(geo);
-        }
-      }
-    }
-
-    if (geometries.length > 0) {
-      const mergedGeo = mergeGeometries(geometries);
-      for (const g of geometries) g.dispose();
-      const mesh = new THREE.Mesh(mergedGeo, material);
-      group.add(mesh);
-    }
-
-    return group;
+    // ponytail: inlined into shared buildWallsFromOutline
+    return null;
   }
 }

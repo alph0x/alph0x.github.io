@@ -6,14 +6,12 @@
  */
 
 import * as THREE from 'three';
+import type { Player } from '../domain/player.js';
 
 /**
  * Extract the camera's forward direction, flattened to the XZ plane.
- *
- * @param {THREE.Camera} camera
- * @returns {{x:number,z:number}} normalized forward vector
  */
-export function extractCameraForwardXZ(camera) {
+export function extractCameraForwardXZ(camera: THREE.Camera): { x: number; z: number } {
   const forward = new THREE.Vector3();
   camera.getWorldDirection(forward);
   forward.y = 0;
@@ -23,10 +21,7 @@ export function extractCameraForwardXZ(camera) {
 
 /**
  * Copy the player's position into the camera.
- *
- * @param {Player} player
- * @param {THREE.Camera} camera
  */
-export function syncPlayerToCamera(player, camera) {
+export function syncPlayerToCamera(player: Player, camera: THREE.Camera): void {
   camera.position.set(player.position.x, player.position.y, player.position.z);
 }

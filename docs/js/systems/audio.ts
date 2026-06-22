@@ -3,12 +3,29 @@
  * Uses Web Audio API with lazy initialization (required for browser autoplay policy).
  */
 
+declare const webkitAudioContext: typeof AudioContext | undefined;
+
+interface AmbientNode {
+  master: GainNode;
+  osc1: OscillatorNode;
+  osc2: OscillatorNode;
+  gain1: GainNode;
+  gain2: GainNode;
+}
+
 export class AudioSystem {
+  private _ctx: AudioContext | null;
+  private _ambientNode: AmbientNode | null;
+  private _stepTimer: number;
+  private _stepInterval: number;
+  private _isMoving: boolean;
+  private _resumeHandler: (() => void) | null;
+
   constructor() {
     this._ctx = null;
     this._ambientNode = null;
     this._stepTimer = 0;
-    this._stepInterval = 0.42; // seconds between steps
+    this._stepInterval = 0.42;
     this._isMoving = false;
     this._resumeHandler = null;
   }
@@ -16,12 +33,12 @@ export class AudioSystem {
   // ── Public API ──────────────────────────────────────────────────
 
   /** Call when player starts moving. */
-  setMoving(isMoving) {
+  setMoving(isMoving: boolean): void {
     this._isMoving = isMoving;
   }
 
   /** Update loop — call every frame with delta time. */
-  update(delta) {
+  update(delta: number): void {
     if (!this._isMoving) {
       this._stepTimer = 0;
       return;
@@ -41,11 +58,11 @@ export class AudioSystem {
   }
 
   /** Start ambient drone (idempotent). */
-  startAmbient() {
+  startAmbient(): void {
     if (!this._ensureContext()) return;
     if (this._ambientNode) return;
 
-    const ctx = this._ctx;
+    const ctx = this._ctx!;
     const master = ctx.createGain();
     master.gain.value = 0.025;
     master.connect(ctx.destination);
@@ -76,23 +93,27 @@ export class AudioSystem {
   }
 
   /** Stop ambient drone. */
-  stopAmbient() {
+  stopAmbient(): void {
     if (!this._ambientNode) return;
     try {
       this._ambientNode.osc1.stop();
       this._ambientNode.osc2.stop();
-    } catch { /* may already be stopped */ }
+    } catch {
+      /* may already be stopped */
+    }
     this._ambientNode = null;
   }
 
   // ── Private ─────────────────────────────────────────────────────
 
-  _ensureContext() {
+  private _ensureContext(): boolean {
     if (this._ctx) return true;
     if (typeof AudioContext === 'undefined' && typeof webkitAudioContext === 'undefined') {
       return false;
     }
     const AC = typeof AudioContext !== 'undefined' ? AudioContext : webkitAudioContext;
+    if (!AC) return false;
+
     this._ctx = new AC();
 
     // Auto-resume on first user interaction (browser autoplay policy)
@@ -107,10 +128,10 @@ export class AudioSystem {
     return true;
   }
 
-  _playStep() {
-    const ctx = this._ctx;
+  private _playStep(): void {
+    const ctx = this._ctx!;
     const sampleRate = ctx.sampleRate;
-    const duration = 0.08; // 80ms
+    const duration = 0.08;
     const samples = Math.floor(sampleRate * duration);
 
     const buffer = ctx.createBuffer(1, samples, sampleRate);
@@ -147,10 +168,10 @@ export class AudioSystem {
     };
   }
 
-  _updateAmbient() {
+  private _updateAmbient(): void {
     if (!this._ambientNode) return;
     // Subtle volume modulation for "alive" feel
-    const t = this._ctx.currentTime;
+    const t = this._ctx!.currentTime;
     const baseVol = 0.025;
     const variation = Math.sin(t * 0.3) * 0.005;
     this._ambientNode.master.gain.setValueAtTime(baseVol + variation, t);

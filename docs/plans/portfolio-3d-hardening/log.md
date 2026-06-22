@@ -78,22 +78,31 @@ ALPH0X Drone explicitly discarded.
 
 Plan finalized at 25 points across Foundation, Cleanup, Core, Product, and Verification phases.
 
-## 2026-06-22 — Foundation started
-
-- Point 1 complete: removed HP/MP HUD blocks, changed loading text to `LOADING...`, added click-outside-to-close, `:focus-visible`, and `prefers-reduced-motion` support. Added `tests/interaction.test.js` (5 tests). All 451 tests pass.
-- Point 2 complete: refreshed `AGENTS.md` to a one-page onboarding brief.
-- Moving to Point 3 (Ponytail cleanup).
-
-## 2026-06-22 — Point 3 complete (Ponytail cleanup)
-
-- Deleted dead renderer modules, `level/decorations/*`, legacy furniture builders, `contract.js`, `test-calc-dims.mjs`, and dead animation modules.
-- Removed unused asset exports (`M.concrete`, `texConcrete`, `makeTexture`) and dead state fields.
-- Unified poster/fairyLights into regular furniture array in seed serialization.
-- Removed redundant `setup-canvas-mock.js` imports from 25 test files.
-- All 447 tests pass.
-
 ## 2026-06-22 — Foundation checkpoint
 
-- Points 1–4 complete and committed.
-- Point 5 (TypeScript full migration) started but paused: mechanical rename of 87 files is straightforward, but resolving ~1,900 strict-mode type errors requires a dedicated session. Board updated to 🟡 in progress.
-- Next: finish Point 5, then proceed to Cleanup/Core/Product phases.
+- UI quick wins, AGENTS.md refresh, ponytail cleanup, TypeScript toolchain complete and committed.
+- TypeScript migration started but paused: mechanical rename of 87 files is straightforward, but resolving ~1,900 strict-mode type errors requires a dedicated session.
+- Next: finish migration, then proceed to shared room geometry, rendering quality, and visual fidelity.
+
+## 2026-06-22 — TypeScript migration resumed (staged)
+
+- Re-evaluated migration strategy: instead of bulk-renaming 87 files, staged approach converting highest-import modules first.
+- **Batch 1 complete** (6 files): `domain/pet.ts`, `domain/player.ts`, `domain/world-state.ts`, `core.ts`, `seed.ts`, `primitives.ts`.
+- **Batch 2 complete** (7 files): `assets/textures.ts`, `assets/materials.ts`, `assets/index.ts`, `furniture/registry.ts`, `editor-utils.ts`, `application/player-movement.ts`, `application/pet-animator.ts`.
+- **Batch 3 complete** (15 files): `infrastructure/pet-renderer.ts`, `infrastructure/player-renderer.ts`, `renderer/index.ts`, `renderer/setup.ts`, `systems/loading.ts`, `systems/touch-controls.ts`, `systems/audio.ts`, `systems/input.ts`, `systems/interaction.ts`, `systems/alphgpt.ts`, `level/index.ts`, `level/lighting.ts`, `level/room.ts`, `level/window.ts`, `level/cityscape.ts`.
+- **Shared room geometry extracted**: `buildWallsFromOutline()` moved to `level/room-geometry.ts`, used by both `level/index.ts` and `editor-modules/room-builder.js`.
+- Total: **28 files converted**, 59 JS files remain.
+- All 447 tests pass, `npm run typecheck` green.
+- **Paused at user request** before Batch 4 (furniture/builders/ — 35 files).
+- Next remaining batches when resumed:
+  - Batch 4: furniture/builders/ (35 files)
+  - Batch 5: editor-modules/ (15 files)
+  - Batch 6: top-level (app.js, game.js, editor.js) + remaining
+  - Final: remove `allowJs` from tsconfig, convert tests to .ts
+
+## 2026-06-22 — Rendering quality raised
+
+- `renderer/setup.ts`: adaptive DPR (cap 2), `PCFSoftShadowMap`, `ACESFilmicToneMapping`, `high-performance` on desktop.
+- `systems/loading.ts`: real milestone tracking (renderer, builders, level), skip on click/space, fake interval removed.
+- All tests pass, typecheck green.
+

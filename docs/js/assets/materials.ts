@@ -2,19 +2,30 @@ import * as THREE from 'three';
 import { COLORS } from '../core.js';
 import { texWall, texFloor, texCeiling, texTerminal, texWood } from './textures.js';
 
-/**
- * PSX-style material factory.
- * Uses MeshStandardMaterial with roughness=1 for flat, visible lighting.
- * flatShading creates the faceted low-poly look.
- */
-export function makeStd({ color, map, emissive = 0x000000, emissiveIntensity = 1, roughness = 1, metalness = 0 }) {
-  const params = { flatShading: true, roughness, metalness, emissive, emissiveIntensity };
+interface StdParams {
+  color?: THREE.ColorRepresentation;
+  map?: THREE.Texture;
+  emissive?: THREE.ColorRepresentation;
+  emissiveIntensity?: number;
+  roughness?: number;
+  metalness?: number;
+}
+
+export function makeStd({
+  color,
+  map,
+  emissive = 0x000000,
+  emissiveIntensity = 1,
+  roughness = 1,
+  metalness = 0,
+}: StdParams): THREE.MeshStandardMaterial {
+  const params: THREE.MeshStandardMaterialParameters = { flatShading: true, roughness, metalness, emissive, emissiveIntensity };
   if (color !== undefined) params.color = color;
   if (map) params.map = map;
   return new THREE.MeshStandardMaterial(params);
 }
 
-export const M = {
+export const M: Record<string, THREE.Material> = {
   wall: makeStd({ map: texWall }),
   floor: makeStd({ map: texFloor }),
   ceiling: makeStd({ map: texCeiling }),

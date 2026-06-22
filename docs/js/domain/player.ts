@@ -5,13 +5,19 @@
  *      Knows nothing about rendering, cameras, or input devices.
  */
 
+import type { Vec3 } from './pet.js';
+
+export interface PlayerConfig {
+  position?: Vec3;
+  height?: number;
+}
+
 export class Player {
-  /**
-   * @param {Object} cfg
-   * @param {{x:number,y:number,z:number}} cfg.position
-   * @param {number} [cfg.height=1.7] — eye height above ground
-   */
-  constructor({ position, height = 1.7 } = {}) {
+  position: Vec3;
+  height: number;
+  isMoving: boolean;
+
+  constructor({ position, height = 1.7 }: PlayerConfig = {}) {
     this.position = { x: position?.x ?? 0, y: position?.y ?? height, z: position?.z ?? 0 };
     this.height = height;
     this.isMoving = false;

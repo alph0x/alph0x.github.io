@@ -54,8 +54,8 @@ describe('Project integrity', () => {
       for (const imp of imports) {
         const resolved = resolve(fileDir, imp);
         const candidates = extname(resolved)
-          ? [resolved]
-          : [resolved + '.js', resolved + '.mjs', join(resolved, 'index.js'), join(resolved, 'index.mjs')];
+          ? [resolved, resolved.replace(/\.js$/, '.ts')]
+          : [resolved + '.js', resolved + '.ts', resolved + '.mjs', join(resolved, 'index.js'), join(resolved, 'index.ts'), join(resolved, 'index.mjs')];
 
         const exists = candidates.some(c => existsSync(c));
         if (!exists) {

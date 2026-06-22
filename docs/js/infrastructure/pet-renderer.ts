@@ -6,12 +6,13 @@
  */
 
 import * as THREE from 'three';
+import type { Pet } from '../domain/pet.js';
 
-/**
- * @param {Pet} pet
- * @param {THREE.Group} threeGroup — the mesh returned by the builder
- */
-export function syncPetToThreeJS(pet, threeGroup, playerPosition) {
+export function syncPetToThreeJS(
+  pet: Pet,
+  threeGroup: THREE.Group,
+  _playerPosition: THREE.Vector3
+): void {
   const body = threeGroup.getObjectByName('body');
   if (body) body.scale.set(1, pet.breathScale, 1);
 

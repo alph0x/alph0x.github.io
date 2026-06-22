@@ -7,14 +7,22 @@
 
 import * as THREE from 'three';
 
-export function makeBox(material, size, pos) {
+export function makeBox(
+  material: THREE.Material,
+  size: [number, number, number],
+  pos: [number, number, number]
+): THREE.Mesh {
   const mesh = new THREE.Mesh(new THREE.BoxGeometry(...size), material);
   mesh.position.set(...pos);
   mesh.castShadow = true; mesh.receiveShadow = true;
   return mesh;
 }
 
-export function makePlane(material, size, pos) {
+export function makePlane(
+  material: THREE.Material,
+  size: [number, number],
+  pos: [number, number, number]
+): THREE.Mesh {
   const mesh = new THREE.Mesh(new THREE.PlaneGeometry(...size), material);
   mesh.position.set(...pos);
   mesh.receiveShadow = true;
@@ -22,9 +30,13 @@ export function makePlane(material, size, pos) {
 }
 
 /** Low-poly cylinder (8 radial segments for PSX look). */
-export function makeCylinder(material, params, pos) {
+export function makeCylinder(
+  material: THREE.Material,
+  params: [number, number, number],
+  pos: [number, number, number]
+): THREE.Mesh {
   // Force low segment count: [radiusTop, radiusBottom, height, 8]
-  const lp = [params[0], params[1], params[2], 8];
+  const lp = [params[0], params[1], params[2], 8] as const;
   const mesh = new THREE.Mesh(new THREE.CylinderGeometry(...lp), material);
   mesh.position.set(...pos);
   mesh.castShadow = true; mesh.receiveShadow = true;
@@ -32,8 +44,12 @@ export function makeCylinder(material, params, pos) {
 }
 
 /** Low-poly cone (8 radial segments for PSX look). */
-export function makeCone(material, params, pos) {
-  const lp = [params[0], params[1], 8];
+export function makeCone(
+  material: THREE.Material,
+  params: [number, number],
+  pos: [number, number, number]
+): THREE.Mesh {
+  const lp = [params[0], params[1], 8] as const;
   const mesh = new THREE.Mesh(new THREE.ConeGeometry(...lp), material);
   mesh.position.set(...pos);
   mesh.castShadow = true; mesh.receiveShadow = true;
@@ -41,15 +57,24 @@ export function makeCone(material, params, pos) {
 }
 
 /** Low-poly sphere (8x6 segments for PSX look). */
-export function makeSphere(material, params, pos) {
-  const lp = [params[0], 8, 6];
+export function makeSphere(
+  material: THREE.Material,
+  params: [number],
+  pos: [number, number, number]
+): THREE.Mesh {
+  const lp = [params[0], 8, 6] as const;
   const mesh = new THREE.Mesh(new THREE.SphereGeometry(...lp), material);
   mesh.position.set(...pos);
   mesh.castShadow = true; mesh.receiveShadow = true;
   return mesh;
 }
 
-export function makeLight(color, intensity, distance, pos) {
+export function makeLight(
+  color: THREE.ColorRepresentation,
+  intensity: number,
+  distance: number,
+  pos: [number, number, number]
+): THREE.PointLight {
   const light = new THREE.PointLight(color, intensity, distance, 1);
   light.position.set(...pos);
   light.castShadow = true;

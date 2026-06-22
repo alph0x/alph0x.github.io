@@ -4,6 +4,26 @@
 
 import { deserializeSeed } from './seed.js';
 
+// ── Types ───────────────────────────────────────────────────────
+
+export interface Vec3 {
+  x: number;
+  y: number;
+  z: number;
+}
+
+export interface Wall {
+  minX: number;
+  maxX: number;
+  minZ: number;
+  maxZ: number;
+}
+
+export interface MovementVector {
+  x: number;
+  z: number;
+}
+
 // ── Configuration ───────────────────────────────────────────────
 
 export const CFG = Object.freeze({
@@ -37,32 +57,31 @@ export const ROOM_LAYOUT = deserializeSeed(DEFAULT_SEED);
 
 // ── Vector Math (plain objects, no Three.js) ────────────────────
 
-export function vec3(x = 0, y = 0, z = 0) {
+export function vec3(x = 0, y = 0, z = 0): Vec3 {
   return { x, y, z };
 }
 
-export function normalizeXZ(v) {
+export function normalizeXZ(v: Vec3): Vec3 {
   const len = Math.sqrt(v.x * v.x + v.z * v.z);
   if (len === 0) return vec3(0, v.y, 0);
   return vec3(v.x / len, v.y, v.z / len);
 }
 
-export function rightFromForward(forward) {
+export function rightFromForward(forward: Vec3): Vec3 {
   return normalizeXZ({ x: -forward.z, y: 0, z: forward.x });
 }
 
-export function scale(v, s) {
+export function scale(v: Vec3, s: number): Vec3 {
   return vec3(v.x * s, v.y * s, v.z * s);
 }
 
-export function add(a, b) {
+export function add(a: Vec3, b: Vec3): Vec3 {
   return vec3(a.x + b.x, a.y + b.y, a.z + b.z);
 }
 
-
 // ── Collision (pure AABB) ───────────────────────────────────────
 
-export function checkCollision(x, z, walls, radius = 0.35) {
+export function checkCollision(x: number, z: number, walls: readonly Wall[], radius = 0.35): boolean {
   for (const w of walls) {
     if (x > w.minX - radius && x < w.maxX + radius &&
         z > w.minZ - radius && z < w.maxZ + radius) {
@@ -72,7 +91,7 @@ export function checkCollision(x, z, walls, radius = 0.35) {
   return false;
 }
 
-export function resolveMove(pos, dx, dz, walls) {
+export function resolveMove(pos: Vec3, dx: number, dz: number, walls: readonly Wall[]): void {
   if (!checkCollision(pos.x + dx, pos.z, walls)) {
     pos.x += dx;
   }
@@ -83,7 +102,13 @@ export function resolveMove(pos, dx, dz, walls) {
 
 // ── Movement Math ───────────────────────────────────────────────
 
-export function computeMovementVector(moveF, moveB, moveL, moveR, forward) {
+export function computeMovementVector(
+  moveF: boolean,
+  moveB: boolean,
+  moveL: boolean,
+  moveR: boolean,
+  forward: Vec3
+): MovementVector {
   const right = rightFromForward(forward);
   const mx = (moveR ? 1 : 0) - (moveL ? 1 : 0);
   const mz = (moveF ? 1 : 0) - (moveB ? 1 : 0);

@@ -5,13 +5,30 @@
  *      Knows nothing about rendering, scenes, or meshes.
  */
 
+export interface Vec3 {
+  x: number;
+  y: number;
+  z: number;
+}
+
+export interface PetConfig {
+  position?: Vec3;
+  rotation?: number;
+}
+
 export class Pet {
-  /**
-   * @param {Object} cfg
-   * @param {{x:number,y:number,z:number}} cfg.position
-   * @param {number} cfg.rotation — body Y rotation in radians
-   */
-  constructor({ position, rotation = 0 } = {}) {
+  position: Vec3;
+  bodyRotation: number;
+  headRotation: number;
+  tailRotationZ: number;
+  tailRotationY: number;
+  earLRotationZ: number;
+  earRRotationZ: number;
+  breathScale: number;
+  isExcited: boolean;
+  distToPlayer: number;
+
+  constructor({ position, rotation = 0 }: PetConfig = {}) {
     this.position = { x: position?.x ?? 0, y: position?.y ?? 0, z: position?.z ?? 0 };
     this.bodyRotation = rotation;
 

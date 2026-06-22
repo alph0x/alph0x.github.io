@@ -7,7 +7,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { serializeLayout, deserializeSeed } from '../docs/js/seed.js';
+import { serializeLayout, deserializeSeed } from '../docs/js/seed.ts';
 
 // ── serializeLayout ─────────────────────────────────────────────
 
