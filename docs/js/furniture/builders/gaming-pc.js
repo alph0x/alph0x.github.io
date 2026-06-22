@@ -19,12 +19,18 @@ function buildGamingPC(cfg) {
   // vertical RGB strip behind glass
   for (let i = 0; i < 5; i++) {
     const ledColor = i % 2 === 0 ? COLORS.accent : COLORS.cyan;
-    g.add(makeBox(new THREE.MeshBasicMaterial({ color: ledColor }), [0.01, 0.12, 0.35], [0.3, 0.2 + i * 0.18, 0]));
+    const ledMesh = makeBox(new THREE.MeshBasicMaterial({ color: ledColor }), [0.01, 0.12, 0.35], [0.3, 0.2 + i * 0.18, 0]);
+    ledMesh.userData._pcLed = true;
+    g.add(ledMesh);
   }
 
   // top and bottom RGB accents
-  g.add(makeBox(M.glowPurple, [0.52, 0.02, 0.01], [0, 0.15, 0.26]));
-  g.add(makeBox(M.glowCyan, [0.52, 0.02, 0.01], [0, 0.95, 0.26]));
+  const topAccent = makeBox(M.glowPurple.clone(), [0.52, 0.02, 0.01], [0, 0.15, 0.26]);
+  topAccent.userData._pcLed = true;
+  g.add(topAccent);
+  const bottomAccent = makeBox(M.glowCyan.clone(), [0.52, 0.02, 0.01], [0, 0.95, 0.26]);
+  bottomAccent.userData._pcLed = true;
+  g.add(bottomAccent);
 
   // front vents
   for (let i = 0; i < 4; i++) {
@@ -39,7 +45,10 @@ function buildGamingPC(cfg) {
   for (const lx of [-0.2, 0.2]) for (const lz of [-0.2, 0.2]) g.add(makeBox(caseMat, [0.04, 0.04, 0.04], [lx, 0.02, lz]));
 
   // internal glow light
-  g.add(makeLight(COLORS.accent, 0.8, 4, [0.3, 0.5, 0]));
+  const pcLight = makeLight(COLORS.accent, 0.8, 4, [0.3, 0.5, 0]);
+  pcLight.userData._pcLight = true;
+  pcLight.userData.baseIntensity = 0.8;
+  g.add(pcLight);
   return { mesh: g };
 }
 register('gamingPC', buildGamingPC);

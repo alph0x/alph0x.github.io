@@ -45,7 +45,9 @@ function buildWindow(cfg) {
 
   // emissive moonlight wash on the glass
   const glowMat = makeStd({ color: 0x6688aa, emissive: 0x6688aa, emissiveIntensity: 0.35, transparent: true, opacity: 0.15, side: THREE.DoubleSide });
-  frame.add(makeBox(glowMat, [winW - 0.05, winH - 0.05, 0.005], [0, 0, 0.008]));
+  const glowMesh = makeBox(glowMat, [winW - 0.05, winH - 0.05, 0.005], [0, 0, 0.008]);
+  glowMesh.userData._windowGlow = true;
+  frame.add(glowMesh);
 
   // spot light shining inward
   const winSpot = new THREE.SpotLight(0x6688aa, 1.2, 8, Math.PI / 4, 0.6, 1);
@@ -53,6 +55,7 @@ function buildWindow(cfg) {
   winSpot.target.position.set(0, 0, 3);
   winSpot.castShadow = true;
   winSpot.shadow.mapSize.width = 256;
+  winSpot.userData._windowSpot = true;
   winSpot.shadow.mapSize.height = 256;
   frame.add(winSpot);
   frame.add(winSpot.target);

@@ -5,7 +5,7 @@ import { makeBox } from '../primitives.js';
 
 import { CFG, ROOM_LAYOUT } from '../core.js';
 import { FurnitureRegistry } from '../furniture/index.js';
-import { setupLighting } from './lighting.js';
+import { setupLighting, applyTimeOfDay } from './lighting.js';
 import { Pet } from '../domain/pet.js';
 import {
   extractMeshFromResult,
@@ -114,7 +114,8 @@ function buildPolygonRoom(scene: THREE.Scene, worldState: WorldState): { edges: 
 
 export function buildLevel(scene: THREE.Scene, worldState: WorldState): void {
   (buildPolygonRoom as any)(scene, worldState);
-  (setupLighting as any)(scene, worldState);
+  const preset = setupLighting(scene);
+
 
   // Furniture
   let petMesh: THREE.Group | null = null;
@@ -146,6 +147,7 @@ export function buildLevel(scene: THREE.Scene, worldState: WorldState): void {
       }
     }
   }
+  applyTimeOfDay(scene, preset);
 
   // Pet
   const ls = (ROOM_LAYOUT as any).luluSpawn || (ROOM_LAYOUT as any).ls || [0, 0];

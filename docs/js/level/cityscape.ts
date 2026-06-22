@@ -68,6 +68,7 @@ export function buildCityscape(cfg: { position: number[]; seed?: number }): THRE
           const wx = bx - bw / 2 + 0.2 + (w * (bw - 0.4)) / Math.max(1, winsPerFloor - 1);
           const wy = (f * 2) - 3 + 0.8;
           const wmesh = makeBox(new THREE.MeshBasicMaterial({ color: winColor }), [0.18, 0.25, 0.05], [wx, wy, bz + bd / 2 + 0.03]);
+          wmesh.userData._emissiveBase = (wmesh.material as THREE.MeshBasicMaterial).color.getHex();
           group.add(wmesh);
         }
       }
@@ -105,6 +106,7 @@ export function buildCityscape(cfg: { position: number[]; seed?: number }): THRE
       const signW = bw * 0.8;
       const signH = bh * 0.25;
       const sign = makeBox(neonMat(landmark.accent), [signW, signH, 0.06], [bx, bh / 2 - 1, bz + bd / 2 + 0.05]);
+      sign.userData._emissiveBase = (sign.material as THREE.MeshBasicMaterial).color.getHex();
       group.add(sign);
 
       // Small accent strips
@@ -113,6 +115,7 @@ export function buildCityscape(cfg: { position: number[]; seed?: number }): THRE
         const sy = bh - 2 - s * 1.8;
         if (sy < 0) break;
         const strip = makeBox(new THREE.MeshBasicMaterial({ color: landmark.accent }), [bw + 0.06, 0.12, bd + 0.06], [bx, sy - 2, bz]);
+        strip.userData._emissiveBase = (strip.material as THREE.MeshBasicMaterial).color.getHex();
         group.add(strip);
       }
     }
@@ -133,6 +136,7 @@ export function buildCityscape(cfg: { position: number[]; seed?: number }): THRE
 
       const light = makeBox(new THREE.MeshBasicMaterial({ color: lightColor }), [0.1, 0.04, 0.04], [fx, fy - (isDrone ? 0.08 : 0.06), fz + (isDrone ? 0.14 : 0.11)]);
       group.add(light);
+      light.userData._emissiveBase = (light.material as THREE.MeshBasicMaterial).color.getHex();
     }
   });
 
