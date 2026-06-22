@@ -4,7 +4,7 @@
 |-------|-------|--------|-------|-------------|
 | UI quick wins (HUD, loading text, Esc, focus, reduced motion) | Foundation | 🟢 done | agent | HP/MP gone, loading says `LOADING...`, panels close with Esc/outside/close button, focus visible |
 | AGENTS.md refresh | Foundation | 🟢 done | agent | `AGENTS.md` reviewed and under 2 min to read |
-| Ponytail cleanup | Foundation | 🔴 not started | agent | dead files/exports removed, `npm test` green |
+| Ponytail cleanup | Foundation | 🟢 done | agent | dead files/exports removed, `npm test` green |
 | TypeScript toolchain | Foundation | 🔴 not started | agent | `tsconfig.json`, `npm run typecheck`, CI typecheck job green |
 | TypeScript: full migration | Foundation | 🔴 not started | agent | zero `.js` files in `docs/js/`, `npm run typecheck` green |
 | Shared room geometry | Cleanup | 🔴 not started | agent | single wall/opening builder used by game + editor |

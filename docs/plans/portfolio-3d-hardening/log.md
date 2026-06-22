@@ -83,3 +83,11 @@ Plan finalized at 25 points across Foundation, Cleanup, Core, Product, and Verif
 - Point 1 complete: removed HP/MP HUD blocks, changed loading text to `LOADING...`, added click-outside-to-close, `:focus-visible`, and `prefers-reduced-motion` support. Added `tests/interaction.test.js` (5 tests). All 451 tests pass.
 - Point 2 complete: refreshed `AGENTS.md` to a one-page onboarding brief.
 - Moving to Point 3 (Ponytail cleanup).
+
+## 2026-06-22 — Point 3 complete (Ponytail cleanup)
+
+- Deleted dead renderer modules, `level/decorations/*`, legacy furniture builders, `contract.js`, `test-calc-dims.mjs`, and dead animation modules.
+- Removed unused asset exports (`M.concrete`, `texConcrete`, `makeTexture`) and dead state fields.
+- Unified poster/fairyLights into regular furniture array in seed serialization.
+- Removed redundant `setup-canvas-mock.js` imports from 25 test files.
+- All 447 tests pass.
