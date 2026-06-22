@@ -57,6 +57,30 @@ describe('updatePet', () => {
       const head = pet.mesh.getObjectByName('head');
       expect(head.rotation.y).toBeCloseTo(0, 1);
     });
+    it('looks forward when body is rotated +90° (looks toward -Z)', () => {
+      // bodyRotation = π/2 in Three.js means the pet looks toward -Z.
+      // Player at -Z is directly in front → head should stay forward.
+      const { pet, camera } = createPetAndCamera({ x: 0, y: 1, z: -2 }, { x: 0, z: 0 }, Math.PI / 2);
+      simulate(pet, camera);
+      const head = pet.mesh.getObjectByName('head');
+      expect(head.rotation.y).toBeCloseTo(0, 1);
+    });
+
+    it('turns head right when player is behind-right', () => {
+      const { pet, camera } = createPetAndCamera({ x: -2, y: 1, z: -0.1 }, { x: 0, z: 0 }, 0);
+      simulate(pet, camera);
+      const head = pet.mesh.getObjectByName('head');
+      expect(head.rotation.y).toBeLessThan(-0.45);
+      expect(head.rotation.y).toBeGreaterThan(-0.55);
+    });
+
+    it('turns head left when player is behind-left', () => {
+      const { pet, camera } = createPetAndCamera({ x: -2, y: 1, z: 0.1 }, { x: 0, z: 0 }, 0);
+      simulate(pet, camera);
+      const head = pet.mesh.getObjectByName('head');
+      expect(head.rotation.y).toBeGreaterThan(0.45);
+      expect(head.rotation.y).toBeLessThan(0.55);
+    });
   });
 
   describe('tail wag', () => {

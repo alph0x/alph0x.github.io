@@ -6,6 +6,9 @@
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "test:visual": "playwright test tests/visual --project=chromium",
+    "test:visual:update": "playwright test tests/visual --project=chromium --update-snapshots",
     "typecheck": "tsc --noEmit",
     "build": "vite build",
     "preflight": "npm test"
@@ -13,6 +16,7 @@
   "devDependencies": {
     "@playwright/test": "^1.59.1",
     "@types/three": "^0.184.1",
+    "@vitest/coverage-v8": "^4.1.5",
     "happy-dom": "^20.9.0",
     "three": "^0.160.0",
     "typescript": "^6.0.3",

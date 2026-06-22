@@ -2,7 +2,7 @@
 const { defineConfig, devices } = require('@playwright/test');
 
 module.exports = defineConfig({
-  testDir: './tests/e2e',
+  testDir: './tests',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
@@ -24,8 +24,9 @@ module.exports = defineConfig({
     },
   ],
   webServer: {
-    command: 'cd docs && python3 -m http.server 8765',
+    command: 'npx vite docs --port 8765',
     url: 'http://localhost:8765',
     reuseExistingServer: !process.env.CI,
+    timeout: 120000,
   },
 });
