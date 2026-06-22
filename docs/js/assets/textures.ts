@@ -1,5 +1,13 @@
 import * as THREE from 'three';
 
+function rng(seed = 12345) {
+  let s = seed >>> 0;
+  return () => {
+    s = (s * 1664525 + 1013904223) >>> 0;
+    return s / 0x100000000;
+  };
+}
+
 function makeTexture(
   w: number,
   h: number,
@@ -16,32 +24,38 @@ function makeTexture(
 }
 
 export const texWall = makeTexture(64, 64, (ctx, w, h) => {
+  const rand = rng(12345);
   ctx.fillStyle = '#2a2a2e'; ctx.fillRect(0, 0, w, h);
   for (let i = 0; i < 200; i++) {
-    const v = 35 + (Math.random() * 20) | 0;
+    const v = 35 + (rand() * 20) | 0;
     ctx.fillStyle = `rgba(${v},${v},${v + 4},0.15)`;
-    ctx.fillRect((Math.random() * w) | 0, (Math.random() * h) | 0, 2, 2);
+    ctx.fillRect((rand() * w) | 0, (rand() * h) | 0, 2, 2);
   }
   ctx.strokeStyle = 'rgba(0,0,0,0.05)';
-  for (let i = 0; i < 2; i++) { ctx.beginPath(); ctx.moveTo(0, (Math.random() * h) | 0); ctx.lineTo(w, (Math.random() * h) | 0); ctx.stroke(); }
+  for (let i = 0; i < 2; i++) { ctx.beginPath(); ctx.moveTo(0, (rand() * h) | 0); ctx.lineTo(w, (rand() * h) | 0); ctx.stroke(); }
 });
 
 export const texFloor = makeTexture(64, 64, (ctx, w, h) => {
+  const rand = rng(98765);
   ctx.fillStyle = '#1c1917'; ctx.fillRect(0, 0, w, h);
-  for (let i = 0; i < 300; i++) {
-    const v = (35 + Math.random() * 15) | 0;
-    ctx.fillStyle = `rgba(${v + 5},${v},${v - 2},0.2)`;
-    ctx.fillRect((Math.random() * w) | 0, (Math.random() * h) | 0, 1 + (Math.random() * 3) | 0, 1 + (Math.random() * 3) | 0);
-  }
-  ctx.strokeStyle = 'rgba(20,18,16,0.3)'; ctx.lineWidth = 1;
-  for (let i = 0; i < 4; i++) {
-    ctx.beginPath(); ctx.moveTo(0, (Math.random() * h) | 0); ctx.lineTo(w, (Math.random() * h) | 0); ctx.stroke();
+  const plankH = 8;
+  for (let y = 0; y < h; y += plankH) {
+    const shade = (28 + rand() * 12) | 0;
+    ctx.fillStyle = `rgba(${shade + 5},${shade},${shade - 2},1)`;
+    ctx.fillRect(0, y, w, plankH);
+    ctx.strokeStyle = 'rgba(10,8,6,0.5)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+    for (let i = 0; i < 4; i++) {
+      ctx.fillStyle = `rgba(40,36,32,${0.1 + rand() * 0.15})`;
+      ctx.fillRect((rand() * w) | 0, y + (rand() * plankH) | 0, 1 + (rand() * 3) | 0, 1);
+    }
   }
 });
 
 export const texCeiling = makeTexture(64, 64, (ctx, w, h) => {
+  const rand = rng(77777);
   ctx.fillStyle = '#1c1917'; ctx.fillRect(0, 0, w, h);
-  for (let i = 0; i < 40; i++) { ctx.fillStyle = `rgba(40,38,36,${Math.random() * 0.15})`; ctx.fillRect((Math.random() * w) | 0, (Math.random() * h) | 0, 2, 2); }
+  for (let i = 0; i < 40; i++) { ctx.fillStyle = `rgba(40,38,36,${rand() * 0.15})`; ctx.fillRect((rand() * w) | 0, (rand() * h) | 0, 2, 2); }
 });
 
 export const texTerminal = makeTexture(64, 64, (ctx, w, h) => {

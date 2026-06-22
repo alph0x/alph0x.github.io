@@ -282,7 +282,8 @@ describe('buildWindow', () => {
     const result = builder({ position: [0, 0, 0], rotation: 0 });
     const cityscape = result.mesh.children.find((c) => c.userData._parallax);
     expect(cityscape).toBeDefined();
-    expect(cityscape.userData._parallaxFactor).toBeGreaterThan(0);
+    const layers = cityscape.children.filter((c) => c.userData._parallax);
+    expect(layers.some((l) => l.userData._parallaxFactor > 0)).toBe(true);
   });
 
   it('contains a SpotLight', () => {

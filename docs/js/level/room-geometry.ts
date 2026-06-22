@@ -4,6 +4,7 @@
  */
 
 import * as THREE from 'three';
+import { makeBox } from '../primitives.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { getEdgeOpenings } from '../editor-utils.js';
 
@@ -31,6 +32,7 @@ export interface BuildWallsOptions {
   wallH: number;
   wallT: number;
   material: THREE.MeshStandardMaterial;
+  trimMaterial?: THREE.Material;
   openings?: WallOpening[];
   /** If provided, pushes collision boxes for stubs below this height. */
   collisionHeight?: number;
@@ -49,7 +51,7 @@ function getWorldAABB(object: THREE.Object3D): THREE.Box3 {
  * Returns edge metadata and populates collisionWalls when requested.
  */
 export function buildWallsFromOutline(options: BuildWallsOptions): WallEdge[] {
-  const { outline, wallH, wallT, material, openings = [], collisionHeight, collisionWalls } = options;
+  const { outline, wallH, wallT, material, openings = [], collisionHeight, collisionWalls, trimMaterial } = options;
   const edges: WallEdge[] = [];
 
   for (let i = 0; i < outline.length; i++) {
@@ -77,8 +79,15 @@ export function buildWallsFromOutline(options: BuildWallsOptions): WallEdge[] {
         const box = getWorldAABB(mesh);
         collisionWalls.push({ minX: box.min.x, maxX: box.max.x, minZ: box.min.z, maxZ: box.max.z });
       }
-
       edges.push({ p1, p2, midX, midZ, angle, len, mesh });
+      if (trimMaterial) {
+        const bbH = 0.08;
+        const baseboard = makeBox(trimMaterial, [wallT + 0.03, bbH, len], [0, -wallH / 2 + bbH / 2, 0]);
+        mesh.add(baseboard);
+        const ctH = 0.05;
+        const crown = makeBox(trimMaterial, [wallT + 0.03, ctH, len], [0, wallH / 2 - ctH / 2, 0]);
+        mesh.add(crown);
+      }
       continue;
     }
 
@@ -145,8 +154,16 @@ export function buildWallsFromOutline(options: BuildWallsOptions): WallEdge[] {
       group.add(visualMesh);
     }
 
+    if (trimMaterial) {
+      const bbH = 0.08;
+      const baseboard = makeBox(trimMaterial, [wallT + 0.03, bbH, len], [0, bbH / 2, 0]);
+      group.add(baseboard);
+      const ctH = 0.05;
+      const crown = makeBox(trimMaterial, [wallT + 0.03, ctH, len], [0, wallH - ctH / 2, 0]);
+      group.add(crown);
+    }
+
     edges.push({ p1, p2, midX, midZ, angle, len, mesh: group });
   }
-
   return edges;
 }

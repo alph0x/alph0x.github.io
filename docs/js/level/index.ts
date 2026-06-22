@@ -1,5 +1,8 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { texWall, texFloor, texCeiling } from '../assets/textures.js';
+import { makeBox } from '../primitives.js';
+
 import { CFG, ROOM_LAYOUT } from '../core.js';
 import { FurnitureRegistry } from '../furniture/index.js';
 import { setupLighting } from './lighting.js';
@@ -27,6 +30,13 @@ function buildPolygonRoom(scene: THREE.Scene, worldState: WorldState): { edges: 
   const mat = ROOM_LAYOUT.mat || { floor: '#1c1917', wall: '#44403c', ceiling: '#1c1917' };
 
   // Floor & Ceiling via ShapeGeometry
+  let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
+  for (const [x, z] of outline) {
+    if (x < minX) minX = x; if (x > maxX) maxX = x;
+    if (z < minZ) minZ = z; if (z > maxZ) maxZ = z;
+  }
+  const roomW = Math.max(0.01, maxX - minX);
+  const roomD = Math.max(0.01, maxZ - minZ);
   const shape = new THREE.Shape();
   shape.moveTo(outline[0][0], outline[0][1]);
   for (let i = 1; i < outline.length; i++) {
@@ -34,20 +44,34 @@ function buildPolygonRoom(scene: THREE.Scene, worldState: WorldState): { edges: 
   }
   shape.closePath();
 
+  const floorTex = texFloor.clone();
+  floorTex.wrapS = THREE.RepeatWrapping; floorTex.wrapT = THREE.RepeatWrapping;
+  floorTex.repeat.set(roomW / 2, roomD / 2);
   const floorGeo = new THREE.ShapeGeometry(shape);
-  const floorMat = new THREE.MeshStandardMaterial({ color: hexToInt(mat.floor), flatShading: true, roughness: 1, metalness: 0 });
+  const floorMat = new THREE.MeshStandardMaterial({ color: hexToInt(mat.floor), map: floorTex, flatShading: true, roughness: 1, metalness: 0 });
   const floor = new THREE.Mesh(floorGeo, floorMat);
   floor.rotation.x = -Math.PI / 2;
   floor.receiveShadow = true;
   scene.add(floor as any);
 
+  const ceilingTex = texCeiling.clone();
+  ceilingTex.wrapS = THREE.RepeatWrapping; ceilingTex.wrapT = THREE.RepeatWrapping;
+  ceilingTex.repeat.set(roomW / 2, roomD / 2);
   const ceilingGeo = new THREE.ShapeGeometry(shape);
-  const ceilingMat = new THREE.MeshStandardMaterial({ color: hexToInt(mat.ceiling), flatShading: true, roughness: 1, metalness: 0 });
+  const ceilingMat = new THREE.MeshStandardMaterial({ color: hexToInt(mat.ceiling), map: ceilingTex, flatShading: true, roughness: 1, metalness: 0 });
   const ceiling = new THREE.Mesh(ceilingGeo, ceilingMat);
   ceiling.rotation.x = Math.PI / 2;
   ceiling.position.y = wallH;
   ceiling.receiveShadow = true;
   scene.add(ceiling as any);
+
+  // Simple ceiling vent (offset if a ceiling lamp already occupies the centre)
+  const hasCeilingLamp = (ROOM_LAYOUT.furniture || []).some((f: any) => f.type === 'ceilingLamp');
+  const ventX = (minX + maxX) / 2 + (hasCeilingLamp ? 0.6 : 0);
+  const ventZ = (minZ + maxZ) / 2;
+  const ventMat = new THREE.MeshStandardMaterial({ color: 0x1f1f23, flatShading: true, roughness: 0.9, metalness: 0 });
+  const vent = makeBox(ventMat, [0.5, 0.05, 0.5], [ventX, wallH - 0.025, ventZ]);
+  scene.add(vent as any);
 
   // Collect openings from furniture layout
   const openings = (ROOM_LAYOUT.furniture || [])
@@ -66,12 +90,16 @@ function buildPolygonRoom(scene: THREE.Scene, worldState: WorldState): { edges: 
       };
     });
 
-  const wallMat = new THREE.MeshStandardMaterial({ color: hexToInt(mat.wall), flatShading: true, roughness: 1, metalness: 0 });
+  const wallTex = texWall.clone();
+  wallTex.wrapS = THREE.RepeatWrapping; wallTex.wrapT = THREE.RepeatWrapping;
+  const wallMat = new THREE.MeshStandardMaterial({ color: hexToInt(mat.wall), map: wallTex, flatShading: true, roughness: 1, metalness: 0 });
+  const trimMat = new THREE.MeshStandardMaterial({ color: 0x292524, flatShading: true, roughness: 0.9, metalness: 0 });
   const edges = buildWallsFromOutline({
     outline,
     wallH,
     wallT,
     material: wallMat,
+    trimMaterial: trimMat,
     openings,
     collisionHeight: 2.0,
     collisionWalls: worldState.room.walls,

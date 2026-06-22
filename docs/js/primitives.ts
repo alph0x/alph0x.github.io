@@ -6,6 +6,7 @@
  */
 
 import * as THREE from 'three';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 
 export function makeBox(
   material: THREE.Material,
@@ -93,7 +94,7 @@ export function makeRoundedBox(
   radius = 0.05,
   segments = 2
 ): THREE.Mesh {
-  const geo = new (THREE as any).RoundedBoxGeometry(size[0], size[1], size[2], segments, radius);
+  const geo = new RoundedBoxGeometry(size[0], size[1], size[2], segments, radius);
   const mesh = new THREE.Mesh(geo, material);
   mesh.position.set(...pos);
   mesh.castShadow = true; mesh.receiveShadow = true;
