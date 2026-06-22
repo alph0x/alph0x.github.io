@@ -50,6 +50,15 @@ export class Game {
         { name: 'pet', position: new THREE.Vector3(-0.4, 1.25, -0.2), target: new THREE.Vector3(-0.85, 0.9, -0.85), panelId: null },
       ],
     };
+
+    // Screen reflection system — ponytail: update screen textures every N frames
+    this._screenReflect = {
+      targets: [],
+      frameInterval: 6, // update every 6 frames (~10fps at 60fps)
+      frameCounter: 0,
+      rt: null,
+      reflectCam: null,
+    };
   }
 
   init() {
@@ -74,6 +83,9 @@ export class Game {
     const tourSkip = document.getElementById('tour-skip');
     if (tourBtn) tourBtn.addEventListener('click', () => this.startTour());
     if (tourSkip) tourSkip.addEventListener('click', () => this.skipTour());
+
+    // ponytail: find screen meshes and set up reflection targets
+    this._initScreenReflections();
   }
 
   onResize() {
@@ -108,6 +120,7 @@ export class Game {
     } else {
       this.interaction.updatePrompt();
     }
+    this._updateScreenReflections();
     this.renderer.render(this.scene, this.camera);
   }
 
@@ -227,5 +240,49 @@ export class Game {
         this._nextStop();
       }
     }
+  }
+
+  // ── Screen Reflections ──────────────────────────────────────────
+
+  _initScreenReflections() {
+    const sr = this._screenReflect;
+    // Find all screen meshes (MeshBasicMaterial with map = CanvasTexture)
+    this.scene.traverse((obj) => {
+      if (!obj.isMesh) return;
+      const mat = obj.material;
+      if (mat && mat.map && mat.map.isCanvasTexture) {
+        sr.targets.push({ mesh: obj, originalMat: mat });
+      }
+    });
+    if (sr.targets.length === 0) return;
+    // Shared render target — ponytail: one RT for all screens, updated per frame
+    sr.rt = new THREE.WebGLRenderTarget(256, 256, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter });
+    sr.reflectCam = new THREE.PerspectiveCamera(60, 1, 0.1, 100);
+    // Replace screen materials with RT texture
+    const rtMat = new THREE.MeshBasicMaterial({ map: sr.rt.texture });
+    for (const t of sr.targets) {
+      t.mesh.material = rtMat;
+    }
+  }
+
+  _updateScreenReflections() {
+    const sr = this._screenReflect;
+    if (!sr.rt || sr.targets.length === 0) return;
+    sr.frameCounter++;
+    if (sr.frameCounter % sr.frameInterval !== 0) return;
+    // Skip if renderer doesn't support render targets (tests/mock)
+    if (!this.renderer.setRenderTarget) return;
+    // Update from first screen's perspective
+    const target = sr.targets[0];
+    const pos = new THREE.Vector3();
+    target.mesh.getWorldPosition(pos);
+    const normal = new THREE.Vector3(0, 0, 1);
+    normal.applyQuaternion(target.mesh.getWorldQuaternion(new THREE.Quaternion()));
+    sr.reflectCam.position.copy(pos).add(normal.multiplyScalar(0.1));
+    sr.reflectCam.lookAt(pos.add(normal.multiplyScalar(2)));
+    const oldTarget = this.renderer.getRenderTarget ? this.renderer.getRenderTarget() : null;
+    this.renderer.setRenderTarget(sr.rt);
+    this.renderer.render(this.scene, sr.reflectCam);
+    this.renderer.setRenderTarget(oldTarget);
   }
 }
