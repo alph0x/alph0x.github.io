@@ -234,7 +234,6 @@ export class EditorApp {
       placed: this.state.placed,
       playerSpawn: this.state.playerSpawn,
       luluSpawn: this.state.luluSpawn,
-      decorations: [],
       mat: this.state.mat,
     });
     this._domRefs.exportOutput.value = formatExportOutput(seed);

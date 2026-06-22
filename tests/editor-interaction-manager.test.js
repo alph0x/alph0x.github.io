@@ -2,7 +2,7 @@
  * @fileoverview Tests for InteractionManager event dispatching.
  */
 
-import './setup-canvas-mock.js';
+
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import * as THREE from 'three';
 import { InteractionManager } from '../docs/js/editor-modules/interaction-manager.js';

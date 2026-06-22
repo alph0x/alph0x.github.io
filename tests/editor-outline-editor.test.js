@@ -2,7 +2,7 @@
  * @fileoverview Tests for OutlineEditor handle construction and mutations.
  */
 
-import './setup-canvas-mock.js';
+
 import { describe, it, expect, beforeEach } from 'vitest';
 import * as THREE from 'three';
 import { OutlineEditor } from '../docs/js/editor-modules/outline-editor.js';

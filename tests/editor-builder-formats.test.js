@@ -3,7 +3,7 @@
  * return formats: raw Group, [Group, meta], { mesh, type }, and raw Mesh.
  */
 
-import './setup-canvas-mock.js';
+
 import { describe, it, expect, beforeEach } from 'vitest';
 import * as THREE from 'three';
 import '../docs/js/furniture/index.js';

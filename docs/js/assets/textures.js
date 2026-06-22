@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-export function makeTexture(w, h, drawFn) {
+function makeTexture(w, h, drawFn) {
   const c = document.createElement('canvas');
   c.width = w; c.height = h;
   const ctx = c.getContext('2d');
@@ -49,14 +49,9 @@ export const texTerminal = makeTexture(64, 64, (ctx, w, h) => {
   for (let i = 12; i < h - 10; i += 6) ctx.fillRect(8, i, (10 + Math.random() * 30) | 0, 2);
 });
 
-export const texConcrete = makeTexture(64, 64, (ctx, w, h) => {
-  ctx.fillStyle = '#1a1a1e'; ctx.fillRect(0, 0, w, h);
-  for (let i = 0; i < 300; i++) { const v = (20 + Math.random() * 30) | 0; ctx.fillStyle = `rgba(${v},${v},${v + 5},0.4)`; ctx.fillRect((Math.random() * w) | 0, (Math.random() * h) | 0, 1 + (Math.random() * 2) | 0, 1 + (Math.random() * 2) | 0); }
-});
-
 export const texWood = makeTexture(64, 64, (ctx, w, h) => {
   ctx.fillStyle = '#3d2b2b'; ctx.fillRect(0, 0, w, h);
   ctx.strokeStyle = 'rgba(0,0,0,0.3)';
   for (let i = 0; i < 8; i++) { ctx.beginPath(); ctx.moveTo(0, (Math.random() * h) | 0); ctx.lineTo(w, (Math.random() * h) | 0); ctx.stroke(); }
-  for (let i = 0; i < 20; i++) { ctx.fillStyle = 'rgba(0,0,0,0.2)'; ctx.fillRect((Math.random() * w) | 0, (Math.random() * h) | 0, 1 + (Math.random() * 4) | 0, 1 + (Math.random() * 4) | 0); }
 });
+

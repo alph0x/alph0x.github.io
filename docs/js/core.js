@@ -59,25 +59,6 @@ export function add(a, b) {
   return vec3(a.x + b.x, a.y + b.y, a.z + b.z);
 }
 
-// ── State Factory ───────────────────────────────────────────────
-
-export function createGameState() {
-  return {
-    moveForward: false,
-    moveBackward: false,
-    moveLeft: false,
-    moveRight: false,
-    velocity: vec3(),
-    direction: vec3(),
-    prevTime: 0,
-    walls: [],
-    interactables: [],
-    implants: [],
-    particles: [],
-    isPanelOpen: false,
-    currentRoom: 'HUB',
-  };
-}
 
 // ── Collision (pure AABB) ───────────────────────────────────────
 

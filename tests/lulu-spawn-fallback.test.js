@@ -3,7 +3,7 @@
  * miniSchnauzer furniture item is present.
  */
 
-import './setup-canvas-mock.js';
+
 import { describe, it, expect, vi } from 'vitest';
 import * as THREE from 'three';
 

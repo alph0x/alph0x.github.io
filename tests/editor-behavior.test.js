@@ -3,7 +3,7 @@
  * Covers camera switching, UI bindings, guide group, dimensions, export, and error handling.
  */
 
-import './setup-canvas-mock.js';
+
 import { describe, it, expect, beforeAll, beforeEach, vi } from 'vitest';
 import * as THREE from 'three';
 

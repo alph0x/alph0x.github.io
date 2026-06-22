@@ -2,7 +2,7 @@
  * @fileoverview Tests for FurnitureManager placement, selection, and undo.
  */
 
-import './setup-canvas-mock.js';
+
 import { describe, it, expect, beforeEach } from 'vitest';
 import * as THREE from 'three';
 import '../docs/js/furniture/index.js';

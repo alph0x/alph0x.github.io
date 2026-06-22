@@ -2,7 +2,7 @@
  * @fileoverview Tests for SpawnManager mesh construction and position updates.
  */
 
-import './setup-canvas-mock.js';
+
 import { describe, it, expect, beforeEach } from 'vitest';
 import * as THREE from 'three';
 import { SpawnManager } from '../docs/js/editor-modules/spawn-manager.js';

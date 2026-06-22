@@ -2,7 +2,7 @@
  * @fileoverview Tests that playerSpawn from seed is a valid walkable position.
  */
 
-import './setup-canvas-mock.js';
+
 import { describe, it, expect } from 'vitest';
 import * as THREE from 'three';
 import { buildLevel } from '../docs/js/level/index.js';

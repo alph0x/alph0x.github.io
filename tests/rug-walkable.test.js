@@ -2,7 +2,7 @@
  * @fileoverview Tests that rug area is walkable (excluded from collision).
  */
 
-import './setup-canvas-mock.js';
+
 import { describe, it, expect, vi } from 'vitest';
 import * as THREE from 'three';
 

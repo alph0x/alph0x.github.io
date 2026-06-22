@@ -7,7 +7,7 @@
  * registry contract without modifying test files.
  */
 
-import './setup-canvas-mock.js';
+
 import { describe, it, expect } from 'vitest';
 import * as THREE from 'three';
 import { FurnitureRegistry } from '../docs/js/furniture/registry.js';

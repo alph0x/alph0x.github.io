@@ -1,4 +1,4 @@
-import './setup-canvas-mock.js';
+
 import { describe, it, expect } from 'vitest';
 import * as THREE from 'three';
 import { updatePet } from '../docs/js/systems/animation/pet.js';

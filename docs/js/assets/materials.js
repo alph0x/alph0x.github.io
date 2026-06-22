@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { COLORS } from '../core.js';
-import { texWall, texFloor, texCeiling, texTerminal, texConcrete, texWood } from './textures.js';
+import { texWall, texFloor, texCeiling, texTerminal, texWood } from './textures.js';
 
 /**
  * PSX-style material factory.
@@ -26,6 +26,5 @@ export const M = {
   glowPink: new THREE.MeshBasicMaterial({ color: COLORS.magenta }),
   glowCyan: new THREE.MeshBasicMaterial({ color: COLORS.cyan }),
   glowGreen: new THREE.MeshBasicMaterial({ color: COLORS.green }),
-  concrete: makeStd({ map: texConcrete }),
   wood: makeStd({ map: texWood }),
 };

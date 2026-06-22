@@ -3,7 +3,7 @@
  * Verifies that the seed serialization format is compatible with buildLevel consumption.
  */
 
-import './setup-canvas-mock.js';
+
 import { describe, it, expect } from 'vitest';
 import * as THREE from 'three';
 import { serializeLayout, deserializeSeed } from '../docs/js/seed.js';
@@ -62,7 +62,6 @@ describe('E2E: editor seed → game level', () => {
       ],
       playerSpawn: { x: 0.5, z: 0.5 },
       luluSpawn: { x: -0.9, z: -0.65 },
-      decorations: [],
       mat: { floor: '#1c1917', wall: '#44403c', ceiling: '#1c1917' },
     };
 

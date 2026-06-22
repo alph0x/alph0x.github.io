@@ -3,7 +3,7 @@
  * covering 3D view controls, drag recovery, and tool passthrough.
  */
 
-import './setup-canvas-mock.js';
+
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import * as THREE from 'three';
 import '../docs/js/furniture/index.js';

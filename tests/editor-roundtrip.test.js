@@ -81,7 +81,6 @@ describe('Editor round-trip with real builders', () => {
       placed,
       playerSpawn: { x: layout.playerSpawn[0], z: layout.playerSpawn[1] },
       luluSpawn: { x: layout.luluSpawn[0], z: layout.luluSpawn[1] },
-      decorations: [],
       mat: layout.mat,
     });
 

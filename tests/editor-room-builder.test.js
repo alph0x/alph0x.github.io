@@ -2,7 +2,7 @@
  * @fileoverview Tests for RoomBuilder geometry construction.
  */
 
-import './setup-canvas-mock.js';
+
 import { describe, it, expect, beforeEach } from 'vitest';
 import * as THREE from 'three';
 import { RoomBuilder } from '../docs/js/editor-modules/room-builder.js';

@@ -20,14 +20,11 @@ export const MOCK_PLACED = [
   { type: 'tv', config: { position: [1.35, 1.4, 1.65], rotation: 3.142 } },
   { type: 'miniSchnauzer', config: { position: [-0.7, 0.89, -0.9], rotation: 5.34 } },
   { type: 'rug', config: { position: [0.5, 0.01, 0.5] } },
+  { type: 'poster', config: { position: [-2.15, 1.6, -0.7], text: 'GAME\\nON', color: 0x7c3aed } },
+  { type: 'poster', config: { position: [2.15, 1.6, -0.5], text: 'GG\\nWP', color: 0xec4899 } },
+  { type: 'fairyLights', config: { position: [1.3, 2.2, -0.8] } },
   { type: 'ceilingLamp', config: { position: [0, 2.7, 0], color: 0xf5f5f4, intensity: 2.0, distance: 8 } },
   { type: 'ceilingLamp', config: { position: [1.3, 2.7, -0.7], color: 0xbfdbfe, intensity: 1.2, distance: 6 } },
-];
-
-export const MOCK_DECORATIONS = [
-  { type: 'poster', position: [-2.15, 1.6, -0.7], text: 'GAME\nON', color: 0x7c3aed },
-  { type: 'poster', position: [2.15, 1.6, -0.5], text: 'GG\nWP', color: 0xec4899 },
-  { type: 'fairyLights', position: [1.3, 2.2, -0.8] },
 ];
 
 export const MOCK_MAT = {
@@ -42,7 +39,6 @@ export function buildMockSeed() {
     placed: MOCK_PLACED,
     playerSpawn: { x: 0.5, z: 0.5 },
     luluSpawn: { x: -0.9, z: -0.65 },
-    decorations: MOCK_DECORATIONS,
     mat: MOCK_MAT,
   });
 }

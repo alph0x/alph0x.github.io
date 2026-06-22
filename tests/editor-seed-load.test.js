@@ -3,7 +3,7 @@
  * Verifies that DEFAULT_SEED creates furniture meshes and updates the DOM.
  */
 
-import './setup-canvas-mock.js';
+
 import { describe, it, expect, vi } from 'vitest';
 
 vi.mock('three', async () => {

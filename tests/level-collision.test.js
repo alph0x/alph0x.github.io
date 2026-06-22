@@ -2,7 +2,7 @@
  * @fileoverview Tests for level collision bounds — no double radius padding.
  */
 
-import './setup-canvas-mock.js';
+
 import { describe, it, expect } from 'vitest';
 import * as THREE from 'three';
 import { buildLevel } from '../docs/js/level/index.js';

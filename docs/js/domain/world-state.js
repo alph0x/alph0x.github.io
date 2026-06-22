@@ -36,18 +36,6 @@ export function createWorldState({ playerSpawn, playerHeight }) {
     // UI state
     ui: {
       isPanelOpen: false,
-      currentRoom: 'HUB',
-    },
-
-    // Animation / effects
-    effects: {
-      implants: [],
-      particles: [],
-    },
-
-    // Meta
-    meta: {
-      prevTime: performance.now(),
     },
   };
 }

@@ -2,7 +2,7 @@
  * @fileoverview Integration tests for editor room preview rebuild.
  */
 
-import './setup-canvas-mock.js';
+
 import { describe, it, expect, beforeEach } from 'vitest';
 import * as THREE from 'three';
 

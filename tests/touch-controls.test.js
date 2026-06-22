@@ -2,7 +2,7 @@
  * @fileoverview Tests for TouchControls mobile input system.
  */
 
-import './setup-canvas-mock.js';
+
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import * as THREE from 'three';
 import { TouchControls } from '../docs/js/systems/touch-controls.js';

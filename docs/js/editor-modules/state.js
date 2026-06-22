@@ -31,7 +31,6 @@ export class EditorState {
       raycaster: new THREE.Raycaster(),
       pointer: new THREE.Vector2(),
       mat: { floor: '#1c1917', wall: '#44403c', ceiling: '#1c1917' },
-      decorations: [],
       lastAction: null,
     };
   }
@@ -86,8 +85,6 @@ export class EditorState {
 
   get mat() { return this._data.mat; }
 
-  get decorations() { return this._data.decorations; }
-  set decorations(v) { this._data.decorations = v; }
 
   // ── Controlled mutations ────────────────────────────────────────
 
@@ -125,7 +122,6 @@ export class EditorState {
       playerSpawn: this._data.playerSpawn,
       luluSpawn: this._data.luluSpawn,
       mat: this._data.mat,
-      decorations: this._data.decorations,
     };
   }
 
@@ -133,7 +129,6 @@ export class EditorState {
     this._data.outline = layout.outline.map((v) => [...v]);
     this._data.placed = [];
     this._data.selectedId = null;
-    this._data.decorations = [];
     this._data.lastAction = null;
     this._data.playerSpawn = { x: layout.playerSpawn[0], z: layout.playerSpawn[1] };
     this._data.luluSpawn = { x: layout.luluSpawn[0], z: layout.luluSpawn[1] };

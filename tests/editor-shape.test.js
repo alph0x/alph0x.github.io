@@ -2,7 +2,7 @@
  * @fileoverview Tests for polygon shape generation and floor/ceiling geometry.
  */
 
-import './setup-canvas-mock.js';
+
 import { describe, it, expect } from 'vitest';
 import * as THREE from 'three';
 import { buildPolygonShape } from '../docs/js/editor-utils.js';

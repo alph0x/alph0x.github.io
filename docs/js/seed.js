@@ -16,13 +16,11 @@
  * { v: 1, w: 4.5, d: 3.5, f: [...], ps: [...], ls: [...], dec: [...] }
  */
 
-export function serializeLayout({ outline, placed, playerSpawn, luluSpawn, decorations, mat }) {
+export function serializeLayout({ outline, placed, playerSpawn, luluSpawn, mat }) {
   const f = [];
-  const dec = [];
 
   for (const item of placed) {
     const cfg = item.config;
-    const isDeco = item.type === 'poster' || item.type === 'fairyLights';
     const o = { t: item.type, p: cfg.position.map((n) => Math.round(n * 100) / 100) };
     if (cfg.rotation) o.r = Math.round(cfg.rotation * 1000) / 1000;
     if (cfg.panelId) o.pid = cfg.panelId;
@@ -31,27 +29,11 @@ export function serializeLayout({ outline, placed, playerSpawn, luluSpawn, decor
     if (cfg.coat) o.c = cfg.coat;
     if (cfg.pose) o.pos = cfg.pose;
     if (cfg.noCollision) o.nc = 1;
-    if (cfg.color != null) {
-      if (isDeco) o.color = cfg.color;
-      else o.col = cfg.color;
-    }
+    if (cfg.color != null) o.col = cfg.color;
     if (cfg.count) o.ct = cfg.count;
     if (cfg.intensity != null) { o.i = cfg.intensity; o.dst = cfg.distance; }
     if (cfg.text != null) o.text = cfg.text;
-
-    if (isDeco) {
-      dec.push(o);
-    } else {
-      f.push(o);
-    }
-  }
-
-  // Backward compat: also include legacy decorations array if passed separately
-  for (const d of decorations || []) {
-    const o = { t: d.type, p: d.position };
-    if (d.text != null) o.text = d.text;
-    if (d.color != null) o.color = d.color;
-    dec.push(o);
+    f.push(o);
   }
 
   const payload = {
@@ -61,7 +43,7 @@ export function serializeLayout({ outline, placed, playerSpawn, luluSpawn, decor
     ps: [Math.round(playerSpawn.x * 100) / 100, Math.round(playerSpawn.z * 100) / 100],
     ls: [Math.round(luluSpawn.x * 100) / 100, Math.round(luluSpawn.z * 100) / 100],
     mat: mat || { floor: '#1c1917', wall: '#44403c', ceiling: '#1c1917' },
-    dec,
+    dec: [],
   };
 
   return btoa(JSON.stringify(payload));
@@ -132,7 +114,6 @@ export function deserializeSeed(seedStr) {
     furniture.push(cfg);
   }
 
-  const decorations = []; // kept empty — decorations are now part of furniture
 
   const mat = s.mat || { floor: '#1c1917', wall: '#44403c', ceiling: '#1c1917' };
 
@@ -145,7 +126,6 @@ export function deserializeSeed(seedStr) {
     playerSpawn: s.ps || [0, 0],
     luluSpawn: s.ls || [0.3, 0.7],
     furniture,
-    decorations,
     mat,
   });
 }

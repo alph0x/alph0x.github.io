@@ -2,7 +2,7 @@
  * @fileoverview Tests for OutlineEditor drag mutations and self-intersection guard.
  */
 
-import './setup-canvas-mock.js';
+
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import * as THREE from 'three';
 import { OutlineEditor } from '../docs/js/editor-modules/outline-editor.js';

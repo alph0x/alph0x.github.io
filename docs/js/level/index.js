@@ -6,7 +6,6 @@ import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { CFG, ROOM_LAYOUT } from '../core.js';
 import { FurnitureRegistry } from '../furniture/index.js';
-import { placeDecorations } from './decorations/index.js';
 import { setupLighting } from './lighting.js';
 import { Pet } from '../domain/pet.js';
 import { getEdgeOpenings, extractMeshFromResult, calculateMeshOpeningDims } from '../editor-utils.js';
@@ -249,6 +248,5 @@ export function buildLevel(scene, worldState) {
     }
   }
 
-  placeDecorations(scene, worldState, ROOM_LAYOUT.decorations);
   setupLighting(scene);
 }

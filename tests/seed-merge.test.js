@@ -1,5 +1,5 @@
 /**
- * @fileoverview Tests for seed decoration→furniture merge and collision layout.
+ * @fileoverview Tests for seed round-trip: legacy decorations merge into furniture.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -36,8 +36,8 @@ describe('deserializeSeed merges legacy decorations into furniture', () => {
   });
 });
 
-describe('serializeLayout places poster/fairyLights into dec array', () => {
-  it('separates decorations from furniture in output', () => {
+describe('serializeLayout places poster/fairyLights into furniture array', () => {
+  it('keeps decorative items as regular furniture in output', () => {
     const seed = serializeLayout({
       outline: [[0, 0], [1, 0], [1, 1], [0, 1]],
       placed: [
@@ -47,12 +47,12 @@ describe('serializeLayout places poster/fairyLights into dec array', () => {
       ],
       playerSpawn: { x: 0, z: 0 },
       luluSpawn: { x: 0, z: 0 },
-      decorations: [],
     });
     const parsed = JSON.parse(atob(seed));
-    expect(parsed.f).toHaveLength(1);
-    expect(parsed.dec).toHaveLength(2);
-    expect(parsed.dec[0].text).toBe('HI');
-    expect(parsed.dec[0].color).toBe(0xff0000);
+    expect(parsed.f).toHaveLength(3);
+    const poster = parsed.f.find((f) => f.t === 'poster');
+    expect(poster.text).toBe('HI');
+    expect(poster.col).toBe(0xff0000);
+    expect(parsed.dec).toEqual([]);
   });
 });

@@ -8,7 +8,7 @@
  * - AlphGPT panel is accessible
  */
 
-import './setup-canvas-mock.js';
+
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 // Mock WebGLRenderer before any Three.js imports

@@ -3,7 +3,7 @@
  * and builds a non-empty categorized palette.
  */
 
-import './setup-canvas-mock.js';
+
 import { describe, it, expect, vi } from 'vitest';
 
 // Mock THREE.WebGLRenderer before editor imports it

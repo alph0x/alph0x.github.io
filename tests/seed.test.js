@@ -18,7 +18,6 @@ describe('serializeLayout', () => {
       placed: [{ type: 'bed', config: { position: [-1.4, 0, -0.8], rotation: 1.571 } }],
       playerSpawn: { x: 0, z: 0 },
       luluSpawn: { x: 0.3, z: 0.7 },
-      decorations: [],
       mat: { floor: '#1c1917', wall: '#44403c', ceiling: '#1c1917' },
     };
     const seed = serializeLayout(layout);
@@ -42,7 +41,6 @@ describe('serializeLayout', () => {
       placed: [{ type: 'desk', config: { position: [1.23456, 0, -0.98765] } }],
       playerSpawn: { x: 0, z: 0 },
       luluSpawn: { x: 0, z: 0 },
-      decorations: [],
     };
     const seed = serializeLayout(layout);
     const parsed = JSON.parse(atob(seed));
@@ -71,7 +69,6 @@ describe('serializeLayout', () => {
       }],
       playerSpawn: { x: 0, z: 0 },
       luluSpawn: { x: 0, z: 0 },
-      decorations: [],
     };
     const seed = serializeLayout(layout);
     const parsed = JSON.parse(atob(seed));
@@ -95,7 +92,6 @@ describe('serializeLayout', () => {
       placed: [{ type: 'box', config: { position: [0, 0, 0] } }],
       playerSpawn: { x: 0, z: 0 },
       luluSpawn: { x: 0, z: 0 },
-      decorations: [],
     };
     const seed = serializeLayout(layout);
     const parsed = JSON.parse(atob(seed));
@@ -106,7 +102,7 @@ describe('serializeLayout', () => {
     expect(item).not.toHaveProperty('nc');
   });
 
-  it('serializes placed decorations into dec array', () => {
+  it('serializes placed decorations into furniture array', () => {
     const layout = {
       outline: [[0, 0], [1, 0], [1, 1], [0, 1]],
       placed: [
@@ -115,16 +111,15 @@ describe('serializeLayout', () => {
       ],
       playerSpawn: { x: 0, z: 0 },
       luluSpawn: { x: 0, z: 0 },
-      decorations: [],
     };
     const seed = serializeLayout(layout);
     const parsed = JSON.parse(atob(seed));
 
-    expect(parsed.dec).toHaveLength(2);
-    expect(parsed.dec[0].t).toBe('poster');
-    expect(parsed.dec[0].text).toBe('HI');
-    expect(parsed.dec[0].color).toBe(0xff0000);
-    expect(parsed.dec[1]).not.toHaveProperty('text');
+    expect(parsed.f).toHaveLength(2);
+    expect(parsed.dec).toEqual([]);
+    const poster = parsed.f.find((f) => f.t === 'poster');
+    expect(poster.text).toBe('HI');
+    expect(poster.col).toBe(0xff0000);
   });
 
   it('uses default materials when mat is omitted', () => {
@@ -133,7 +128,6 @@ describe('serializeLayout', () => {
       placed: [],
       playerSpawn: { x: 0, z: 0 },
       luluSpawn: { x: 0, z: 0 },
-      decorations: [],
     };
     const seed = serializeLayout(layout);
     const parsed = JSON.parse(atob(seed));
@@ -272,7 +266,7 @@ describe('deserializeSeed', () => {
     expect(poster.color).toBe(0x7c3aed);
     const lights = result.furniture.find((f) => f.type === 'fairyLights');
     expect(lights).toBeDefined();
-    expect(result.decorations).toEqual([]);
+    expect(result).not.toHaveProperty('decorations');
   });
 
   it('returns a frozen object', () => {
@@ -343,7 +337,6 @@ describe('MOCK_SEED round-trip', () => {
       placed,
       playerSpawn: { x: layout.playerSpawn[0], z: layout.playerSpawn[1] },
       luluSpawn: { x: layout.luluSpawn[0], z: layout.luluSpawn[1] },
-      decorations: [],
       mat: layout.mat,
     });
 

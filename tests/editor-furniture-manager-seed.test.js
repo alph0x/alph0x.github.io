@@ -3,7 +3,7 @@
  * Verifies that all DEFAULT_SEED furniture types create actual meshes in the scene.
  */
 
-import './setup-canvas-mock.js';
+
 import { describe, it, expect, beforeEach } from 'vitest';
 import * as THREE from 'three';
 import '../docs/js/furniture/index.js';
