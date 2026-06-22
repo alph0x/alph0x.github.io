@@ -239,6 +239,41 @@ export class EditorApp {
     this._domRefs.exportOutput.value = formatExportOutput(seed);
   }
 
+  _copyShareableLink() {
+    const seed = serializeLayout({
+      outline: this.state.outline,
+      placed: this.state.placed,
+      playerSpawn: this.state.playerSpawn,
+      luluSpawn: this.state.luluSpawn,
+      mat: this.state.mat,
+    });
+    const url = `${window.location.origin}${window.location.pathname}?seed=${encodeURIComponent(seed)}`;
+    navigator.clipboard.writeText(url).catch(() => {});
+    this._domRefs.exportOutput.value = `Link copied to clipboard!\n${url}`;
+  }
+
+  _saveSlot(slot) {
+    const seed = serializeLayout({
+      outline: this.state.outline,
+      placed: this.state.placed,
+      playerSpawn: this.state.playerSpawn,
+      luluSpawn: this.state.luluSpawn,
+      mat: this.state.mat,
+    });
+    localStorage.setItem(`editor-slot-${slot}`, seed);
+    this._domRefs.exportOutput.value = `Saved to slot ${slot}`;
+  }
+
+  _loadSlot(slot) {
+    const seed = localStorage.getItem(`editor-slot-${slot}`);
+    if (seed) {
+      this.loadSeedIntoEditor(seed);
+      this._domRefs.exportOutput.value = `Loaded from slot ${slot}`;
+    } else {
+      this._domRefs.exportOutput.value = `Slot ${slot} is empty`;
+    }
+  }
+
   // ── Loop ──────────────────────────────────────────────────────
 
   _startLoop() {

@@ -21,6 +21,8 @@ export class EditorUIManager {
     this._bindTransformControls();
     this._bindUndoRedo();
     this._bindExport();
+    this._bindCopyLink();
+    this._bindSaveSlots();
   }
 
   deactivateAllTools() {
@@ -178,6 +180,17 @@ export class EditorUIManager {
 
   _bindExport() {
     this._dom.btnExport.addEventListener('click', () => this._deps.onExport?.());
+  }
+
+  _bindCopyLink() {
+    this._dom.btnCopyLink?.addEventListener('click', () => this._deps.onCopyLink?.());
+  }
+
+  _bindSaveSlots() {
+    for (let i = 1; i <= 3; i++) {
+      this._dom[`btnSaveSlot${i}`]?.addEventListener('click', () => this._deps.onSaveSlot?.(i));
+      this._dom[`btnLoadSlot${i}`]?.addEventListener('click', () => this._deps.onLoadSlot?.(i));
+    }
   }
 
   _bindToolToggle(btn, toolName, onToggle) {

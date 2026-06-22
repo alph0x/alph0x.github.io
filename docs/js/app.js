@@ -12,13 +12,25 @@ import { ROOM_LAYOUT, CFG } from './core.js';
 import { createWorldState } from './domain/world-state.js';
 import { TouchControls } from './systems/touch-controls.js';
 
-export function initGame() {
+export async function initGame() {
   const isMobile = window.matchMedia('(max-width: 768px)').matches || ('ontouchstart' in window && navigator.maxTouchPoints > 0);
+
+  // ponytail: read ?seed= on boot and override ROOM_LAYOUT
+  const params = new URLSearchParams(window.location.search);
+  const seedParam = params.get('seed');
+  if (seedParam) {
+    try {
+      const { deserializeSeed } = await import('./seed.js');
+      const decoded = deserializeSeed(seedParam);
+      Object.assign(ROOM_LAYOUT, decoded);
+    } catch {
+      /* invalid seed, ignore */
+    }
+  }
 
   try {
     const { scene, camera, renderer } = createRenderer();
 
-    // Spawn camera at playerSpawn from seed (fallback to center)
     const spawn = ROOM_LAYOUT.playerSpawn || [0, 0];
     camera.position.set(spawn[0], CFG.playerHeight, spawn[1]);
 

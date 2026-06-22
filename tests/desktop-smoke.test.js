@@ -60,8 +60,8 @@ describe('Desktop game smoke', () => {
 
     vi.resetModules();
     const { initGame } = await import('../docs/js/app.js');
-    game = initGame();
-  });
+    game = await initGame();
+  })
 
   it('creates a real Game instance', () => {
     expect(game).toBeTruthy();
