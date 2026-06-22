@@ -13,15 +13,16 @@ export function createSceneAndCamera(): { scene: THREE.Scene; camera: THREE.Came
 }
 
 export function createWebGLRenderer(): THREE.WebGLRenderer {
-  const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'low-power' });
+  // ponytail: quality based on device capability, not fixed low
+  const isMobile = window.matchMedia('(max-width: 768px)').matches || ('ontouchstart' in window && navigator.maxTouchPoints > 0);
+  const dpr = isMobile ? Math.min(window.devicePixelRatio, 2) : Math.min(window.devicePixelRatio, 2);
+  const renderer = new THREE.WebGLRenderer({ antialias: !isMobile, powerPreference: isMobile ? 'low-power' : 'high-performance' });
   renderer.setClearColor(0x1a1a2e);
   renderer.setSize(window.innerWidth, window.innerHeight, false);
-  renderer.setPixelRatio(0.5);
+  renderer.setPixelRatio(dpr);
   renderer.shadowMap.enabled = true;
-  // PSX: hard shadows (BasicShadowMap) instead of soft PCF
-  renderer.shadowMap.type = THREE.BasicShadowMap;
-  // PSX: no HDR tone mapping — flat, limited colour range
-  renderer.toneMapping = THREE.NoToneMapping;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.0;
   document.body.appendChild(renderer.domElement);
   return renderer;
