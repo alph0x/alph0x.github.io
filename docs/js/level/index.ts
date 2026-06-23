@@ -57,11 +57,11 @@ function buildPolygonRoom(scene: THREE.Scene, worldState: WorldState): { edges: 
   const ceilingTex = texCeiling.clone();
   ceilingTex.wrapS = THREE.RepeatWrapping; ceilingTex.wrapT = THREE.RepeatWrapping;
   ceilingTex.repeat.set(roomW / 2, roomD / 2);
-  const ceilingGeo = new THREE.ShapeGeometry(shape);
+  // ponytail: use thin box instead of ShapeGeometry plane so both faces are visible
+  const ceilingGeo = new THREE.BoxGeometry(roomW + wallT, 0.02, roomD + wallT);
   const ceilingMat = new THREE.MeshStandardMaterial({ color: hexToInt(mat.ceiling), map: ceilingTex, flatShading: true, roughness: 1, metalness: 0 });
   const ceiling = new THREE.Mesh(ceilingGeo, ceilingMat);
-  ceiling.rotation.x = Math.PI / 2;
-  ceiling.position.y = wallH;
+  ceiling.position.y = wallH - 0.01;
   ceiling.receiveShadow = true;
   scene.add(ceiling as any);
 
