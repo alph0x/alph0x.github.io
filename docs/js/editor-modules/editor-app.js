@@ -65,7 +65,10 @@ export class EditorApp {
 
   _setupRenderer(container) {
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
-    this.renderer.setSize(container.clientWidth, container.clientHeight);
+    // ponytail: ensure container has size before setting renderer size
+    const w = container.clientWidth || container.offsetWidth || 800;
+    const h = container.clientHeight || container.offsetHeight || 600;
+    this.renderer.setSize(w, h);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     container.appendChild(this.renderer.domElement);
   }
@@ -166,6 +169,20 @@ export class EditorApp {
 
   _setupEvents() {
     window.addEventListener('resize', () => this.cameraSystem.onResize(this.state.viewMode));
+    // ponytail: ResizeObserver ensures canvas fills container even when CSS flex resolves late
+    const container = this._domRefs['canvas-wrap'];
+    if (container && typeof ResizeObserver !== 'undefined') {
+      const ro = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          const { width, height } = entry.contentRect;
+          if (width > 0 && height > 0) {
+            this.renderer.setSize(width, height);
+            this.cameraSystem.onResize(this.state.viewMode);
+          }
+        }
+      });
+      ro.observe(container);
+    }
     this.errorHandler = new EditorErrorHandler();
     this.errorHandler.attach();
   }

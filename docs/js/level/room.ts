@@ -23,9 +23,9 @@ export function addFloor(x: number, z: number, w: number, d: number): THREE.Mesh
 }
 
 export function addCeiling(x: number, z: number, w: number, d: number): THREE.Mesh {
-  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(w, d), M.ceiling!);
-  mesh.rotation.x = Math.PI / 2;
-  mesh.position.set(x, CFG.wallH, z);
+  // ponytail: use thin box instead of plane so both faces are visible from any angle
+  const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, 0.02, d), M.ceiling!);
+  mesh.position.set(x, CFG.wallH - 0.01, z);
   mesh.receiveShadow = true;
   return mesh;
 }
