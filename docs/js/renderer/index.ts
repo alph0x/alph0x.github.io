@@ -3,7 +3,7 @@ import { createSceneAndCamera, createWebGLRenderer } from './setup.js';
 
 export function createRenderer(): {
   scene: THREE.Scene;
-  camera: THREE.Camera;
+  camera: THREE.PerspectiveCamera;
   renderer: THREE.WebGLRenderer;
 } {
   const { scene, camera } = createSceneAndCamera();

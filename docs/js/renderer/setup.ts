@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { CFG } from '../core.js';
 
-export function createSceneAndCamera(): { scene: THREE.Scene; camera: THREE.Camera } {
+export function createSceneAndCamera(): { scene: THREE.Scene; camera: THREE.PerspectiveCamera } {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x1a1a2e);
   scene.fog = new THREE.FogExp2(0x1a1a2e, 0.015);

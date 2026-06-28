@@ -100,3 +100,29 @@ export function makeRoundedBox(
   mesh.castShadow = true; mesh.receiveShadow = true;
   return mesh;
 }
+
+/**
+ * Extrude a 2D shape along Z.
+ * @param points — closed 2D polygon in XY plane (counter-clockwise).
+ * @param depth — extrusion depth; centered around z=0.
+ */
+export function makeExtrudedShape(
+  material: THREE.Material,
+  points: [number, number][],
+  depth: number,
+  pos: [number, number, number]
+): THREE.Mesh {
+  const shape = new THREE.Shape();
+  const [[x0, y0], ...rest] = points;
+  shape.moveTo(x0, y0);
+  for (const [x, y] of rest) shape.lineTo(x, y);
+  shape.closePath();
+
+  const geo = new THREE.ExtrudeGeometry(shape, { depth, bevelEnabled: false, curveSegments: 1 });
+  geo.center();
+  const mesh = new THREE.Mesh(geo, material);
+  mesh.position.set(...pos);
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  return mesh;
+}

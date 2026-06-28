@@ -6,11 +6,12 @@
 import * as THREE from 'three';
 import type { FurnitureConfig } from '../seed.js';
 
-export type BuilderFn = (config: FurnitureConfig) => THREE.Mesh | THREE.Group | [THREE.Mesh | THREE.Group, any];
+export type BuilderResult = { mesh: THREE.Mesh | THREE.Group } & Record<string, unknown>;
+export type BuilderFn = (config: FurnitureConfig) => BuilderResult;
 
 export interface FurnitureMeta {
   category?: string;
-  dimensions?: { w: number; h: number; d: number };
+  dimensions?: { w: number; h: number; d: number } | string;
   icon?: string;
 }
 

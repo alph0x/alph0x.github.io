@@ -5,7 +5,7 @@
  *      Organised by domain concern so each system receives only what it needs.
  */
 
-import type { Group } from 'three';
+import type { Group, Object3D } from 'three';
 import { Player } from './player.js';
 import type { Pet } from './pet.js';
 
@@ -16,6 +16,14 @@ export interface Wall {
   maxZ: number;
 }
 
+export interface Interactable {
+  mesh: Object3D;
+  type: string;
+  panelId?: string;
+  name: string;
+  label?: string;
+}
+
 export interface WorldState {
   player: Player;
   pet: {
@@ -24,7 +32,7 @@ export interface WorldState {
   };
   room: {
     walls: Wall[];
-    interactables: unknown[];
+    interactables: Interactable[];
     playerSpawn: { x: number; z: number };
     luluSpawn: { x: number; z: number };
   };
