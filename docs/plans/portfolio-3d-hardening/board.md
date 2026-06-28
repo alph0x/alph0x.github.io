@@ -6,19 +6,19 @@
 | AGENTS.md refresh | Foundation | 🟢 done | agent | `AGENTS.md` reviewed and under 2 min to read |
 | Ponytail cleanup | Foundation | 🟢 done | agent | dead files/exports removed, `npm test` green |
 | TypeScript toolchain | Foundation | 🟢 done | agent | `tsconfig.json`, `npm run typecheck`, CI typecheck job green |
-| TypeScript: full migration | Foundation | 🟡 in progress | agent | mechanical rename done, type errors pending; needs dedicated session |
-| Shared room geometry | Cleanup | 🔴 not started | agent | single wall/opening builder used by game + editor |
-| Visual fidelity: infrastructure | Product | 🔴 not started | agent | new primitives + deterministic pixel-art textures + PBR materials |
-| Visual fidelity: core furniture | Product | 🔴 not started | agent | bed/desk/nightstand/TV/macbook/gaming-pc/monitor rebuilt, AABB preserved |
-| Visual fidelity: fixtures | Product | 🔴 not started | agent | ceiling-lamp/door/window/posters/fairy-lights rebuilt |
-| Visual fidelity: Lulú | Product | 🔴 not started | agent | mini-schnauzer no longer looks like stacked boxes |
-| Visual fidelity: room shell | Product | 🔴 not started | agent | walls/floor/ceiling have better materials and trim |
-| Career Skyline window | Product | 🔴 not started | agent | window view shows personalized career skyline |
-| Rendering quality + loading | Core | 🔴 not started | agent | default quality raised, deterministic textures, real loading |
-| Shareable seeds | Product | 🔴 not started | agent | `?seed=` loads, editor saves/loads 3 local slots |
-| Mobile touch FPS controls | Product | 🔴 not started | agent | on-screen move + look controls work |
-| Portfolio Tour | Product | 🔴 not started | agent | scripted tour runs and opens panels at stops |
-| Dynamic time of day | Product | 🔴 not started | agent | lighting changes with user's local time |
+| TypeScript: full migration | Foundation | 🟢 done | agent | zero .js files under docs/js/, npm run typecheck green |
+| Shared room geometry | Cleanup | 🟢 done | agent | single wall/opening builder used by game + editor |
+| Visual fidelity: infrastructure | Product | 🟢 done | agent | new primitives + deterministic pixel-art textures + PBR materials |
+| Visual fidelity: core furniture | Product | 🟢 done | agent | bed/desk/nightstand/TV/macbook/gaming-pc/monitor rebuilt, AABB preserved |
+| Visual fidelity: fixtures | Product | 🟢 done | agent | ceiling-lamp/door/window/posters/fairy-lights rebuilt |
+| Visual fidelity: Lulú | Product | 🟢 done | agent | mini-schnauzer no longer looks like stacked boxes |
+| Visual fidelity: room shell | Product | 🟢 done | agent | walls/floor/ceiling have better materials and trim |
+| Career Skyline window | Product | 🟢 done | agent | window view shows personalized career skyline |
+| Rendering quality + loading | Core | 🟢 done | agent | default quality raised, deterministic textures, real loading |
+| Shareable seeds | Product | 🟢 done | agent | `?seed=` loads, editor saves/loads 3 local slots |
+| Mobile touch FPS controls | Product | 🟢 done | agent | on-screen move + look controls work |
+| Portfolio Tour | Product | 🟢 done | agent | scripted tour runs and opens panels at stops |
+| Dynamic time of day | Product | 🟢 done | agent | lighting changes with user's local time |
 | Dynamic screen reflections | Product | 🔴 not started | agent | screens reflect room/player with render targets |
 | AlphGPT MacBook terminal mode | Product | 🔴 not started | agent | camera zooms to laptop, terminal UI renders on screen |
 | In-game object labels | Product | 🔴 not started | agent | hover prompt shows furniture name |
