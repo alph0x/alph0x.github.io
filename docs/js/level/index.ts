@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { texWall, texFloor, texCeiling } from '../assets/textures.js';
-import { makeBox } from '../primitives.js';
+import { texWall, texFloor, texCeiling, texMetal, texConcrete } from '../assets/textures.js';
+import { makeBox, makeCylinder } from '../primitives.js';
 
 import { CFG, ROOM_LAYOUT } from '../core.js';
 import { FurnitureRegistry } from '../furniture/index.js';
@@ -44,20 +44,47 @@ function buildPolygonRoom(scene: THREE.Scene, worldState: WorldState): { edges: 
   }
   shape.closePath();
 
+  // Floor — ShapeGeometry with world-space UVs so plank texture aligns across the room
   const floorTex = texFloor.clone();
   floorTex.wrapS = THREE.RepeatWrapping; floorTex.wrapT = THREE.RepeatWrapping;
   floorTex.repeat.set(roomW / 2, roomD / 2);
   const floorGeo = new THREE.ShapeGeometry(shape);
+  const posAttr = floorGeo.attributes.position;
+  const uvAttr = floorGeo.attributes.uv;
+  for (let i = 0; i < posAttr.count; i++) {
+    const ux = (posAttr.getX(i) - minX) / roomW;
+    const uy = (posAttr.getY(i) - minZ) / roomD;
+    uvAttr.setXY(i, ux * floorTex.repeat.x, uy * floorTex.repeat.y);
+  }
+  floorGeo.attributes.uv.needsUpdate = true;
   const floorMat = new THREE.MeshStandardMaterial({ color: hexToInt(mat.floor), map: floorTex, flatShading: true, roughness: 1, metalness: 0 });
   const floor = new THREE.Mesh(floorGeo, floorMat);
   floor.rotation.x = -Math.PI / 2;
   floor.receiveShadow = true;
   scene.add(floor as any);
 
+  // Floor perimeter trim
+  const trimColor = 0x292524;
+  const floorTrimMat = new THREE.MeshStandardMaterial({ color: trimColor, flatShading: true, roughness: 0.9, metalness: 0 });
+  for (let i = 0; i < outline.length; i++) {
+    const p1 = outline[i];
+    const p2 = outline[(i + 1) % outline.length];
+    const dx = p2[0] - p1[0];
+    const dz = p2[1] - p1[1];
+    const len = Math.sqrt(dx * dx + dz * dz);
+    if (len < 0.01) continue;
+    const midX = (p1[0] + p2[0]) / 2;
+    const midZ = (p1[1] + p2[1]) / 2;
+    const angle = Math.atan2(dx, dz);
+    const trim = makeBox(floorTrimMat, [wallT + 0.04, 0.04, len + 0.04], [midX, 0.02, midZ]);
+    trim.rotation.y = angle;
+    scene.add(trim as any);
+  }
+
+  // Ceiling — thin box with tiled texture and a recessed grid overlay
   const ceilingTex = texCeiling.clone();
   ceilingTex.wrapS = THREE.RepeatWrapping; ceilingTex.wrapT = THREE.RepeatWrapping;
   ceilingTex.repeat.set(roomW / 2, roomD / 2);
-  // ponytail: use thin box instead of ShapeGeometry plane so both faces are visible
   const ceilingGeo = new THREE.BoxGeometry(roomW + wallT, 0.02, roomD + wallT);
   const ceilingMat = new THREE.MeshStandardMaterial({ color: hexToInt(mat.ceiling), map: ceilingTex, flatShading: true, roughness: 1, metalness: 0 });
   const ceiling = new THREE.Mesh(ceilingGeo, ceilingMat);
@@ -65,13 +92,32 @@ function buildPolygonRoom(scene: THREE.Scene, worldState: WorldState): { edges: 
   ceiling.receiveShadow = true;
   scene.add(ceiling as any);
 
-  // Simple ceiling vent (offset if a ceiling lamp already occupies the centre)
+  const gridMat = new THREE.MeshStandardMaterial({ color: 0x252525, flatShading: true, roughness: 0.95 });
+  const tileW = 0.9;
+  const tileD = 0.9;
+  const cols = Math.max(1, Math.floor(roomW / tileW));
+  const rows = Math.max(1, Math.floor(roomD / tileD));
+  for (let c = 1; c < cols; c++) {
+    const x = minX + c * tileW;
+    scene.add(makeBox(gridMat, [0.02, 0.015, roomD + wallT], [x, wallH - 0.005, (minZ + maxZ) / 2]) as any);
+  }
+  for (let r = 1; r < rows; r++) {
+    const z = minZ + r * tileD;
+    scene.add(makeBox(gridMat, [roomW + wallT, 0.015, 0.02], [(minX + maxX) / 2, wallH - 0.005, z]) as any);
+  }
+
+  // Ceiling vent with slats (offset if a ceiling lamp already occupies the centre)
   const hasCeilingLamp = (ROOM_LAYOUT.furniture || []).some((f: any) => f.type === 'ceilingLamp');
   const ventX = (minX + maxX) / 2 + (hasCeilingLamp ? 0.6 : 0);
   const ventZ = (minZ + maxZ) / 2;
-  const ventMat = new THREE.MeshStandardMaterial({ color: 0x1f1f23, flatShading: true, roughness: 0.9, metalness: 0 });
-  const vent = makeBox(ventMat, [0.5, 0.05, 0.5], [ventX, wallH - 0.025, ventZ]);
-  scene.add(vent as any);
+  const ventMat = new THREE.MeshStandardMaterial({ map: texMetal, color: 0x222226, flatShading: true, roughness: 0.6, metalness: 0.4 });
+  const ventGroup = new THREE.Group();
+  ventGroup.position.set(ventX, wallH - 0.03, ventZ);
+  ventGroup.add(makeBox(ventMat, [0.5, 0.04, 0.5], [0, 0, 0]));
+  for (let i = -2; i <= 2; i++) {
+    ventGroup.add(makeBox(new THREE.MeshStandardMaterial({ color: 0x111114, flatShading: true }), [0.42, 0.01, 0.03], [0, -0.02, i * 0.09]));
+  }
+  scene.add(ventGroup as any);
 
   // Collect openings from furniture layout
   const openings = (ROOM_LAYOUT.furniture || [])
