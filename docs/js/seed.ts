@@ -111,6 +111,21 @@ export function serializeLayout({ outline, placed, playerSpawn, luluSpawn, mat }
   return btoa(JSON.stringify(payload));
 }
 
+// ── URL seed application ───────────────────────────────────────
+
+export function applySeedFromUrl(search: string, target: Partial<SeedData>): boolean {
+  const params = new URLSearchParams(search);
+  const seedParam = params.get('seed');
+  if (!seedParam) return false;
+  try {
+    const decoded = deserializeSeed(seedParam);
+    Object.assign(target, decoded);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 // ── Deserialization ─────────────────────────────────────────────
 
 export function deserializeSeed(seedStr: string | object): SeedData {

@@ -37,6 +37,10 @@ function buildEditorDOM() {
     <button id="btnViewMode"></button><button id="btnRotate"></button>
     <button id="btnDelete"></button><button id="btnUndo"></button>
     <button id="btnRedo"></button><button id="btnExport"></button>
+    <button id="btnCopyLink"></button>
+    <button id="btnSaveSlot1"></button><button id="btnLoadSlot1"></button>
+    <button id="btnSaveSlot2"></button><button id="btnLoadSlot2"></button>
+    <button id="btnSaveSlot3"></button><button id="btnLoadSlot3"></button>
     <input id="colorFloor" value="#1c1917"/><input id="colorFloorText" value="#1c1917"/>
     <input id="colorWall" value="#44403c"/><input id="colorWallText" value="#44403c"/>
     <input id="colorCeiling" value="#1c1917"/><input id="colorCeilingText" value="#1c1917"/>
@@ -293,5 +297,45 @@ describe('Editor behavior', () => {
     btn.click();
     expect(window.__editorState.activeTool).toBeNull();
     expect(btn.classList.contains('active')).toBe(false);
+  });
+
+  it('copies a shareable link when clicking btnCopyLink', () => {
+    document.getElementById('btnCopyLink').click();
+    const output = document.getElementById('exportOutput');
+    expect(output.value).toContain('Link copied to clipboard!');
+    expect(output.value).toContain('?seed=');
+  });
+
+  it('saves current layout to localStorage slot 1', () => {
+    localStorage.clear();
+    document.getElementById('btnSaveSlot1').click();
+    const output = document.getElementById('exportOutput');
+    expect(output.value).toContain('Saved to slot 1');
+    expect(localStorage.getItem('editor-slot-1')).toBeTruthy();
+  });
+
+  it('loads a previously saved slot and restores layout', () => {
+    localStorage.clear();
+    // Save current layout, then mutate it, then load back
+    document.getElementById('btnSaveSlot1').click();
+    const savedSeed = localStorage.getItem('editor-slot-1');
+    window.__editorState.outline = [[0, 0], [1, 0], [1, 1], [0, 1]];
+    document.getElementById('btnLoadSlot1').click();
+    const output = document.getElementById('exportOutput');
+    expect(output.value).toContain('Loaded from slot 1');
+    expect(window.__editorState.outline).toEqual([
+      [-2.25, -1.75],
+      [2.25, -1.75],
+      [2.25, 1.75],
+      [-2.25, 1.75],
+    ]);
+    expect(localStorage.getItem('editor-slot-1')).toBe(savedSeed);
+  });
+
+  it('reports empty slot when loading an unsaved slot', () => {
+    localStorage.clear();
+    document.getElementById('btnLoadSlot2').click();
+    const output = document.getElementById('exportOutput');
+    expect(output.value).toContain('Slot 2 is empty');
   });
 });
