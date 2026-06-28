@@ -33,6 +33,16 @@ describe('window parallax', () => {
     expect(new Set(factors).size).toBeGreaterThan(1);
   });
 
+  it('includes career-themed landmark buildings', () => {
+    const result = builder({ position: [0, 0, 0], rotation: 0 });
+    const cityscape = result.mesh.children.find((c) => c.userData._parallax);
+    const midground = cityscape.children.find((c) => c.userData._parallaxFactor === 0.03);
+    expect(midground).toBeDefined();
+    expect(midground.children.length).toBeGreaterThanOrEqual(5);
+    const landmarkColors = new Set(midground.children.map((c) => c.material?.color?.getHex?.()));
+    expect(landmarkColors.size).toBeGreaterThan(2);
+  });
+
   it('produces deterministic cityscapes for the same seed', () => {
     const resultA = builder({ position: [0, 0, 0], rotation: 0 });
     const resultB = builder({ position: [0, 0, 0], rotation: 0 });
