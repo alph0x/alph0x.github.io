@@ -28,5 +28,13 @@ export function syncPetToThreeJS(
   if (earR) earR.rotation.z = pet.earRRotationZ;
 
   const head = threeGroup.getObjectByName('head');
-  if (head) head.rotation.y = pet.headRotation;
+  if (head) {
+    if (pet.isSleeping) {
+      head.rotation.x = -0.45;
+      head.rotation.y = 0;
+    } else {
+      head.rotation.x = 0;
+      head.rotation.y = pet.headRotation;
+    }
+  }
 }

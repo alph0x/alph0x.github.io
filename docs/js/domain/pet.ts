@@ -26,6 +26,7 @@ export class Pet {
   earRRotationZ: number;
   breathScale: number;
   isExcited: boolean;
+  isSleeping: boolean;
   distToPlayer: number;
 
   constructor({ position, rotation = 0 }: PetConfig = {}) {
@@ -40,8 +41,9 @@ export class Pet {
     this.earRRotationZ = -0.2;
     this.breathScale = 1;
 
-    // Mood / distance
+    // Mood / distance / time-of-day
     this.isExcited = false;
+    this.isSleeping = false;
     this.distToPlayer = Infinity;
   }
 }

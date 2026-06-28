@@ -6,17 +6,24 @@
  */
 
 import type { Pet, Vec3 } from '../domain/pet.js';
+import type { TimeOfDayName } from '../level/lighting.js';
 
 const MAX_HEAD_TURN = 0.5;
 const SMOOTH_FACTOR = 0.12;
 const EXCITE_DISTANCE = 1.0;
 const LOSE_INTEREST_DISTANCE = 2.5;
 
-export function updatePetAnimation(pet: Pet, playerPosition: Vec3, timeS: number): void {
+export function updatePetAnimation(
+  pet: Pet,
+  playerPosition: Vec3,
+  timeS: number,
+  timeOfDay: TimeOfDayName = 'afternoon'
+): void {
   const dx = playerPosition.x - pet.position.x;
   const dz = playerPosition.z - pet.position.z;
   pet.distToPlayer = Math.sqrt(dx * dx + dz * dz);
   pet.isExcited = pet.distToPlayer < EXCITE_DISTANCE;
+  pet.isSleeping = timeOfDay === 'night';
 
   updateBreathing(pet, timeS);
   updateTail(pet, timeS);
@@ -27,6 +34,10 @@ export function updatePetAnimation(pet: Pet, playerPosition: Vec3, timeS: number
 /* ── Breathing ─────────────────────────────────────────────────────── */
 
 function updateBreathing(pet: Pet, timeS: number): void {
+  if (pet.isSleeping) {
+    pet.breathScale = 1 + Math.sin(timeS * 1.5) * 0.008;
+    return;
+  }
   const breathAmp = pet.isExcited ? 0.025 : 0.015;
   pet.breathScale = 1 + Math.sin(timeS * 2) * breathAmp;
 }
@@ -34,6 +45,11 @@ function updateBreathing(pet: Pet, timeS: number): void {
 /* ── Tail ──────────────────────────────────────────────────────────── */
 
 function updateTail(pet: Pet, timeS: number): void {
+  if (pet.isSleeping) {
+    pet.tailRotationZ = 0.1;
+    pet.tailRotationY = 0;
+    return;
+  }
   const speed = pet.isExcited ? 12 : 7;
   const ampZ = pet.isExcited ? 0.15 : 0.08;
   const ampY = pet.isExcited ? 0.12 : 0.06;
@@ -44,6 +60,11 @@ function updateTail(pet: Pet, timeS: number): void {
 /* ── Ears ──────────────────────────────────────────────────────────── */
 
 function updateEars(pet: Pet, timeS: number): void {
+  if (pet.isSleeping) {
+    pet.earLRotationZ = -0.35;
+    pet.earRRotationZ = -0.35;
+    return;
+  }
   if (pet.isExcited) {
     pet.earLRotationZ = -0.05 + Math.sin(timeS * 3) * 0.03;
     pet.earRRotationZ = -0.05 - Math.sin(timeS * 3) * 0.03;
@@ -57,6 +78,10 @@ function updateEars(pet: Pet, timeS: number): void {
 /* ── Head look ─────────────────────────────────────────────────────── */
 
 function updateHead(pet: Pet, playerPosition: Vec3): void {
+  if (pet.isSleeping) {
+    pet.headRotation += (0 - pet.headRotation) * SMOOTH_FACTOR;
+    return;
+  }
   if (pet.distToPlayer > LOSE_INTEREST_DISTANCE) {
     // Return to neutral when player is far away
     pet.headRotation += (0 - pet.headRotation) * SMOOTH_FACTOR;

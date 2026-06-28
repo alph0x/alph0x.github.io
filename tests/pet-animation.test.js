@@ -107,6 +107,44 @@ describe('updatePet', () => {
     });
   });
 
+  describe('sleeping at night', () => {
+    it('marks pet as sleeping when time-of-day is night', () => {
+      const { pet, camera } = createPetAndCamera({ x: 0, y: 1, z: 2 }, { x: 0, z: 0 }, 0);
+      window.__TIME_OF_DAY_NOW__ = new Date('2026-06-22T23:00:00');
+      updatePet(0, pet, camera);
+      expect(pet.model.isSleeping).toBe(true);
+      delete window.__TIME_OF_DAY_NOW__;
+    });
+
+    it('is not sleeping during the afternoon', () => {
+      const { pet, camera } = createPetAndCamera({ x: 0, y: 1, z: 2 }, { x: 0, z: 0 }, 0);
+      window.__TIME_OF_DAY_NOW__ = new Date('2026-06-22T14:00:00');
+      updatePet(0, pet, camera);
+      expect(pet.model.isSleeping).toBe(false);
+      delete window.__TIME_OF_DAY_NOW__;
+    });
+
+    it('keeps tail still when sleeping', () => {
+      const { pet, camera } = createPetAndCamera({ x: 0, y: 1, z: 2 }, { x: 0, z: 0 }, 0);
+      window.__TIME_OF_DAY_NOW__ = new Date('2026-06-22T23:00:00');
+      updatePet(0, pet, camera);
+      updatePet(500, pet, camera);
+      const tail = pet.mesh.getObjectByName('tail');
+      expect(tail.rotation.z).toBeCloseTo(0.1, 2);
+      expect(tail.rotation.y).toBeCloseTo(0, 2);
+      delete window.__TIME_OF_DAY_NOW__;
+    });
+
+    it('lowers head when sleeping', () => {
+      const { pet, camera } = createPetAndCamera({ x: 0, y: 1, z: 2 }, { x: 0, z: 0 }, 0);
+      window.__TIME_OF_DAY_NOW__ = new Date('2026-06-22T23:00:00');
+      updatePet(0, pet, camera);
+      const head = pet.mesh.getObjectByName('head');
+      expect(head.rotation.x).toBeLessThan(-0.3);
+      delete window.__TIME_OF_DAY_NOW__;
+    });
+  });
+
   describe('excited animation', () => {
     it('has perkier ears when player is very close (< 1m)', () => {
       const { pet: petFar, camera: camFar } = createPetAndCamera({ x: 0, y: 1, z: 2 }, { x: 0, z: 0 }, 0);
