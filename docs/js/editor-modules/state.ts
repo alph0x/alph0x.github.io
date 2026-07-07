@@ -53,6 +53,8 @@ interface EditorStateData {
   pointer: THREE.Vector2;
   mat: MatConfig;
   lastAction: string | null;
+  snapEnabled: boolean;
+  snapSize: number;
 }
 
 export class EditorState {
@@ -83,6 +85,8 @@ export class EditorState {
       pointer: new THREE.Vector2(),
       mat: { floor: '#1c1917', wall: '#44403c', ceiling: '#1c1917' },
       lastAction: null,
+      snapEnabled: true,
+      snapSize: 0.05,
     };
   }
 
@@ -136,6 +140,11 @@ export class EditorState {
 
   get mat() { return this._data.mat; }
 
+  get snapEnabled() { return this._data.snapEnabled; }
+  set snapEnabled(v) { this._data.snapEnabled = v; }
+
+  get snapSize() { return this._data.snapSize; }
+  set snapSize(v) { this._data.snapSize = v; }
 
   // ── Controlled mutations ────────────────────────────────────────
 

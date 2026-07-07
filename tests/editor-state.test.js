@@ -100,4 +100,18 @@ describe('EditorState', () => {
     expect(s.luluSpawn).toEqual({ x: 0.1, z: 0.1 });
     expect(s.mat).toEqual({ floor: '#fff', wall: '#000', ceiling: '#ccc' });
   });
+
+  it('initializes with default snap settings', () => {
+    const s = new EditorState();
+    expect(s.snapEnabled).toBe(true);
+    expect(s.snapSize).toBe(0.05);
+  });
+
+  it('mutates snap settings via setters', () => {
+    const s = new EditorState();
+    s.snapEnabled = false;
+    s.snapSize = 0.1;
+    expect(s.snapEnabled).toBe(false);
+    expect(s.snapSize).toBe(0.1);
+  });
 });

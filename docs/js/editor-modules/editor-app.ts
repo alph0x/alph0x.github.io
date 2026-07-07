@@ -89,12 +89,6 @@ interface AppDomRefs {
   [key: string]: HTMLElement | null | undefined;
 }
 
-// State types two snap properties that are read/written at runtime but absent from EditorState.
-interface StateExtras {
-  snapEnabled: boolean;
-  snapSize: number;
-}
-
 interface ControlsLike {
   enabled: boolean;
 }
@@ -136,6 +130,7 @@ export class EditorApp {
       this._setupCamera(container);
       this._setupManagers(floorPlane, roomGroup, spawnGroup, outlineGroup);
       this._setupUI(outlineGroup);
+      this._loadSnapSettings();
       this.guideGroup = this._sceneSetup.createGuideGroup();
       this._setupInteraction(floorPlane);
       this._setupEvents();
@@ -269,7 +264,7 @@ export class EditorApp {
       spawnManager: this.spawnManager,
       roomBuilder: this.roomBuilder,
       config: this.config,
-      snap: (v) => editorSnap(v, this.config.snap),
+      snap: (v) => (this.state.snapEnabled ? editorSnap(v, this.state.snapSize) : v),
       controls: () => this.cameraSystem.controls as unknown as ControlsLike,
       onSpawnPlaced: (type) => {
         this._domRefs[type === 'player' ? 'toolPlayer' : 'toolLulu'].classList.remove('active');
@@ -431,15 +426,32 @@ export class EditorApp {
   }
 
   private _setSnapEnabled(enabled: boolean): void {
-    const state = this.state as unknown as StateExtras;
-    state.snapEnabled = enabled;
+    this.state.snapEnabled = enabled;
     localStorage.setItem('editor-snap-enabled', String(enabled));
   }
 
   private _setSnapSize(size: number): void {
-    const state = this.state as unknown as StateExtras;
-    state.snapSize = size;
+    this.state.snapSize = size;
+    this.config.snap = size;
     localStorage.setItem('editor-snap-size', String(size));
+  }
+
+  private _loadSnapSettings(): void {
+    const enabledRaw = localStorage.getItem('editor-snap-enabled');
+    const sizeRaw = localStorage.getItem('editor-snap-size');
+    if (enabledRaw !== null) {
+      const enabled = enabledRaw === 'true';
+      this.state.snapEnabled = enabled;
+      if (this._domRefs.snapToggle) this._domRefs.snapToggle.checked = enabled;
+    }
+    if (sizeRaw !== null) {
+      const size = parseFloat(sizeRaw);
+      if (!isNaN(size) && size > 0) {
+        this.state.snapSize = size;
+        this.config.snap = size;
+        if (this._domRefs.snapSize) this._domRefs.snapSize.value = String(size);
+      }
+    }
   }
 
   // ── Loop ──────────────────────────────────────────────────────
