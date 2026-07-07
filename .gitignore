@@ -50,6 +50,7 @@ playwright/.cache/
 AGENTS.md
 scripts/preflight-check.js
 .missions/
+docs/plans/
 
 # ── Local context files ─────────────────────────
 CONTEXT.md
