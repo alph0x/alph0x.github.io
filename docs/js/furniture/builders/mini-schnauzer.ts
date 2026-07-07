@@ -4,7 +4,7 @@ import { makeStd, texFabric } from '../../assets/index.js';
 import { makeRoundedBox, makeCylinder, makeSphere, makeCone, makeBox } from '../../primitives.js';
 import type { FurnitureConfig } from '../../seed.js';
 
-function buildMiniSchnauzer(cfg: FurnitureConfig): { mesh: THREE.Group } {
+function buildMiniSchnauzer(cfg: FurnitureConfig): { mesh: THREE.Group; label: string } {
   const [x, y, z] = cfg.position;
   const g = new THREE.Group();
   g.position.set(x, y, z);
@@ -124,7 +124,7 @@ function buildMiniSchnauzer(cfg: FurnitureConfig): { mesh: THREE.Group } {
   g.add(tail);
   g.add(makeSphere(coatDark, [0.018], [-0.22, 0.13, 0], 6)); // tail tip
 
-  return { mesh: g };
+  return { mesh: g, label: 'Lulú' };
 }
 
 register('miniSchnauzer', buildMiniSchnauzer);

@@ -4,7 +4,7 @@ import { M, makeStd, texFabric, texWood } from '../../assets/index.js';
 import { makeBox, makeCylinder, makeRoundedBox } from '../../primitives.js';
 import type { FurnitureConfig } from '../../seed.js';
 
-function buildBed(cfg: FurnitureConfig): { mesh: THREE.Group } {
+function buildBed(cfg: FurnitureConfig): { mesh: THREE.Group; label: string } {
   const [x, y, z] = cfg.position;
   const g = new THREE.Group();
   g.position.set(x, y, z);
@@ -45,6 +45,6 @@ function buildBed(cfg: FurnitureConfig): { mesh: THREE.Group } {
   g.add(makeRoundedBox(wood, [0.12, 1.0, 1.4], [-0.95, 0.7, 0], 0.04, 2));
   g.add(makeRoundedBox(M.wood, [0.04, 0.85, 1.2], [-0.88, 0.7, 0], 0.02, 2));
 
-  return { mesh: g };
+  return { mesh: g, label: 'Bed' };
 }
 register('bed', buildBed);

@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import * as THREE from 'three';
 import { InteractionSystem } from '../docs/js/systems/interaction.js';
 
 describe('InteractionSystem panels', () => {
@@ -40,6 +41,40 @@ describe('InteractionSystem panels', () => {
     expect(document.getElementById('panel-profile').classList.contains('active')).toBe(true);
     expect(document.getElementById('crosshair').style.display).toBe('none');
     expect(controls.unlock).toHaveBeenCalledOnce();
+  });
+
+  it('shows furniture label in prompt on hover', () => {
+    document.body.innerHTML = '<div id="prompt"></div>';
+    const camera = new THREE.PerspectiveCamera();
+    const worldState = { ui: { isPanelOpen: false }, room: { interactables: [] } };
+    const system = new InteractionSystem({ camera, worldState, controls });
+
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial());
+    mesh.position.set(0, 0, -2);
+    mesh.updateMatrixWorld();
+    worldState.room.interactables.push({ mesh, type: 'testType', panelId: 'panel-test', name: 'Test Label' });
+
+    system.updatePrompt();
+    const prompt = document.getElementById('prompt');
+    expect(prompt.textContent).toBe('[E] Test Label');
+    expect(prompt.classList.contains('active')).toBe(true);
+  });
+
+  it('falls back to type in prompt when label is missing', () => {
+    document.body.innerHTML = '<div id="prompt"></div>';
+    const camera = new THREE.PerspectiveCamera();
+    const worldState = { ui: { isPanelOpen: false }, room: { interactables: [] } };
+    const system = new InteractionSystem({ camera, worldState, controls });
+
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial());
+    mesh.position.set(0, 0, -2);
+    mesh.updateMatrixWorld();
+    worldState.room.interactables.push({ mesh, type: 'boxType', panelId: 'panel-box', name: '' });
+
+    system.updatePrompt();
+    const prompt = document.getElementById('prompt');
+    expect(prompt.textContent).toBe('[E] boxType');
+    expect(prompt.classList.contains('active')).toBe(true);
   });
 
   it('keeps crosshair hidden while any panel is open', () => {

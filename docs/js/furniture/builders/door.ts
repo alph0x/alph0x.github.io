@@ -10,7 +10,7 @@ import { makeRoundedBox, makeBox, makeCylinder } from '../../primitives.js';
 import { getInteriorOffset } from './wall-offset.js';
 import type { FurnitureConfig } from '../../seed.js';
 
-function buildDoor(cfg: FurnitureConfig): { mesh: THREE.Group } {
+function buildDoor(cfg: FurnitureConfig): { mesh: THREE.Group; label: string } {
   const [x, y, z] = cfg.position;
   const wrapper = new THREE.Group();
   wrapper.position.set(x, y, z);
@@ -54,7 +54,7 @@ function buildDoor(cfg: FurnitureConfig): { mesh: THREE.Group } {
   door.position.set(off.x, 0, off.z);
   wrapper.add(door);
 
-  return { mesh: wrapper };
+  return { mesh: wrapper, label: 'Door' };
 }
 
 register('door', buildDoor);

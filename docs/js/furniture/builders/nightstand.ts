@@ -4,7 +4,7 @@ import { M, makeStd, texMetal, texWood } from '../../assets/index.js';
 import { makeBox, makeCylinder, makeRoundedBox, makeSphere } from '../../primitives.js';
 import type { FurnitureConfig } from '../../seed.js';
 
-function buildNightstand(cfg: FurnitureConfig): { mesh: THREE.Group } {
+function buildNightstand(cfg: FurnitureConfig): { mesh: THREE.Group; label: string } {
   const [x, y, z] = cfg.position;
   const g = new THREE.Group();
   g.position.set(x, y, z);
@@ -35,6 +35,6 @@ function buildNightstand(cfg: FurnitureConfig): { mesh: THREE.Group } {
     }
   }
 
-  return { mesh: g };
+  return { mesh: g, label: 'Nightstand' };
 }
 register('nightstand', buildNightstand);

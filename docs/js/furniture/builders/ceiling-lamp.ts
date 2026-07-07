@@ -5,7 +5,7 @@ import { makeStd, texMetal } from '../../assets/index.js';
 import { makeCylinder, makeSphere } from '../../primitives.js';
 import type { FurnitureConfig } from '../../seed.js';
 
-function buildCeilingLamp(cfg: FurnitureConfig): { mesh: THREE.Group } {
+function buildCeilingLamp(cfg: FurnitureConfig): { mesh: THREE.Group; label: string } {
   const [x, y, z] = cfg.position;
   const g = new THREE.Group();
   g.position.set(x, y, z);
@@ -41,7 +41,7 @@ function buildCeilingLamp(cfg: FurnitureConfig): { mesh: THREE.Group } {
   light.shadow.mapSize.height = 256;
   g.add(light);
 
-  return { mesh: g };
+  return { mesh: g, label: 'Ceiling Lamp' };
 }
 
 register('ceilingLamp', buildCeilingLamp);

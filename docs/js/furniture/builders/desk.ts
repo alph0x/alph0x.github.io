@@ -4,7 +4,7 @@ import { makeStd, texMetal, texPlastic, texWood } from '../../assets/index.js';
 import { makeBox, makeCylinder, makeRoundedBox } from '../../primitives.js';
 import type { FurnitureConfig } from '../../seed.js';
 
-function buildDesk(cfg: FurnitureConfig): { mesh: THREE.Group } {
+function buildDesk(cfg: FurnitureConfig): { mesh: THREE.Group; label: string } {
   const [x, y, z] = cfg.position;
   const g = new THREE.Group();
   g.position.set(x, y, z);
@@ -46,6 +46,6 @@ function buildDesk(cfg: FurnitureConfig): { mesh: THREE.Group } {
   // keyboard mat
   g.add(makeRoundedBox(plastic, [0.6, 0.02, 0.22], [-0.2, 0.84, 0.15], 0.01, 2));
 
-  return { mesh: g };
+  return { mesh: g, label: 'Desk' };
 }
 register('desk', buildDesk);

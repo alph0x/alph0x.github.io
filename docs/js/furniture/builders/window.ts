@@ -12,7 +12,7 @@ import { buildCityscape } from '../../level/cityscape.js';
 import { getInteriorOffset } from './wall-offset.js';
 import type { FurnitureConfig } from '../../seed.js';
 
-function buildWindow(cfg: FurnitureConfig): { mesh: THREE.Group } {
+function buildWindow(cfg: FurnitureConfig): { mesh: THREE.Group; label: string } {
   const [x, y, z] = cfg.position;
   const wrapper = new THREE.Group();
   wrapper.position.set(x, y, z);
@@ -90,7 +90,7 @@ function buildWindow(cfg: FurnitureConfig): { mesh: THREE.Group } {
   city.userData._parallaxFactor = 0.03;
   wrapper.add(city);
 
-  return { mesh: wrapper };
+  return { mesh: wrapper, label: 'Window' };
 }
 
 register('window', buildWindow);
