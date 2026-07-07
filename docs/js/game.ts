@@ -41,14 +41,15 @@ interface TourStop {
 interface ScreenReflectTarget {
   mesh: THREE.Mesh;
   originalMat: THREE.Material;
+  rt: THREE.WebGLRenderTarget;
 }
 
 interface ScreenReflectState {
   targets: ScreenReflectTarget[];
   frameInterval: number;
   frameCounter: number;
-  rt: THREE.WebGLRenderTarget | null;
   reflectCam: THREE.PerspectiveCamera | null;
+  lowEnd: boolean;
 }
 
 function isMesh(obj: THREE.Object3D): obj is THREE.Mesh {
@@ -132,8 +133,8 @@ export class Game {
       targets: [],
       frameInterval: 6,
       frameCounter: 0,
-      rt: null,
       reflectCam: null,
+      lowEnd: false,
     };
   }
 
@@ -324,45 +325,59 @@ export class Game {
 
   _initScreenReflections() {
     const sr = this._screenReflect;
-    // Find all screen meshes (MeshBasicMaterial with map = CanvasTexture)
+    // ponytail: skip expensive reflections on low-end / touch devices
+    const isLowEnd =
+      window.matchMedia('(max-width: 768px)').matches ||
+      ('ontouchstart' in window && navigator.maxTouchPoints > 0);
+    if (isLowEnd) {
+      sr.lowEnd = true;
+      return;
+    }
+
+    // Find all screen meshes (MeshBasicMaterial with CanvasTexture map)
     this.scene.traverse((obj) => {
       if (!isMesh(obj)) return;
-      const mat = obj.material as THREE.MeshBasicMaterial | undefined;
-      if (mat && mat.map && (mat.map as { isCanvasTexture?: boolean }).isCanvasTexture) {
-        sr.targets.push({ mesh: obj, originalMat: mat });
-      }
+      const mat = obj.material;
+      if (Array.isArray(mat)) return;
+      if (!mat) return;
+      if (!(mat instanceof THREE.MeshBasicMaterial)) return;
+      if (!mat.map || !(mat.map instanceof THREE.CanvasTexture)) return;
+      const rt = new THREE.WebGLRenderTarget(256, 256, {
+        minFilter: THREE.LinearFilter,
+        magFilter: THREE.LinearFilter,
+      });
+      const rtMat = new THREE.MeshBasicMaterial({ map: rt.texture });
+      sr.targets.push({ mesh: obj, originalMat: mat, rt });
+      obj.material = rtMat;
     });
+
     if (sr.targets.length === 0) return;
-    // Shared render target — ponytail: one RT for all screens, updated per frame
-    sr.rt = new THREE.WebGLRenderTarget(256, 256, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter });
     sr.reflectCam = new THREE.PerspectiveCamera(60, 1, 0.1, 100);
-    // Replace screen materials with RT texture
-    const rtMat = new THREE.MeshBasicMaterial({ map: sr.rt.texture });
-    for (const t of sr.targets) {
-      t.mesh.material = rtMat;
-    }
   }
 
   _updateScreenReflections() {
     const sr = this._screenReflect;
-    if (!sr.rt || sr.targets.length === 0 || !sr.reflectCam) return;
+    if (sr.lowEnd || sr.targets.length === 0 || !sr.reflectCam) return;
     sr.frameCounter++;
     if (sr.frameCounter % sr.frameInterval !== 0) return;
     // Skip if renderer doesn't support render targets (tests/mock)
     if (!this.renderer.setRenderTarget) return;
-    // Update from first screen's perspective
-    const target = sr.targets[0];
-    const pos = new THREE.Vector3();
-    target.mesh.getWorldPosition(pos);
-    const normal = new THREE.Vector3(0, 0, 1);
-    const quat = new THREE.Quaternion();
-    target.mesh.getWorldQuaternion(quat);
-    normal.applyQuaternion(quat);
-    sr.reflectCam.position.copy(pos).add(normal.clone().multiplyScalar(0.1));
-    sr.reflectCam.lookAt(pos.clone().add(normal.multiplyScalar(2)));
+
     const oldTarget = this.renderer.getRenderTarget ? this.renderer.getRenderTarget() : null;
-    this.renderer.setRenderTarget(sr.rt);
-    this.renderer.render(this.scene, sr.reflectCam);
+    const normal = new THREE.Vector3(0, 0, 1);
+    const pos = new THREE.Vector3();
+    const quat = new THREE.Quaternion();
+
+    for (const target of sr.targets) {
+      target.mesh.getWorldPosition(pos);
+      target.mesh.getWorldQuaternion(quat);
+      normal.set(0, 0, 1).applyQuaternion(quat);
+      sr.reflectCam.position.copy(pos).add(normal.clone().multiplyScalar(0.1));
+      sr.reflectCam.lookAt(pos.clone().add(normal.multiplyScalar(2)));
+      this.renderer.setRenderTarget(target.rt);
+      this.renderer.render(this.scene, sr.reflectCam);
+    }
+
     this.renderer.setRenderTarget(oldTarget);
   }
 }
