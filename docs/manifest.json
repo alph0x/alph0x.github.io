@@ -1,11 +1,14 @@
 {
-  "name": "ALPH0X Portfolio",
-  "short_name": "ALPH0X",
-  "start_url": "/",
+  "name": "Alph0x Portfolio",
+  "short_name": "Alph0x",
+  "description": "3D first-person portfolio — a low-poly gamer room with AlphGPT, editor, and Lulú.",
+  "start_url": ".",
   "display": "standalone",
   "background_color": "#0c0a09",
-  "theme_color": "#7c3aed",
+  "theme_color": "#00ff9d",
+  "orientation": "any",
   "icons": [
-    { "src": "/favicon.ico", "sizes": "64x64", "type": "image/x-icon" }
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" }
   ]
 }
