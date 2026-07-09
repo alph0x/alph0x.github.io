@@ -6,7 +6,9 @@
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test tests/e2e/portfolio.spec.cjs tests/e2e/editor.spec.cjs",
+    "test:e2e:full": "playwright test tests/e2e/*.spec.cjs",
     "test:visual": "playwright test tests/visual --project=chromium",
     "test:visual:update": "playwright test tests/visual --project=chromium --update-snapshots",
     "typecheck": "tsc --noEmit",

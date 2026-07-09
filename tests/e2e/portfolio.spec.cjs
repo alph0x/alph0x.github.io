@@ -27,6 +27,8 @@ test.describe('Portfolio Desktop', () => {
     test.skip(isMobile, 'Desktop-only test');
     await page.goto('/');
 
+    // Wait for loading to finish and the start screen to appear.
+    await page.locator('#loading').waitFor({ state: 'hidden', timeout: 10000 });
     const startScreen = page.locator('#start-screen');
     await expect(startScreen).toBeVisible({ timeout: 5000 });
 
