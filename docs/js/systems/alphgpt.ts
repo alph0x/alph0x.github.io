@@ -5,6 +5,15 @@
  * Designed to feel like a retro terminal AI.
  */
 
+export interface AlphGPTContext {
+  timeOfDay?: 'morning' | 'afternoon' | 'evening' | 'night';
+  localTime?: string;
+  furnitureNames?: string[];
+  luluNearby?: boolean;
+  isMoving?: boolean;
+  tourActive?: boolean;
+}
+
 interface IntentEntry {
   keywords: string[];
   responses: string[];
@@ -73,8 +82,20 @@ const KNOWLEDGE_BASE: Record<string, IntentEntry> = {
   help: {
     keywords: ['help', 'what can', 'topics', 'question', 'ask'],
     responses: [
-      "Here are some things you can ask me:\n\n• who are you / tell me about Alfredo\n• skills / tech stack\n• experience / work history\n• projects / portfolio\n• contact / email / hire\n• location / where is he\n• education / degree\n• lulu / dog\n• joke / funny",
+      "Here are some things you can ask me:\n\n• who are you / tell me about Alfredo\n• skills / tech stack\n• experience / work history\n• projects / portfolio\n• contact / email / hire\n• location / where is he\n• education / degree\n• lulu / dog\n• time / what time is it\n• room / what is in this room\n• joke / funny",
     ],
+  },
+  time: {
+    keywords: ['time', 'hour', 'clock', 'morning', 'afternoon', 'evening', 'night'],
+    responses: ['STATE_TIME'],
+  },
+  room: {
+    keywords: ['room', 'furniture', 'what is here', 'what is in', 'objects', 'items'],
+    responses: ['STATE_ROOM'],
+  },
+  moving: {
+    keywords: ['moving', 'walking', 'running', 'speed', 'go'],
+    responses: ['STATE_MOVING'],
   },
 };
 
@@ -136,7 +157,8 @@ function pickFallback(): string {
 
 export function askAlphGPT(
   userText: string,
-  lastIntent: string | null = null
+  lastIntent: string | null = null,
+  context: AlphGPTContext | null = null
 ): { text: string; intent: string | null } {
   const tokens = tokenize(userText);
   if (tokens.length === 0) return { text: pickFallback(), intent: null };
@@ -164,7 +186,46 @@ export function askAlphGPT(
     return { text: pickFallback(), intent: null };
   }
 
+  if (context) {
+    const dynamic = buildStateResponse(bestIntent, context);
+    if (dynamic) return { text: dynamic, intent: bestIntent };
+  }
+
   return { text: pickResponse(bestIntent), intent: bestIntent };
+}
+
+function buildStateResponse(intent: string, context: AlphGPTContext): string | null {
+  switch (intent) {
+    case 'time': {
+      const tod = context.timeOfDay ?? 'now';
+      const localTime = context.localTime ?? '';
+      const phrases: Record<string, string> = {
+        morning: 'early morning — Alfredo is probably on his first coffee.',
+        afternoon: 'afternoon — peak focus hours.',
+        evening: 'evening — winding down with a side project.',
+        night: 'night — either deep work or dodging low-priority Slack messages.',
+      };
+      return `It's ${localTime} (${tod}). ${phrases[tod] ?? 'Good time to explore.'}`;
+    }
+    case 'room': {
+      const names = context.furnitureNames ?? [];
+      if (names.length === 0) return 'The room is empty right now.';
+      const list = [...new Set(names)].join(', ');
+      return `This room contains: ${list}.`;
+    }
+    case 'lulu': {
+      if (context.luluNearby) {
+        return "Lulú is right here! Give her some attention — she's the unofficial QA engineer.";
+      }
+      return "Lulú is nearby, probably napping where it's warm.";
+    }
+    case 'moving': {
+      return context.isMoving
+        ? "You're moving through the room. Watch the desk corner!"
+        : "Standing still. Good for inspecting the details.";
+    }
+  }
+  return null;
 }
 
 export type TerminalCommandType = 'response' | 'clear' | 'exit';
@@ -212,7 +273,8 @@ export function getTerminalCommands(): readonly string[] {
 
 export function processTerminalCommand(
   input: string,
-  lastIntent: string | null = null
+  lastIntent: string | null = null,
+  context: AlphGPTContext | null = null
 ): { type: TerminalCommandType; text: string; intent: string | null } {
   const text = input.trim();
   pushTerminalCommand(text);
@@ -220,7 +282,7 @@ export function processTerminalCommand(
   if (lower === 'help') {
     return {
       type: 'response',
-      text: 'Available terminal commands:\n  help  — show this message\n  clear — clear the screen\n  exit  — close terminal\nOr ask about Alfredo.',
+      text: 'Available terminal commands:\n  help  — show this message\n  clear — clear the screen\n  exit  — close terminal\nOr ask about Alfredo, the room, or the time.',
       intent: 'help',
     };
   }
@@ -230,6 +292,6 @@ export function processTerminalCommand(
   if (lower === 'exit') {
     return { type: 'exit', text: '', intent: null };
   }
-  const result = askAlphGPT(text, lastIntent);
+  const result = askAlphGPT(text, lastIntent, context);
   return { type: 'response', text: result.text, intent: result.intent };
 }

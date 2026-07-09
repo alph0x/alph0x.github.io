@@ -855,9 +855,10 @@
     function handleSend() {
       const text = inputEl.value.trim();
       if (!text) return;
+      const context = window.__alphgptContext || undefined;
 
       if (isTerminalMode()) {
-        const result = processTerminalCommand(text, lastIntent);
+        const result = processTerminalCommand(text, lastIntent, context);
         if (result.type === 'exit') {
           window.closePanels();
           return;
@@ -879,7 +880,7 @@
       showTyping();
       setTimeout(() => {
         removeTyping();
-        const result = askAlphGPT(text, lastIntent);
+        const result = askAlphGPT(text, lastIntent, context);
         appendMsg(result.text, false);
         lastIntent = result.intent;
       }, 600 + Math.random() * 400);

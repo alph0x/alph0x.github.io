@@ -12,7 +12,14 @@ import { AudioSystem } from './systems/audio.js';
 import { updatePlayerMovement } from './application/player-movement.js';
 import { extractCameraForwardXZ, syncPlayerToCamera } from './infrastructure/player-renderer.js';
 import type { WorldState, Interactable } from './domain/world-state.js';
+import type { AlphGPTContext } from './systems/alphgpt.js';
 import type { TouchControls } from './systems/touch-controls.js';
+
+declare global {
+  interface Window {
+    __alphgptContext?: AlphGPTContext;
+  }
+}
 
 interface GameControls {
   isLocked: boolean;
@@ -199,6 +206,7 @@ export class Game {
     } else {
       this.interaction.updatePrompt();
     }
+    this._updateAlphGPTContext();
     this._updateScreenReflections();
     this.renderer.render(this.scene, this.camera);
   }
@@ -322,6 +330,36 @@ export class Game {
   }
 
   // ── Screen Reflections ──────────────────────────────────────────
+
+  private _updateAlphGPTContext(): void {
+    const { player, room, pet, input } = this.worldState;
+    const now = new Date();
+    const hour = now.getHours();
+    const timeOfDay: AlphGPTContext['timeOfDay'] =
+      hour < 6 ? 'night' : hour < 12 ? 'morning' : hour < 18 ? 'afternoon' : 'evening';
+
+    const px = player.position.x;
+    const pz = player.position.z;
+    const lx = room.luluSpawn.x;
+    const lz = room.luluSpawn.z;
+    const luluNearby = Math.hypot(px - lx, pz - lz) < 1.2;
+
+    const isMoving =
+      input.moveForward || input.moveBackward || input.moveLeft || input.moveRight || player.isMoving;
+
+    const furnitureNames = room.interactables
+      .filter((i) => i.type !== 'playerSpawn' && i.type !== 'luluSpawn')
+      .map((i) => i.name || i.type);
+
+    window.__alphgptContext = {
+      timeOfDay,
+      localTime: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      furnitureNames,
+      luluNearby,
+      isMoving,
+      tourActive: this.tour.active,
+    };
+  }
 
   _initScreenReflections() {
     const sr = this._screenReflect;

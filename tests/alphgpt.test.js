@@ -73,6 +73,38 @@ describe('askAlphGPT', () => {
     expect(result.text).toContain('skills');
     expect(result.intent).toBe('help');
   });
+
+  it('returns dynamic time response with context', () => {
+    const result = askAlphGPT('what time is it', null, {
+      timeOfDay: 'afternoon',
+      localTime: '3:42 PM',
+    });
+    expect(result.text).toContain('3:42 PM');
+    expect(result.text).toContain('afternoon');
+    expect(result.intent).toBe('time');
+  });
+
+  it('returns dynamic room response with context', () => {
+    const result = askAlphGPT('what is in this room', null, {
+      furnitureNames: ['Bed', 'Desk', 'Lulú'],
+    });
+    expect(result.text).toContain('Bed');
+    expect(result.text).toContain('Desk');
+    expect(result.text).toContain('Lulú');
+    expect(result.intent).toBe('room');
+  });
+
+  it('returns nearby-aware lulu response with context', () => {
+    const result = askAlphGPT('where is lulu', null, { luluNearby: true });
+    expect(result.text).toContain('right here');
+    expect(result.intent).toBe('lulu');
+  });
+
+  it('returns movement state response with context', () => {
+    const result = askAlphGPT('are we moving', null, { isMoving: true });
+    expect(result.text).toContain('moving');
+    expect(result.intent).toBe('moving');
+  });
 });
 
 describe('terminal mode', () => {
