@@ -13,6 +13,8 @@ interface StdParams {
   opacity?: number;
   side?: THREE.Side;
   flatShading?: boolean;
+  normalMap?: THREE.Texture;
+  roughnessMap?: THREE.Texture;
 }
 
 export function makeStd({
@@ -25,6 +27,8 @@ export function makeStd({
   transparent,
   opacity,
   side,
+  normalMap,
+  roughnessMap,
 }: StdParams): THREE.MeshStandardMaterial {
   const params: THREE.MeshStandardMaterialParameters = { flatShading: true, roughness, metalness, emissive, emissiveIntensity };
   if (color !== undefined) params.color = color;
@@ -32,6 +36,8 @@ export function makeStd({
   if (transparent !== undefined) params.transparent = transparent;
   if (opacity !== undefined) params.opacity = opacity;
   if (side !== undefined) params.side = side;
+  if (normalMap) params.normalMap = normalMap;
+  if (roughnessMap) params.roughnessMap = roughnessMap;
   return new THREE.MeshStandardMaterial(params);
 }
 

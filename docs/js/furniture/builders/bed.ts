@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { register } from '../registry.js';
-import { M, makeStd, texFabric, texWood } from '../../assets/index.js';
+import { M, makeStd, texWood } from '../../assets/index.js';
+import { loadPbrSet } from '../../assets/pbr.js';
 import { makeBox, makeCylinder, makeRoundedBox, rootGroup } from '../../primitives.js';
 import type { FurnitureConfig } from '../../seed.js';
 
@@ -9,9 +10,10 @@ function buildBed(cfg: FurnitureConfig): { mesh: THREE.Group; label: string } {
 
   const wood = makeStd({ map: texWood, color: 0x5a3a2a, roughness: 0.85 });
   const woodDark = makeStd({ map: texWood, color: 0x3d2b2b, roughness: 0.9 });
-  const fabricLight = makeStd({ map: texFabric, color: 0xddddcc, roughness: 0.95 });
-  const fabricWhite = makeStd({ map: texFabric, color: 0xf5f5f0, roughness: 0.9 });
-  const blanket = makeStd({ map: texFabric, color: 0x2a4a6a, roughness: 1.0 });
+  const fabricSet = loadPbrSet('fabric', 2, 2);
+  const fabricLight = makeStd({ map: fabricSet.map, normalMap: fabricSet.normalMap, color: 0xddddcc, roughness: 0.95 });
+  const fabricWhite = makeStd({ map: fabricSet.map, color: 0xf5f5f0, roughness: 0.9 });
+  const blanket = makeStd({ map: fabricSet.map, color: 0x2a4a6a, roughness: 1.0 });
 
   // tapered legs
   for (const lx of [-0.9, 0.9]) {

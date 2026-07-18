@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { texWall, texFloor, texCeiling, texMetal, texConcrete } from '../assets/textures.js';
+import { texCeiling, texMetal, texConcrete } from '../assets/textures.js';
+import { loadPbrSet } from '../assets/pbr.js';
 import { makeBox, makeCylinder } from '../primitives.js';
 
 import { CFG, ROOM_LAYOUT, DEFAULT_MAT, DEFAULT_WALL_T, DEFAULT_LULU_SPAWN } from '../core.js';
@@ -36,7 +37,8 @@ function buildPolygonRoom(scene: THREE.Scene, worldState: WorldState): { edges: 
   const shape = buildPolygonShape(outline);
 
   // Floor — ShapeGeometry with world-space UVs so plank texture aligns across the room
-  const floorTex = tiledTexture(texFloor, roomW / 2, roomD / 2);
+  const floorPbr = loadPbrSet('wood-floor', roomW / 2, roomD / 2);
+  const floorTex = floorPbr.map;
   const floorGeo = new THREE.ShapeGeometry(shape);
   const posAttr = floorGeo.attributes.position;
   const uvAttr = floorGeo.attributes.uv;
@@ -46,7 +48,14 @@ function buildPolygonRoom(scene: THREE.Scene, worldState: WorldState): { edges: 
     uvAttr.setXY(i, ux * floorTex.repeat.x, uy * floorTex.repeat.y);
   }
   floorGeo.attributes.uv.needsUpdate = true;
-  const floorMat = new THREE.MeshStandardMaterial({ color: mat.floor, map: floorTex, flatShading: true, roughness: 1, metalness: 0 });
+  const floorMat = new THREE.MeshStandardMaterial({
+    color: 0xffffff,
+    map: floorPbr.map,
+    normalMap: floorPbr.normalMap,
+    roughnessMap: floorPbr.roughnessMap,
+    roughness: 1,
+    metalness: 0,
+  });
   const floor = new THREE.Mesh(floorGeo, floorMat);
   floor.rotation.x = -Math.PI / 2;
   floor.receiveShadow = true;
@@ -106,8 +115,16 @@ function buildPolygonRoom(scene: THREE.Scene, worldState: WorldState): { edges: 
   }
   scene.add(ventGroup);
 
-  const wallTex = tiledTexture(texWall, 1, 1);
-  const wallMat = new THREE.MeshStandardMaterial({ color: mat.wall, map: wallTex, flatShading: true, roughness: 1, metalness: 0 });
+  const wallPbr = loadPbrSet('plaster', 4, 1.5);
+  const wallMat = new THREE.MeshStandardMaterial({
+    color: mat.wall,
+    map: wallPbr.map,
+    normalMap: wallPbr.normalMap,
+    roughnessMap: wallPbr.roughnessMap,
+    flatShading: true,
+    roughness: 1,
+    metalness: 0,
+  });
   const trimMat = new THREE.MeshStandardMaterial({ color: 0x292524, flatShading: true, roughness: 0.9, metalness: 0 });
   const edges = buildWallsFromOutline({
     outline,

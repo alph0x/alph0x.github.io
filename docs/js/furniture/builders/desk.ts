@@ -1,14 +1,16 @@
 import * as THREE from 'three';
 import { register } from '../registry.js';
-import { makeStd, texMetal, texPlastic, texWood } from '../../assets/index.js';
+import { makeStd, texMetal, texPlastic } from '../../assets/index.js';
+import { loadPbrSet } from '../../assets/pbr.js';
 import { makeBox, makeCylinder, makeRoundedBox, rootGroup } from '../../primitives.js';
 import type { FurnitureConfig } from '../../seed.js';
 
 function buildDesk(cfg: FurnitureConfig): { mesh: THREE.Group; label: string } {
   const g = rootGroup(cfg);
 
-  const wood = makeStd({ map: texWood, roughness: 0.8 });
-  const woodDark = makeStd({ color: 0x3a2a20, map: texWood, roughness: 0.85 });
+  const woodSet = loadPbrSet('wood-floor', 1, 1);
+  const wood = makeStd({ map: woodSet.map, normalMap: woodSet.normalMap, roughnessMap: woodSet.roughnessMap, roughness: 0.8 });
+  const woodDark = makeStd({ color: 0x3a2a20, map: woodSet.map, roughness: 0.85 });
   const metal = makeStd({ map: texMetal, roughness: 0.4, metalness: 0.6 });
   const plastic = makeStd({ map: texPlastic, roughness: 0.6 });
   const led = makeStd({ color: 0x06b6d4, emissive: 0x06b6d4, emissiveIntensity: 0.8 });
