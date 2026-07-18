@@ -29,11 +29,11 @@ docs/
     ├── editor.ts           # Editor logic
     ├── editor-utils.ts     # Pure geometry helpers (testable)
     ├── primitives.ts       # Geometry helpers
-    ├── assets/             # Textures + materials
-    ├── renderer/           # Three.js bootstrap
-    ├── systems/            # input, interaction, loading, audio, animation
-    ├── level/              # Room geometry, window, cityscape, lighting
-    └── furniture/          # Registry + builders (one file per item)
+    ├── assets/             # Textures + materials + PBR loader
+    ├── renderer/           # Three.js bootstrap + post composer
+    ├── systems/            # input, interaction, loading, audio, animation, tour, reflections
+    ├── level/              # Room geometry, lighting rig, atmosphere (fog/dust/shaft)
+    └── furniture/          # Registry + builders (one file per item, cityscape in window)
 tests/                      # Vitest + happy-dom
 ```
 

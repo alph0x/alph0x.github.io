@@ -27,7 +27,7 @@ const GradeShader = {
     tDiffuse: { value: null as THREE.Texture | null },
     time: { value: 0 },
     vignetteStrength: { value: 0.42 },
-    grainStrength: { value: 0.035 },
+    grainStrength: { value: typeof window !== 'undefined' && (window as unknown as { __snapshotMode?: boolean }).__snapshotMode ? 0 : 0.035 },
   },
   vertexShader: /* glsl */ `
     varying vec2 vUv;

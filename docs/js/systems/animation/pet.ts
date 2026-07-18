@@ -17,7 +17,10 @@ interface PetState {
   model: Pet | null;
 }
 
+const isTestEnv = typeof window !== 'undefined' && (window as unknown as { __snapshotMode?: boolean }).__snapshotMode === true;
+
 export function updatePet(time: number, pet: PetState | null | undefined, camera: THREE.Camera): void {
+  if (isTestEnv) return;
   if (!pet?.model || !pet?.mesh || !camera) return;
 
   const timeS = time * 0.001;

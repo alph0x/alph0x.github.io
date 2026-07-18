@@ -1,6 +1,10 @@
 const { test, expect } = require('@playwright/test');
 
 test.describe('visual snapshots', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => { window.__snapshotMode = true; });
+  });
+
   test('index.html matches baseline', async ({ page }) => {
     await page.goto('/index.html');
     await page.waitForLoadState('networkidle');

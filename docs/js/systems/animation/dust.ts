@@ -12,7 +12,10 @@ export function registerDust(cloud: THREE.Points): void {
   _clouds.push(cloud);
 }
 
+const isTestEnv = typeof window !== 'undefined' && (window as unknown as { __snapshotMode?: boolean }).__snapshotMode === true;
+
 export function updateDust(time: number): void {
+  if (isTestEnv) return;
   const t = time * 0.001;
   for (const cloud of _clouds) {
     const base = cloud.userData._base as Float32Array;

@@ -9,7 +9,10 @@ export function registerFlickerLight(light: THREE.PointLight): void {
   _flickerLights.push(light);
 }
 
+const isTestEnv = typeof window !== 'undefined' && (window as unknown as { __snapshotMode?: boolean }).__snapshotMode === true;
+
 export function updateFlickerLights(time: number): void {
+  if (isTestEnv) return;
   for (const light of _flickerLights) {
     light.intensity = light.userData.baseIntensity + Math.sin(time * light.userData.flickerSpeed + light.userData.flickerPhase) * 0.3;
   }
