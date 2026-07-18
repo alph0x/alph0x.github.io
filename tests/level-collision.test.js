@@ -26,14 +26,13 @@ describe('buildLevel collision bounds', () => {
     const bedWall = worldState.room.walls.find((w) =>
       w.minX < -1.0 && w.maxX > -1.0 && w.minZ < -0.9 && w.maxZ > -0.9
     );
-    if (bedWall) {
-      const width = bedWall.maxX - bedWall.minX;
-      const depth = bedWall.maxZ - bedWall.minZ;
-      expect(width).toBeGreaterThan(1.5);
-      expect(width).toBeLessThan(2.5);
-      expect(depth).toBeGreaterThan(1.0);
-      expect(depth).toBeLessThan(2.0);
-    }
+    expect(bedWall).toBeDefined();
+    const width = bedWall.maxX - bedWall.minX;
+    const depth = bedWall.maxZ - bedWall.minZ;
+    expect(width).toBeGreaterThan(1.5);
+    expect(width).toBeLessThan(2.5);
+    expect(depth).toBeGreaterThan(1.0);
+    expect(depth).toBeLessThan(2.0);
 
     // Door AABB should block the opening near z ~ 1.9
     const doorWall = worldState.room.walls.find((w) =>

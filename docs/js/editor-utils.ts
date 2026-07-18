@@ -165,3 +165,24 @@ export function isSelfIntersecting(outline: [number, number][]): boolean {
   }
   return false;
 }
+
+/** Apply an edge drag with axis-lock + snap; returns null if the result self-intersects. */
+export function computeEdgeDrag(
+  outline: readonly number[][],
+  edgeIndex: number,
+  dx: number,
+  dz: number,
+  snapFn: (v: number) => number = snap
+): number[][] | null {
+  const i = edgeIndex;
+  const j = (i + 1) % outline.length;
+  const v0 = outline[i];
+  const v1 = outline[j];
+  const epsilon = 0.01;
+  if (Math.abs(v0[0] - v1[0]) < epsilon) dz = 0;
+  else if (Math.abs(v0[1] - v1[1]) < epsilon) dx = 0;
+  const newOutline = outline.map((v) => [...v]);
+  newOutline[i] = [snapFn(v0[0] + dx), snapFn(v0[1] + dz)];
+  newOutline[j] = [snapFn(v1[0] + dx), snapFn(v1[1] + dz)];
+  return isSelfIntersecting(newOutline as [number, number][]) ? null : newOutline;
+}

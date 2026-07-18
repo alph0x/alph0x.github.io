@@ -77,4 +77,18 @@ describe('computeMovementVector', () => {
     expect(result.x).toBe(0);
     expect(result.z).toBe(0);
   });
+
+  it('cancels opposing keys W+S to a zero vector', () => {
+    const forward = { x: 0, y: 0, z: -1 };
+    const result = computeMovementVector(true, true, false, false, forward);
+    expect(result.x).toBe(0);
+    expect(result.z).toBe(0);
+  });
+
+  it('cancels opposing keys A+D to a zero vector', () => {
+    const forward = { x: 0, y: 0, z: -1 };
+    const result = computeMovementVector(false, false, true, true, forward);
+    expect(result.x).toBe(0);
+    expect(result.z).toBe(0);
+  });
 });

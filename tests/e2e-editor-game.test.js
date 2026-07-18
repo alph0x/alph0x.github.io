@@ -23,6 +23,18 @@ describe('E2E: editor seed → game level', () => {
     expect(ROOM_LAYOUT.mat.ceiling).toBeDefined();
   });
 
+  it('DEFAULT_SEED content matches the designed room contract', () => {
+    const xs = ROOM_LAYOUT.outline.map((v) => v[0]);
+    const zs = ROOM_LAYOUT.outline.map((v) => v[1]);
+    expect(Math.max(...xs) - Math.min(...xs)).toBeCloseTo(4.5);
+    expect(Math.max(...zs) - Math.min(...zs)).toBeCloseTo(3.5);
+    expect(ROOM_LAYOUT.playerSpawn).toEqual([0.5, 0.5]);
+    const types = ROOM_LAYOUT.furniture.map((f) => f.type);
+    for (const t of ['bed', 'desk', 'macBook', 'miniSchnauzer', 'ceilingLamp', 'window', 'door']) {
+      expect(types).toContain(t);
+    }
+  });
+
   it('buildLevel consumes ROOM_LAYOUT without errors', () => {
     const scene = new THREE.Scene();
     const worldState = {
@@ -37,11 +49,9 @@ describe('E2E: editor seed → game level', () => {
     // Walls should be populated from room edges + furniture + door
     expect(worldState.room.walls.length).toBeGreaterThan(0);
 
-    // Pet should be tracked if present in seed
-    if (ROOM_LAYOUT.furniture.some((f) => f.type === 'miniSchnauzer')) {
-      expect(worldState.pet.mesh).toBeDefined();
-      expect(worldState.pet.mesh).toBeInstanceOf(THREE.Group);
-    }
+    expect(ROOM_LAYOUT.furniture.some((f) => f.type === 'miniSchnauzer')).toBe(true);
+    expect(worldState.pet.mesh).toBeDefined();
+    expect(worldState.pet.mesh).toBeInstanceOf(THREE.Group);
 
     // Scene should contain floor, ceiling, walls, furniture, lights
     expect(scene.children.length).toBeGreaterThan(0);

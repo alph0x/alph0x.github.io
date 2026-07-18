@@ -5,7 +5,7 @@
 
 import * as THREE from 'three';
 import { getClosestEdgePoint, getCurrentOpenings } from '../primitives.js';
-import { isSelfIntersecting } from '../editor-utils.js';
+import { isSelfIntersecting, computeEdgeDrag } from '../editor-utils.js';
 import { pointerNDC } from '../systems/input-utils.js';
 import { EditorState, type MatConfig } from './state.js';
 import type { EDITOR_CONFIG } from './editor-config.js';
@@ -319,30 +319,13 @@ export class OutlineEditor {
   private _moveDragEdge(pt: THREE.Vector3): void {
     const s = this._state as unknown as StateCompat;
     if (s.dragEdgeIndex === null || !s.dragEdgeVerts) return;
-    const i = s.dragEdgeIndex;
-    const j = (i + 1) % this._state.outline.length;
-    let dx = pt.x - this._state.dragOffset.x;
-    let dz = pt.z - this._state.dragOffset.z;
-
-    // Axis-lock: horizontal edges move only in Z, vertical edges only in X
-    const v0 = s.dragEdgeVerts[0];
-    const v1 = s.dragEdgeVerts[1];
-    const epsilon = 0.01;
-    if (Math.abs(v0[0] - v1[0]) < epsilon) {
-      // Vertical edge (same X) → lock to X-only movement
-      dz = 0;
-    } else if (Math.abs(v0[1] - v1[1]) < epsilon) {
-      // Horizontal edge (same Z) → lock to Z-only movement
-      dx = 0;
-    }
-
-    const newOutline = [...this._state.outline];
-    newOutline[i] = [this._snap(v0[0] + dx), this._snap(v0[1] + dz)];
-    newOutline[j] = [this._snap(v1[0] + dx), this._snap(v1[1] + dz)];
-    if (isSelfIntersecting(newOutline as [number, number][])) return;
+    const dx = pt.x - this._state.dragOffset.x;
+    const dz = pt.z - this._state.dragOffset.z;
+    const newOutline = computeEdgeDrag(this._state.outline, s.dragEdgeIndex, dx, dz, this._snap);
+    if (!newOutline) return;
     this._state.outline = newOutline;
     this._updateVisualHandles();
-    this._highlightEdge(i);
+    this._highlightEdge(s.dragEdgeIndex);
   }
 
   private _moveDragVertex(pt: THREE.Vector3): void {

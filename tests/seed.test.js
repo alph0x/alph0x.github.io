@@ -360,3 +360,48 @@ describe('MOCK_SEED round-trip', () => {
     expect(layout2.mat).toEqual(layout.mat);
   });
 });
+
+describe('seed boundary contracts', () => {
+  it('serialize omits falsy rotation 0 (default) but keeps color 0', () => {
+    const out = serializeLayout({
+      outline: [[-1, -1], [1, -1], [1, 1], [-1, 1]],
+      placed: [
+        { type: 'bed', config: { position: [0, 0, 0], rotation: 0, color: 0 } },
+      ],
+      playerSpawn: [0, 0],
+      luluSpawn: [0, 0],
+      mat: null,
+    });
+    const parsed = JSON.parse(atob(out));
+    expect(parsed.f[0].r).toBeUndefined();
+    expect(parsed.f[0].col).toBe(0);
+  });
+
+  it('deserialize defaults distance to 4 when intensity is set without dst', () => {
+    const seed = btoa(JSON.stringify({ v: 2, outline: [[-1, -1], [1, -1], [1, 1], [-1, 1]], f: [{ t: 'ceilingLamp', p: [0, 2.7, 0], i: 2 }] }));
+    const data = deserializeSeed(seed);
+    const lamp = data.furniture.find((f) => f.type === 'ceilingLamp' && f.intensity === 2);
+    expect(lamp.distance).toBe(4);
+  });
+
+  it('decodes base64 seeds and plain-JSON seeds via the sniff precedence', () => {
+    const payload = { v: 2, outline: [[-2, -1], [2, -1], [2, 1], [-2, 1]], f: [] };
+    const asBase64 = btoa(JSON.stringify(payload));
+    const asJson = JSON.stringify(payload);
+    expect(deserializeSeed(asBase64).width).toBe(4);
+    expect(deserializeSeed(asJson).width).toBe(4);
+  });
+
+  it('rotation 0 survives a round-trip as the default', () => {
+    const out = serializeLayout({
+      outline: [[-1, -1], [1, -1], [1, 1], [-1, 1]],
+      placed: [{ type: 'tv', config: { position: [1, 0, 1], rotation: 0 } }],
+      playerSpawn: [0, 0],
+      luluSpawn: [0, 0],
+      mat: null,
+    });
+    const data = deserializeSeed(out);
+    const tv = data.furniture.find((f) => f.type === 'tv');
+    expect(tv.rotation ?? 0).toBe(0);
+  });
+});
