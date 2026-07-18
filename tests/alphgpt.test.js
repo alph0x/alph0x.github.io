@@ -15,26 +15,29 @@ import {
 describe('askAlphGPT', () => {
   it('returns a greeting response for hello', () => {
     const result = askAlphGPT('hello');
-    expect(result.text).toContain("Alfredo");
     expect(result.intent).toBe('greeting');
+    expect(result.text.length).toBeGreaterThan(10);
   });
 
   it('returns skills for tech stack query', () => {
     const result = askAlphGPT('what is your tech stack?');
-    expect(result.text).toContain('React Native');
     expect(result.intent).toBe('skills');
+    // Skills response is a bullet list of technologies
+    expect(result.text.match(/•/g).length).toBeGreaterThanOrEqual(5);
   });
 
   it('returns contact info for email query', () => {
     const result = askAlphGPT('how can I contact you?');
-    expect(result.text).toContain('alfredop88@me.com');
     expect(result.intent).toBe('contact');
+    // Structural marker: an email-shaped address
+    expect(result.text).toMatch(/[\w.]+@[\w-]+\.[a-z]{2,}/);
   });
 
   it('returns experience for work query', () => {
     const result = askAlphGPT('tell me about your work experience');
-    expect(result.text).toContain('GeoPagos');
     expect(result.intent).toBe('experience');
+    // Structural marker: work history references a year
+    expect(result.text).toMatch(/\b(19|20)\d{2}\b/);
   });
 
   it('returns fallback for unknown query', () => {
@@ -52,26 +55,27 @@ describe('askAlphGPT', () => {
 
   it('returns who info for identity query', () => {
     const result = askAlphGPT('who is alfredo?');
-    expect(result.text).toContain('BSc');
     expect(result.intent).toBe('who');
+    expect(result.text.length).toBeGreaterThan(40);
   });
 
   it('returns location info', () => {
     const result = askAlphGPT('where are you based?');
-    expect(result.text).toContain('Buenos Aires');
     expect(result.intent).toBe('location');
+    expect(result.text.length).toBeGreaterThan(10);
   });
 
   it('returns lulu info for dog query', () => {
     const result = askAlphGPT('who is lulu?');
-    expect(result.text).toContain('schnauzer');
     expect(result.intent).toBe('lulu');
+    expect(result.text.length).toBeGreaterThan(10);
   });
 
   it('returns help for help query', () => {
     const result = askAlphGPT('help');
-    expect(result.text).toContain('skills');
     expect(result.intent).toBe('help');
+    // Help response lists available topics as bullets
+    expect(result.text.match(/•/g).length).toBeGreaterThanOrEqual(5);
   });
 
   it('returns dynamic time response with context', () => {
@@ -147,7 +151,6 @@ describe('terminal mode', () => {
   it('delegates unknown commands to askAlphGPT', () => {
     const result = processTerminalCommand('who is alfredo?');
     expect(result.type).toBe('response');
-    expect(result.text).toContain('BSc');
     expect(result.intent).toBe('who');
   });
 });

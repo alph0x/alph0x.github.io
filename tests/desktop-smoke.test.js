@@ -13,19 +13,8 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 // Mock WebGLRenderer before any Three.js imports
 vi.mock('three', async () => {
-  const actual = await vi.importActual('three');
-  class FakeRenderer {
-    constructor() {
-      this.domElement = document.createElement('canvas');
-      this.shadowMap = { enabled: false, type: null };
-    }
-    setSize() {}
-    setPixelRatio() {}
-    setClearColor() {}
-    render() {}
-    getContext() { return null; }
-  }
-  return { ...actual, WebGLRenderer: FakeRenderer };
+  const { mockThreeModule } = await import('./helpers/mock-three.js');
+  return mockThreeModule(await vi.importActual('three'));
 });
 
 // Mock window.matchMedia to simulate DESKTOP (no touch)

@@ -10,14 +10,14 @@ test.describe('Editor Wall Axis Lock', () => {
   test('horizontal wall only moves vertically, vertical wall only moves horizontally', async ({ page }, testInfo) => {
     // Edge-handle precision dragging requires a large canvas; skip on narrow viewports
     testInfo.skip(testInfo.project.name === 'Mobile Chrome', 'Desktop only: canvas too narrow for reliable handle hit-testing');
-    await page.goto('http://localhost:8765/editor.html');
+    await page.goto('/editor.html');
     await page.reload({ waitUntil: 'networkidle' });
     await page.waitForSelector('#canvas-wrap > canvas:not(#preview-wrap canvas)', { state: 'visible', timeout: 10000 });
-    await page.waitForTimeout(600);
+    await page.waitForFunction(() => window.__editorState && window.__editorProject);
 
     // Enter outline mode
     await page.click('#toolOutline');
-    await page.waitForTimeout(300);
+    await page.waitForFunction(() => window.__editorState.activeTool === 'outline');
 
     // ── Helper: read outline ──
     const readOutline = () => page.evaluate(() => window.__editorState.outline);
@@ -31,7 +31,7 @@ test.describe('Editor Wall Axis Lock', () => {
     await page.mouse.down();
     await page.mouse.move(handle.x + 120, handle.y, { steps: 5 });
     await page.mouse.up();
-    await page.waitForTimeout(200);
+    await page.waitForFunction(() => !window.__editorState.isDragging);
 
     const afterTopHorizontal = await readOutline();
     // Z coordinates of top edge should be essentially unchanged
@@ -44,7 +44,7 @@ test.describe('Editor Wall Axis Lock', () => {
     await page.mouse.down();
     await page.mouse.move(handle.x, handle.y - 80, { steps: 5 });
     await page.mouse.up();
-    await page.waitForTimeout(200);
+    await page.waitForFunction(() => !window.__editorState.isDragging);
 
     const afterTopVertical = await readOutline();
     // Top edge should have moved up (Z increased)
@@ -57,7 +57,7 @@ test.describe('Editor Wall Axis Lock', () => {
     // ── Test 2: Vertical wall (right edge, midpoint x ≈ 2.25) ──
     // Reset to known rectangle so right-edge midpoint is predictable
     await page.click('#btnResetRect');
-    await page.waitForTimeout(200);
+    await page.waitForFunction(() => window.__editorState.outline[1][0] === 2.25 && window.__editorState.outline[2][1] === 1.75);
     const beforeRight = await readOutline();
 
     // Try dragging vertically → should NOT move
@@ -66,7 +66,7 @@ test.describe('Editor Wall Axis Lock', () => {
     await page.mouse.down();
     await page.mouse.move(handle.x, handle.y - 80, { steps: 5 });
     await page.mouse.up();
-    await page.waitForTimeout(200);
+    await page.waitForFunction(() => !window.__editorState.isDragging);
 
     const afterRightVertical = await readOutline();
     // X coordinates of right edge should be essentially unchanged
@@ -80,7 +80,7 @@ test.describe('Editor Wall Axis Lock', () => {
     await page.mouse.down();
     await page.mouse.move(handle.x - 100, handle.y, { steps: 5 });
     await page.mouse.up();
-    await page.waitForTimeout(200);
+    await page.waitForFunction(() => !window.__editorState.isDragging);
 
     const afterRightHorizontal = await readOutline();
     // Right edge should have moved right (X increased)

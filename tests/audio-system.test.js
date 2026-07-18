@@ -28,17 +28,12 @@ describe('AudioSystem', () => {
     expect(audio._isMoving).toBe(false);
   });
 
-  it('update does not throw without AudioContext', () => {
-    expect(() => audio.update(0.016)).not.toThrow();
-    expect(() => audio.update(0.5)).not.toThrow();
-  });
-
-  it('startAmbient does not throw without AudioContext', () => {
-    expect(() => audio.startAmbient()).not.toThrow();
-  });
-
-  it('stopAmbient does not throw when not started', () => {
-    expect(() => audio.stopAmbient()).not.toThrow();
+  it('tolerates a missing AudioContext', () => {
+    expect(() => {
+      audio.update(0.016);
+      audio.startAmbient();
+      audio.stopAmbient();
+    }).not.toThrow();
   });
 
   it('accumulates step timer while moving', () => {

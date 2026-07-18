@@ -23,6 +23,9 @@ test.describe('Editor E2E', () => {
   });
 
   test('loads, zooms, and toggles 3D/top view', async ({ page }) => {
+    // Wait for the next rendered frame (used instead of fixed sleeps)
+    const nextFrame = () => page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+
     await page.goto('/editor.html');
 
     // Wait for main canvas to appear (direct child of canvas-wrap, not the preview)
@@ -38,22 +41,24 @@ test.describe('Editor E2E', () => {
     // Zoom in (scroll wheel up on canvas)
     await page.mouse.move(640, 360);
     await page.mouse.wheel(0, -500);
-    await page.waitForTimeout(300);
+    await nextFrame();
     await page.screenshot({ path: 'tests/e2e/screenshots/editor-02-zoom-in.png' });
 
     // Zoom out (scroll wheel down on canvas)
     await page.mouse.wheel(0, 500);
-    await page.waitForTimeout(300);
+    await nextFrame();
     await page.screenshot({ path: 'tests/e2e/screenshots/editor-03-zoom-out.png' });
 
     // Toggle to 3D view
     await viewBtn.click();
-    await page.waitForTimeout(600);
+    await page.waitForFunction(() => window.__editorState.viewMode === '3d');
+    await nextFrame();
     await page.screenshot({ path: 'tests/e2e/screenshots/editor-04-3d-view.png' });
 
     // Toggle back to top view
     await viewBtn.click();
-    await page.waitForTimeout(600);
+    await page.waitForFunction(() => window.__editorState.viewMode === 'top');
+    await nextFrame();
     await page.screenshot({ path: 'tests/e2e/screenshots/editor-05-back-to-top.png' });
 
     const realErrors = filterKnownErrors(page.errors);

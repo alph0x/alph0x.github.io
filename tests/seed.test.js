@@ -312,54 +312,7 @@ describe('deserializeSeed', () => {
   });
 });
 
-// ── Round-trip with MOCK_SEED ─────────────────────────────────
-
-describe('MOCK_SEED round-trip', () => {
-  it('serializes back to equivalent layout after editor load', () => {
-    const { MOCK_SEED } = require('./fixtures.js');
-    const layout = deserializeSeed(MOCK_SEED);
-
-    // Simulate how the editor builds `state.placed` in loadSeedIntoEditor
-    const placed = layout.furniture.map((f) => {
-      const cfg = {
-        position: [...f.position],
-        rotation: f.rotation || 0,
-        type: f.type,
-      };
-      if (f.text != null) cfg.text = f.text;
-      if (f.color != null) cfg.color = f.color;
-      if (f.intensity != null) { cfg.intensity = f.intensity; cfg.distance = f.distance; }
-      return { type: f.type, config: cfg };
-    });
-
-    const seed2 = serializeLayout({
-      outline: layout.outline,
-      placed,
-      playerSpawn: { x: layout.playerSpawn[0], z: layout.playerSpawn[1] },
-      luluSpawn: { x: layout.luluSpawn[0], z: layout.luluSpawn[1] },
-      mat: layout.mat,
-    });
-
-    const layout2 = deserializeSeed(seed2);
-
-    // Compare all furniture including ceiling lamps
-    expect(layout2.furniture).toHaveLength(layout.furniture.length);
-
-    for (let i = 0; i < layout.furniture.length; i++) {
-      const a = layout.furniture[i];
-      const b = layout2.furniture[i];
-      expect(b.type).toBe(a.type);
-      expect(b.position[0]).toBeCloseTo(a.position[0], 2);
-      expect(b.position[1]).toBeCloseTo(a.position[1], 2);
-      expect(b.position[2]).toBeCloseTo(a.position[2], 2);
-      expect(b.rotation || 0).toBeCloseTo(a.rotation || 0, 3);
-    }
-
-    expect(layout2.playerSpawn).toEqual(layout.playerSpawn);
-    expect(layout2.luluSpawn).toEqual(layout.luluSpawn);
-    expect(layout2.mat).toEqual(layout.mat);
-  });
-});
+// ── Round-trip coverage lives in editor-roundtrip.test.js ───────
 
 describe('seed boundary contracts', () => {
   it('serialize omits falsy rotation 0 (default) but keeps color 0', () => {

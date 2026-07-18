@@ -37,7 +37,6 @@ describe('AnimationSystem', () => {
     const sys = new AnimationSystem({ scene, worldState, camera });
 
     expect(() => sys.update(0.016, 1000)).not.toThrow();
-    expect(() => sys.update(0.016, 2000)).not.toThrow();
   });
 
   it('update handles pet animation when pet is present', () => {

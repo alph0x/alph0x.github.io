@@ -38,7 +38,9 @@ test.describe('Portfolio Desktop', () => {
     await expect(startScreen).toBeHidden();
 
     await expect(page.locator('canvas')).toBeVisible();
-    await page.waitForTimeout(500);
+    await page.waitForFunction(() => window.__scene, { timeout: 10000 });
+    // Let the first frames render before screenshotting
+    await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
     await page.screenshot({ path: 'tests/e2e/screenshots/02-room-desktop.png' });
 
     const realErrors = filterKnownErrors(page.errors);

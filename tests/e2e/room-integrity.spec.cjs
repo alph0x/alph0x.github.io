@@ -30,13 +30,12 @@ test.describe('Room Integrity', () => {
   test('room structure is complete and openings are correct', async ({ page, isMobile }) => {
     test.skip(isMobile, 'Desktop-only integrity test');
 
-    await page.goto('http://localhost:8765');
+    await page.goto('/');
 
     // Start the game
     const startBtn = page.locator('#start-btn');
     await expect(startBtn).toBeVisible({ timeout: 10000 });
     await startBtn.click();
-    await page.waitForTimeout(1500);
 
     // Wait for scene and game globals
     await page.waitForFunction(
@@ -170,7 +169,8 @@ test.describe('Room Integrity', () => {
         cam.lookAt(targetPos.x, targetPos.y, targetPos.z);
         cam.updateProjectionMatrix();
       }, { camPos, targetPos });
-      await page.waitForTimeout(300);
+      // Wait for the repositioned camera to be rendered (two frames: update + paint)
+      await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
       await page.screenshot({ path: `tests/e2e/screenshots/integrity-${name}.png` });
     };
 

@@ -12,6 +12,9 @@ export const MOCK_OUTLINE = [
   [-2.25, 1.75],
 ];
 
+// ponytail: intentionally frozen fixture, decoupled from DEFAULT_SEED so tests stay
+// stable when the shipped layout changes. Note: macBook has drifted from the current
+// DEFAULT_SEED ([1.6, 0.82, -1.2], r=5.76) — realign only if editor tests should track it.
 export const MOCK_PLACED = [
   { type: 'bed', config: { position: [-1.1, 0, -0.95], rotation: 6.283 } },
   { type: 'nightstand', config: { position: [-1.85, 0, 0.05] } },

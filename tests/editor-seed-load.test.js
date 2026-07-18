@@ -6,42 +6,16 @@
 
 import { describe, it, expect, vi } from 'vitest';
 
+import { buildEditorDOM } from './helpers/editor-dom.js';
+
 vi.mock('three', async () => {
-  const actual = await vi.importActual('three');
-  class FakeRenderer {
-    constructor() {
-      this.domElement = document.createElement('canvas');
-    }
-    setSize() {}
-    setPixelRatio() {}
-    render() {}
-  }
-  return { ...actual, WebGLRenderer: FakeRenderer };
+  const { mockThreeModule } = await import('./helpers/mock-three.js');
+  return mockThreeModule(await vi.importActual('three'));
 });
 
 describe('Editor seed load integration', () => {
   it('loads DEFAULT_SEED without errors and updates the DOM', async () => {
-    document.body.innerHTML = `
-      <div id="canvas-wrap" style="width:800px;height:600px;"></div>
-      <div id="preview-wrap" style="display:none;"><div class="preview-label"></div></div>
-      <div id="palette"></div>
-      <div id="placedList"></div>
-      <div id="selectionInfo"></div>
-      <input id="selX" /><input id="selY" /><input id="selYRange" />
-      <input id="selZ" /><input id="selRot" />
-      <button id="toolPlayer"></button><button id="toolLulu"></button>
-      <button id="toolOutline"></button><button id="btnResetRect"></button>
-      <button id="btnViewMode"></button><button id="btnRotate"></button>
-      <button id="btnDelete"></button><button id="btnUndo"></button>
-      <button id="btnRedo"></button><button id="btnExport"></button>
-      <input id="colorFloor" value="#000000"/><input id="colorFloorText" value="#000000"/>
-      <input id="colorWall" value="#000000"/><input id="colorWallText" value="#000000"/>
-      <input id="colorCeiling" value="#000000"/><input id="colorCeilingText" value="#000000"/>
-      <textarea id="exportOutput"></textarea>
-      <div id="roomDimensions"></div>
-      <div id="roomAxisAligned"></div>
-      <div id="error-display"></div>
-    `;
+    buildEditorDOM();
 
     await import('../docs/js/editor.js');
 

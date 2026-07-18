@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -28,15 +28,19 @@ describe('PWA manifest', () => {
 });
 
 describe('PWA service worker', () => {
-  it('sw.js exists and registers event listeners', () => {
-    const swPath = path.join(DOCS_ROOT, 'sw.js');
-    const sw = fs.readFileSync(swPath, 'utf-8');
+  it('registers install, activate, and fetch lifecycle handlers', async () => {
+    const registered = [];
+    vi.stubGlobal('self', {
+      addEventListener: (type) => registered.push(type),
+      skipWaiting: vi.fn(),
+      location: { origin: 'http://localhost' },
+      clients: { claim: vi.fn() },
+    });
 
-    expect(sw).toContain('self.addEventListener(\'install\'');
-    expect(sw).toContain('self.addEventListener(\'activate\'');
-    expect(sw).toContain('self.addEventListener(\'fetch\'');
-    expect(sw).toContain('caches.open');
-    expect(sw).toContain('event.respondWith');
+    await import('../docs/sw.js');
+    vi.unstubAllGlobals();
+
+    expect(registered).toEqual(['install', 'activate', 'fetch']);
   });
 });
 

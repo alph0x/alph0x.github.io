@@ -17,13 +17,12 @@ test.describe('Visual Inspection', () => {
       }
     });
 
-    await page.goto('http://localhost:8765');
+    await page.goto('/');
 
     // Wait for start screen and click ENTER
     const startBtn = page.locator('#start-btn');
     await expect(startBtn).toBeVisible({ timeout: 10000 });
     await startBtn.click();
-    await page.waitForTimeout(1500);
 
     // Inject accessor for Three.js scene objects
     await page.waitForFunction(() => window.__scene && window.__camera, { timeout: 10000 });
@@ -36,7 +35,8 @@ test.describe('Visual Inspection', () => {
         cam.lookAt(targetPos.x, targetPos.y, targetPos.z);
         cam.updateProjectionMatrix();
       }, { camPos, targetPos });
-      await page.waitForTimeout(300);
+      // Wait for the repositioned camera to be rendered (two frames: update + paint)
+      await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
       await page.screenshot({ path: `tests/e2e/screenshots/inspect-${name}.png` });
     };
 

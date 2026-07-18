@@ -12,7 +12,7 @@ import { extractMeshFromResult } from '../docs/js/primitives.js';
 import '../docs/js/furniture/index.js';
 
 describe('Editor round-trip with real builders', () => {
-  it('places all DEFAULT_SEED furniture at correct positions and rotations', () => {
+  it('places all MOCK_SEED furniture at correct positions and rotations', () => {
     const layout = deserializeSeed(MOCK_SEED);
     const scene = new THREE.Scene();
     const placed = [];
@@ -73,6 +73,7 @@ describe('Editor round-trip with real builders', () => {
       };
       if (f.text != null) cfg.text = f.text;
       if (f.color != null) cfg.color = f.color;
+      if (f.intensity != null) { cfg.intensity = f.intensity; cfg.distance = f.distance; }
       return { type: f.type, config: cfg };
     });
 
@@ -100,6 +101,20 @@ describe('Editor round-trip with real builders', () => {
       expect(back.position[1]).toBeCloseTo(orig.position[1], 2);
       expect(back.position[2]).toBeCloseTo(orig.position[2], 2);
       expect(back.rotation || 0).toBeCloseTo(orig.rotation || 0, 3);
+    }
+
+    // Verify spawns and materials round-trip
+    expect(layout2.playerSpawn).toEqual(layout.playerSpawn);
+    expect(layout2.luluSpawn).toEqual(layout.luluSpawn);
+    expect(layout2.mat).toEqual(layout.mat);
+
+    // Verify ceiling lamp light params round-trip
+    const origLamps = layout.furniture.filter((f) => f.type === 'ceilingLamp');
+    const backLamps = layout2.furniture.filter((f) => f.type === 'ceilingLamp');
+    expect(backLamps).toHaveLength(origLamps.length);
+    for (let i = 0; i < origLamps.length; i++) {
+      expect(backLamps[i].intensity).toBe(origLamps[i].intensity);
+      expect(backLamps[i].distance).toBe(origLamps[i].distance);
     }
 
     // Verify decorations (posters, fairyLights) round-trip correctly if present
