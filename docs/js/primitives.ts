@@ -233,3 +233,10 @@ export function getCurrentOpenings(placed: PlacedItem[]): Opening[] {
     });
 }
 
+export function tiledTexture(tex: THREE.Texture, rx: number, ry: number): THREE.Texture {
+  const t = tex.clone();
+  t.wrapS = THREE.RepeatWrapping;
+  t.wrapT = THREE.RepeatWrapping;
+  t.repeat.set(rx, ry);
+  return t;
+}

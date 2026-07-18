@@ -41,7 +41,7 @@ export interface BuildWallsOptions {
 }
 
 /** Compute world-space AABB ensuring ancestor matrices are up to date. */
-function getWorldAABB(object: THREE.Object3D): THREE.Box3 {
+export function getWorldAABB(object: THREE.Object3D): THREE.Box3 {
   object.updateWorldMatrix(true, true);
   return new THREE.Box3().setFromObject(object);
 }

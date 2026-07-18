@@ -4,22 +4,20 @@ import { texWall, texFloor, texCeiling, texMetal, texConcrete } from '../assets/
 import { makeBox, makeCylinder } from '../primitives.js';
 
 import { CFG, ROOM_LAYOUT, DEFAULT_MAT, DEFAULT_WALL_T, DEFAULT_LULU_SPAWN } from '../core.js';
-import { FurnitureRegistry } from '../furniture/index.js';
+import { FurnitureRegistry, type BuilderResult } from '../furniture/index.js';
 import { setupLighting, applyTimeOfDay } from './lighting.js';
 import { Pet } from '../domain/pet.js';
 import {
   extractMeshFromResult,
-  calculateMeshOpeningDims,
+  buildPolygonShape,
+  tiledTexture,
 } from '../primitives.js';
+import { getWorldAABB } from './room-geometry.js';
+import { shouldLoadExternalModels } from '../assets/loader.js';
 import { buildWallsFromOutline } from './room-geometry.js';
 import { loadMiniSchnauzer } from '../furniture/builders/mini-schnauzer.js';
 import { loadMacBook } from '../furniture/builders/macbook.js';
 import type { WorldState } from '../domain/world-state.js';
-
-function getWorldAABB(object: THREE.Object3D): THREE.Box3 {
-  object.updateWorldMatrix(true, true);
-  return new THREE.Box3().setFromObject(object);
-}
 
 function buildPolygonRoom(scene: THREE.Scene, worldState: WorldState): { edges: unknown[] } {
   const outline = ROOM_LAYOUT.outline as [number, number][];
@@ -35,17 +33,10 @@ function buildPolygonRoom(scene: THREE.Scene, worldState: WorldState): { edges: 
   }
   const roomW = Math.max(0.01, maxX - minX);
   const roomD = Math.max(0.01, maxZ - minZ);
-  const shape = new THREE.Shape();
-  shape.moveTo(outline[0][0], outline[0][1]);
-  for (let i = 1; i < outline.length; i++) {
-    shape.lineTo(outline[i][0], outline[i][1]);
-  }
-  shape.closePath();
+  const shape = buildPolygonShape(outline);
 
   // Floor — ShapeGeometry with world-space UVs so plank texture aligns across the room
-  const floorTex = texFloor.clone();
-  floorTex.wrapS = THREE.RepeatWrapping; floorTex.wrapT = THREE.RepeatWrapping;
-  floorTex.repeat.set(roomW / 2, roomD / 2);
+  const floorTex = tiledTexture(texFloor, roomW / 2, roomD / 2);
   const floorGeo = new THREE.ShapeGeometry(shape);
   const posAttr = floorGeo.attributes.position;
   const uvAttr = floorGeo.attributes.uv;
@@ -59,7 +50,7 @@ function buildPolygonRoom(scene: THREE.Scene, worldState: WorldState): { edges: 
   const floor = new THREE.Mesh(floorGeo, floorMat);
   floor.rotation.x = -Math.PI / 2;
   floor.receiveShadow = true;
-  scene.add(floor as any);
+  scene.add(floor);
 
   // Floor perimeter trim
   const trimColor = 0x292524;
@@ -76,19 +67,17 @@ function buildPolygonRoom(scene: THREE.Scene, worldState: WorldState): { edges: 
     const angle = Math.atan2(dx, dz);
     const trim = makeBox(floorTrimMat, [wallT + 0.04, 0.04, len + 0.04], [midX, 0.02, midZ]);
     trim.rotation.y = angle;
-    scene.add(trim as any);
+    scene.add(trim);
   }
 
   // Ceiling — thin box with tiled texture and a recessed grid overlay
-  const ceilingTex = texCeiling.clone();
-  ceilingTex.wrapS = THREE.RepeatWrapping; ceilingTex.wrapT = THREE.RepeatWrapping;
-  ceilingTex.repeat.set(roomW / 2, roomD / 2);
+  const ceilingTex = tiledTexture(texCeiling, roomW / 2, roomD / 2);
   const ceilingGeo = new THREE.BoxGeometry(roomW + wallT, 0.02, roomD + wallT);
   const ceilingMat = new THREE.MeshStandardMaterial({ color: mat.ceiling, map: ceilingTex, flatShading: true, roughness: 1, metalness: 0 });
   const ceiling = new THREE.Mesh(ceilingGeo, ceilingMat);
   ceiling.position.y = wallH - 0.01;
   ceiling.receiveShadow = true;
-  scene.add(ceiling as any);
+  scene.add(ceiling);
 
   const gridMat = new THREE.MeshStandardMaterial({ color: 0x252525, flatShading: true, roughness: 0.95 });
   const tileW = 0.9;
@@ -97,15 +86,15 @@ function buildPolygonRoom(scene: THREE.Scene, worldState: WorldState): { edges: 
   const rows = Math.max(1, Math.floor(roomD / tileD));
   for (let c = 1; c < cols; c++) {
     const x = minX + c * tileW;
-    scene.add(makeBox(gridMat, [0.02, 0.015, roomD + wallT], [x, wallH - 0.005, (minZ + maxZ) / 2]) as any);
+    scene.add(makeBox(gridMat, [0.02, 0.015, roomD + wallT], [x, wallH - 0.005, (minZ + maxZ) / 2]));
   }
   for (let r = 1; r < rows; r++) {
     const z = minZ + r * tileD;
-    scene.add(makeBox(gridMat, [roomW + wallT, 0.015, 0.02], [(minX + maxX) / 2, wallH - 0.005, z]) as any);
+    scene.add(makeBox(gridMat, [roomW + wallT, 0.015, 0.02], [(minX + maxX) / 2, wallH - 0.005, z]));
   }
 
   // Ceiling vent with slats (offset if a ceiling lamp already occupies the centre)
-  const hasCeilingLamp = (ROOM_LAYOUT.furniture || []).some((f: any) => f.type === 'ceilingLamp');
+  const hasCeilingLamp = (ROOM_LAYOUT.furniture || []).some((f) => f.type === 'ceilingLamp');
   const ventX = (minX + maxX) / 2 + (hasCeilingLamp ? 0.6 : 0);
   const ventZ = (minZ + maxZ) / 2;
   const ventMat = new THREE.MeshStandardMaterial({ map: texMetal, color: 0x222226, flatShading: true, roughness: 0.6, metalness: 0.4 });
@@ -115,27 +104,9 @@ function buildPolygonRoom(scene: THREE.Scene, worldState: WorldState): { edges: 
   for (let i = -2; i <= 2; i++) {
     ventGroup.add(makeBox(new THREE.MeshStandardMaterial({ color: 0x111114, flatShading: true }), [0.42, 0.01, 0.03], [0, -0.02, i * 0.09]));
   }
-  scene.add(ventGroup as any);
+  scene.add(ventGroup);
 
-  // Collect openings from furniture layout
-  const openings = (ROOM_LAYOUT.furniture || [])
-    .filter((f: any) => f.type === 'door' || f.type === 'window')
-    .map((f: any) => {
-      const entry = (FurnitureRegistry as any).get(f.type);
-      const mesh = extractMeshFromResult(entry.builder(f));
-      const dims = calculateMeshOpeningDims(mesh!);
-      return {
-        x: f.position[0],
-        z: f.position[2],
-        width: (dims as any).width,
-        height: (dims as any).height,
-        bottom: (dims as any).bottom,
-        t: f.position[1] === 0 ? undefined : f.position[1],
-      };
-    });
-
-  const wallTex = texWall.clone();
-  wallTex.wrapS = THREE.RepeatWrapping; wallTex.wrapT = THREE.RepeatWrapping;
+  const wallTex = tiledTexture(texWall, 1, 1);
   const wallMat = new THREE.MeshStandardMaterial({ color: mat.wall, map: wallTex, flatShading: true, roughness: 1, metalness: 0 });
   const trimMat = new THREE.MeshStandardMaterial({ color: 0x292524, flatShading: true, roughness: 0.9, metalness: 0 });
   const edges = buildWallsFromOutline({
@@ -144,27 +115,26 @@ function buildPolygonRoom(scene: THREE.Scene, worldState: WorldState): { edges: 
     wallT,
     material: wallMat,
     trimMaterial: trimMat,
-    openings,
     collisionHeight: 2.0,
     collisionWalls: worldState.room.walls,
   });
 
   for (const edge of edges) {
-    scene.add(edge.mesh as any);
+    scene.add(edge.mesh);
   }
 
   return { edges };
 }
 
 export async function buildLevel(scene: THREE.Scene, worldState: WorldState): Promise<void> {
-  (buildPolygonRoom as any)(scene, worldState);
+  buildPolygonRoom(scene, worldState);
   const preset = setupLighting(scene);
 
   // Async load external models for Lulú and MacBook (game path only).
-  const isTest = typeof navigator !== 'undefined' && (navigator as any).webdriver === true;
+  const isTest = typeof navigator !== 'undefined' && (navigator).webdriver === true;
   const useExternal = !isTest;
 
-  let externalResults: Record<string, { mesh: THREE.Group; [k: string]: unknown }> | null = null;
+  let externalResults: Record<string, BuilderResult> | null = null;
   if (useExternal) {
     try {
       const luluCfg = ROOM_LAYOUT.furniture?.find((f) => f.type === 'miniSchnauzer') ?? { position: [0, 0, 0], type: 'miniSchnauzer' };
@@ -184,11 +154,11 @@ export async function buildLevel(scene: THREE.Scene, worldState: WorldState): Pr
   let petMesh: THREE.Group | null = null;
   const noCollisionTypes = new Set(['rug', 'ceilingLamp', 'door', 'window']);
   for (const f of ROOM_LAYOUT.furniture || []) {
-    const entry = (FurnitureRegistry as any).get(f.type);
+    const entry = (FurnitureRegistry).get(f.type);
     if (!entry) continue;
 
     // Use external model if available; otherwise fall back to procedural builder.
-    let result: { mesh: THREE.Group; [k: string]: unknown };
+    let result: BuilderResult;
     if (externalResults && externalResults[f.type]) {
       result = externalResults[f.type];
     } else {
@@ -197,16 +167,16 @@ export async function buildLevel(scene: THREE.Scene, worldState: WorldState): Pr
 
     const mesh = extractMeshFromResult(result);
     if (!mesh) continue;
-    (mesh as any).position.set(f.position[0], f.position[1], f.position[2] as any);
-    (mesh as any).rotation.y = f.rotation ?? 0;
-    scene.add(mesh as any);
+    (mesh).position.set(f.position[0], f.position[1], f.position[2]);
+    (mesh).rotation.y = f.rotation ?? 0;
+    scene.add(mesh);
     const label = typeof result.label === 'string' ? result.label : undefined;
-    worldState.room.interactables.push({ mesh: mesh as any, type: f.type, panelId: f.panelId, name: f.name ?? label ?? f.type });
+    worldState.room.interactables.push({ mesh: mesh, type: f.type, panelId: f.panelId, name: f.name ?? label ?? f.type });
     if (f.type === 'miniSchnauzer') petMesh = mesh as THREE.Group;
 
     // Collision: extract AABB from placed mesh
     if (!f.noCollision && !noCollisionTypes.has(f.type)) {
-      const box = getWorldAABB(mesh as any);
+      const box = getWorldAABB(mesh);
       const sizeX = box.max.x - box.min.x;
       const sizeZ = box.max.z - box.min.z;
       if (sizeX > 0.05 && sizeZ > 0.05) {
@@ -222,9 +192,9 @@ export async function buildLevel(scene: THREE.Scene, worldState: WorldState): Pr
   applyTimeOfDay(scene, preset);
 
   // Pet
-  const ls = (ROOM_LAYOUT as any).luluSpawn ?? (ROOM_LAYOUT as any).ls ?? DEFAULT_LULU_SPAWN;
+  const ls = ROOM_LAYOUT.luluSpawn ?? DEFAULT_LULU_SPAWN;
   const luluPos = worldState.room.luluSpawn || { x: ls[0], z: ls[1] };
-  const pet = new (Pet as any)({ position: { x: luluPos.x, y: 0, z: luluPos.z } });
+  const pet = new Pet({ position: { x: luluPos.x, y: 0, z: luluPos.z } });
   worldState.pet.model = pet;
   worldState.pet.mesh = petMesh || new THREE.Group();
   if (petMesh) scene.add(petMesh);

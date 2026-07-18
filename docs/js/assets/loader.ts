@@ -9,3 +9,7 @@ export function loadGlb(path: string): Promise<THREE.Group> {
   return promise;
 }
 
+/** Test environments (webdriver) skip external model fetches. */
+export function shouldLoadExternalModels(): boolean {
+  return typeof navigator === 'undefined' || navigator.webdriver !== true;
+}

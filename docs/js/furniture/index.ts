@@ -40,4 +40,4 @@ import './builders/macbook.js';
 
 import './meta.js';
 
-export { FurnitureRegistry } from './registry.js';
+export { FurnitureRegistry, type BuilderResult, type RegistryEntry } from './registry.js';
