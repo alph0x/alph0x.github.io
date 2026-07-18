@@ -1,13 +1,11 @@
 import * as THREE from 'three';
 import { register } from '../registry.js';
 import { makeStd } from '../../assets/index.js';
-import { makeCylinder, makeCone } from '../../primitives.js';
+import { makeCylinder, makeCone, rootGroup } from '../../primitives.js';
 import type { FurnitureConfig } from '../../seed.js';
 
 function buildPlant(cfg: FurnitureConfig): { mesh: THREE.Group } {
-  const [x, y, z] = cfg.position;
-  const g = new THREE.Group();
-  g.position.set(x, y, z);
+  const g = rootGroup(cfg);
   const pot = makeStd({ color: 0x5a3a20 });
   const leaf = makeStd({ color: 0x1a5a2a });
   g.add(makeCylinder(pot, [0.15, 0.12, 0.25], [0, 0.125, 0]));

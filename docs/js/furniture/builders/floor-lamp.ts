@@ -1,13 +1,11 @@
 import * as THREE from 'three';
 import { register } from '../registry.js';
 import { makeStd } from '../../assets/index.js';
-import { makeBox, makeCone, makeSphere, makeLight } from '../../primitives.js';
+import { makeBox, makeCone, makeSphere, makeLight, rootGroup } from '../../primitives.js';
 import type { FurnitureConfig } from '../../seed.js';
 
 function buildFloorLamp(cfg: FurnitureConfig): { mesh: THREE.Group } {
-  const [x, y, z] = cfg.position;
-  const g = new THREE.Group();
-  g.position.set(x, y, z);
+  const g = rootGroup(cfg);
 
   const metal = makeStd({ color: 0x2a2a30 });
   g.add(makeBox(metal, [0.2, 0.04, 0.2], [0, 0.02, 0]));

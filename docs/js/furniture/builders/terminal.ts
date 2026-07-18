@@ -2,13 +2,11 @@ import * as THREE from 'three';
 import { COLORS } from '../../core.js';
 import { register } from '../registry.js';
 import { M } from '../../assets/index.js';
-import { makeBox, makeLight } from '../../primitives.js';
+import { makeBox, makeLight, rootGroup } from '../../primitives.js';
 import type { FurnitureConfig } from '../../seed.js';
 
 function buildTerminal(cfg: FurnitureConfig): { mesh: THREE.Group; type: string; panelId?: string; label: string; room: string } {
-  const [x, y, z] = cfg.position;
-  const group = new THREE.Group();
-  group.position.set(x, y, z);
+  const group = rootGroup(cfg);
   const colorKey = cfg.color as unknown as string;
   const screenMat = colorKey === 'yellow' ? M.terminal : colorKey === 'pink' ? M.terminalPink : colorKey === 'cyan' ? M.terminalCyan : M.terminalGreen;
   // Desktop monitor proportions (~27")

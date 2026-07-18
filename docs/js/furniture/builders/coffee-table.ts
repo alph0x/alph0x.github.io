@@ -1,13 +1,11 @@
 import * as THREE from 'three';
 import { register } from '../registry.js';
 import { makeStd } from '../../assets/index.js';
-import { makeBox } from '../../primitives.js';
+import { makeBox, rootGroup } from '../../primitives.js';
 import type { FurnitureConfig } from '../../seed.js';
 
 function buildCoffeeTable(cfg: FurnitureConfig): { mesh: THREE.Group } {
-  const [x, y, z] = cfg.position;
-  const g = new THREE.Group();
-  g.position.set(x, y, z);
+  const g = rootGroup(cfg);
   const mat = makeStd({ color: 0x2a2a30 });
   g.add(makeBox(mat, [0.9, 0.05, 0.55], [0, 0.4, 0]));
   for (const lx of [-0.4, 0.4]) for (const lz of [-0.25, 0.25]) g.add(makeBox(mat, [0.03, 0.03, 0.4], [lx, 0.2, lz]));

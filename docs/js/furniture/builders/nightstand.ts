@@ -1,13 +1,11 @@
 import * as THREE from 'three';
 import { register } from '../registry.js';
 import { M, makeStd, texMetal, texWood } from '../../assets/index.js';
-import { makeBox, makeCylinder, makeRoundedBox, makeSphere } from '../../primitives.js';
+import { makeBox, makeCylinder, makeRoundedBox, makeSphere, rootGroup } from '../../primitives.js';
 import type { FurnitureConfig } from '../../seed.js';
 
 function buildNightstand(cfg: FurnitureConfig): { mesh: THREE.Group; label: string } {
-  const [x, y, z] = cfg.position;
-  const g = new THREE.Group();
-  g.position.set(x, y, z);
+  const g = rootGroup(cfg);
 
   const woodMat = makeStd({ map: texWood, color: 0x5a3a2a, roughness: 0.85 });
   const drawerMat = makeStd({ map: texWood, color: 0x6a4a3a, roughness: 0.85 });
