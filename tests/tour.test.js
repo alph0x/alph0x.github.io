@@ -75,19 +75,19 @@ describe('Portfolio tour', () => {
     expect(game.worldState.ui.isPanelOpen).toBe(true);
   });
 
-  it('skipTour stops an active tour', () => {
+  it('stopTour stops an active tour', () => {
     const game = makeGame();
     game.startTour();
-    expect(game.skipTour()).toBe(true);
+    expect(game.stopTour()).toBe(true);
     expect(game.tour.active).toBe(false);
     expect(game.tour.phase).toBe('idle');
     expect(game.tour.index).toBe(0);
     expect(document.getElementById('tour-skip').style.display).toBe('none');
   });
 
-  it('skipTour is a no-op when not touring', () => {
+  it('stopTour is a no-op when not touring', () => {
     const game = makeGame();
-    expect(game.skipTour()).toBe(false);
+    expect(game.stopTour()).toBe(false);
     expect(game.tour.active).toBe(false);
   });
 
@@ -125,7 +125,7 @@ describe('Portfolio tour input wiring', () => {
     `;
   });
 
-  it('Escape calls skipTour on an active tour', () => {
+  it('Escape calls stopTour on an active tour', () => {
     const game = makeGameWithScene();
     game.startTour();
     expect(game.tour.active).toBe(true);

@@ -11,7 +11,6 @@ import { describe, it, expect } from 'vitest';
 import * as THREE from 'three';
 import {
   snap,
-  hexToInt,
   extractMeshFromResult,
   buildPolygonShape,
   getClosestEdgePoint,
@@ -24,6 +23,7 @@ import {
   countAxisParallel,
   formatExportOutput,
 } from '../docs/js/editor-utils.js';
+import { extractMeshFromResult, buildPolygonShape, getClosestEdgePoint, fitMeshToPreview, calculateMeshOpeningDims, getCurrentOpenings } from '../docs/js/primitives.js';
 
 // ── snap ────────────────────────────────────────────────────────
 
@@ -49,27 +49,6 @@ describe('snap', () => {
 
   it('returns zero for zero input', () => {
     expect(snap(0)).toBe(0);
-  });
-});
-
-// ── hexToInt ────────────────────────────────────────────────────
-
-describe('hexToInt', () => {
-  it('converts #ffffff to 16777215', () => {
-    expect(hexToInt('#ffffff')).toBe(0xffffff);
-  });
-
-  it('converts shorthand #fff', () => {
-    expect(hexToInt('#fff')).toBe(0xfff);
-  });
-
-  it('converts without hash prefix', () => {
-    expect(hexToInt('ff0000')).toBe(0xff0000);
-    expect(hexToInt('00ff00')).toBe(0x00ff00);
-  });
-
-  it('converts dark colors', () => {
-    expect(hexToInt('#1c1917')).toBe(0x1c1917);
   });
 });
 

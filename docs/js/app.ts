@@ -13,13 +13,7 @@ import { createWorldState } from './domain/world-state.js';
 import { TouchControls } from './systems/touch-controls.js';
 import { applySeedFromUrl } from './seed.js';
 
-interface DummyControls {
-  isLocked: boolean;
-  lock: () => void;
-  unlock: () => void;
-  addEventListener: () => void;
-  removeEventListener: () => void;
-}
+import type { ControlsLike } from './core.js';
 
 export async function initGame(): Promise<Game> {
   const isMobile = window.matchMedia('(max-width: 768px)').matches || ('ontouchstart' in window && navigator.maxTouchPoints > 0);
@@ -35,7 +29,7 @@ export async function initGame(): Promise<Game> {
 
     const worldState = createWorldState({ playerSpawn: spawn, playerHeight: CFG.playerHeight });
 
-    let controls: PointerLockControls | DummyControls;
+    let controls: PointerLockControls | ControlsLike;
     let touchControls: TouchControls | null = null;
 
     if (isMobile) {

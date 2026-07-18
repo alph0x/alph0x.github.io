@@ -10,7 +10,9 @@ import * as THREE from 'three';
 import { COLORS } from '../core.js';
 import { makeLight } from '../primitives.js';
 
-export type TimeOfDayName = 'morning' | 'afternoon' | 'night';
+import type { TimeOfDayName } from '../core.js';
+export type { TimeOfDayName };
+
 
 export interface TimeOfDayPreset {
   name: TimeOfDayName;

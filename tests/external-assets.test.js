@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import * as THREE from 'three';
-import { createMockGlbGroup } from '../docs/js/assets/loader.js';
+import { createMockGlbGroup } from './helpers/mock-glb.js';
 
 describe('external asset loaders', () => {
   it('createMockGlbGroup returns a valid THREE.Group', () => {

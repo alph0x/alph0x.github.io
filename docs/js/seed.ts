@@ -58,6 +58,10 @@ export interface SeedV2 {
   dec: unknown[];
 }
 
+export const DEFAULT_MAT = Object.freeze({ floor: '#1c1917', wall: '#44403c', ceiling: '#1c1917' });
+export const DEFAULT_WALL_T = 0.2;
+export const DEFAULT_LULU_SPAWN = Object.freeze([0.3, 0.7] as const);
+
 export interface SeedV1 {
   v: number;
   w: number;
@@ -104,7 +108,7 @@ export function serializeLayout({ outline, placed, playerSpawn, luluSpawn, mat }
     f,
     ps: [Math.round(playerSpawn.x * 100) / 100, Math.round(playerSpawn.z * 100) / 100],
     ls: [Math.round(luluSpawn.x * 100) / 100, Math.round(luluSpawn.z * 100) / 100],
-    mat: mat || { floor: '#1c1917', wall: '#44403c', ceiling: '#1c1917' },
+    mat: mat || DEFAULT_MAT,
     dec: [],
   };
 
@@ -191,16 +195,16 @@ export function deserializeSeed(seedStr: string | object): SeedData {
     furniture.push(cfg);
   }
 
-  const mat = s.mat || { floor: '#1c1917', wall: '#44403c', ceiling: '#1c1917' };
+  const mat = s.mat || DEFAULT_MAT;
 
   return Object.freeze({
     version: v,
     outline,
     width,
     depth,
-    wallThickness: 0.2,
+    wallThickness: DEFAULT_WALL_T,
     playerSpawn: s.ps || [0, 0],
-    luluSpawn: s.ls || [0.3, 0.7],
+    luluSpawn: s.ls || [...DEFAULT_LULU_SPAWN],
     furniture,
     mat,
   } as SeedData);

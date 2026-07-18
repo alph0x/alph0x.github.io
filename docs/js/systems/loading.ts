@@ -2,11 +2,9 @@
  * @fileoverview Loading screen + start screen wiring.
  */
 
-export interface PointerLockLike {
-  lock(): void;
-  unlock(): void;
-  addEventListener(type: 'unlock' | 'lock', listener: () => void): void;
-}
+import type { ControlsLike } from '../core.js';
+
+export type PointerLockLike = ControlsLike;
 
 export class LoadingSystem {
   controls: PointerLockLike;

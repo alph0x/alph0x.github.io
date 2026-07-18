@@ -5,7 +5,7 @@
  *      Knows nothing about rendering, cameras, or input devices.
  */
 
-import type { Vec3 } from './pet.js';
+import type { Vec3 } from '../core.js';
 
 export interface PlayerConfig {
   position?: Vec3;

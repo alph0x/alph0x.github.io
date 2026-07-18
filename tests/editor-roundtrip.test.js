@@ -8,7 +8,7 @@ import * as THREE from 'three';
 import { MOCK_SEED } from './fixtures.js';
 import { serializeLayout, deserializeSeed } from '../docs/js/seed.js';
 import { FurnitureRegistry } from '../docs/js/furniture/registry.js';
-import { extractMeshFromResult } from '../docs/js/editor-utils.js';
+import { extractMeshFromResult } from '../docs/js/primitives.js';
 import '../docs/js/furniture/index.js';
 
 describe('Editor round-trip with real builders', () => {

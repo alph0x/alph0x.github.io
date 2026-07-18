@@ -5,11 +5,7 @@
  *      Knows nothing about rendering, scenes, or meshes.
  */
 
-export interface Vec3 {
-  x: number;
-  y: number;
-  z: number;
-}
+import type { Vec3 } from '../core.js';
 
 export interface PetConfig {
   position?: Vec3;

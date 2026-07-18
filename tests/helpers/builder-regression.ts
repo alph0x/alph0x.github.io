@@ -5,8 +5,8 @@
 
 import * as THREE from 'three';
 import { FurnitureRegistry } from '../../docs/js/furniture/registry.js';
-import { extractMeshFromResult } from '../../docs/js/editor-utils.js';
-import { serializeLayout, deserializeSeed, type FurnitureConfig } from '../../docs/js/seed.js';
+import { extractMeshFromResult } from '../../docs/js/primitives.js';
+import { serializeLayout, deserializeSeed, DEFAULT_MAT, type FurnitureConfig } from '../../docs/js/seed.js';
 
 const DEFAULT_OUTLINE = [
   [-2.25, -1.75],
@@ -14,8 +14,6 @@ const DEFAULT_OUTLINE = [
   [2.25, 1.75],
   [-2.25, 1.75],
 ];
-
-const DEFAULT_MAT = { floor: '#1c1917', wall: '#44403c', ceiling: '#1c1917' };
 
 interface RegressionResult {
   before: THREE.Box3;

@@ -101,28 +101,135 @@ export function makeRoundedBox(
   return mesh;
 }
 
-/**
- * Extrude a 2D shape along Z.
- * @param points — closed 2D polygon in XY plane (counter-clockwise).
- * @param depth — extrusion depth; centered around z=0.
- */
-export function makeExtrudedShape(
-  material: THREE.Material,
-  points: [number, number][],
-  depth: number,
-  pos: [number, number, number]
-): THREE.Mesh {
-  const shape = new THREE.Shape();
-  const [[x0, y0], ...rest] = points;
-  shape.moveTo(x0, y0);
-  for (const [x, y] of rest) shape.lineTo(x, y);
-  shape.closePath();
-
-  const geo = new THREE.ExtrudeGeometry(shape, { depth, bevelEnabled: false, curveSegments: 1 });
-  geo.center();
-  const mesh = new THREE.Mesh(geo, material);
-  mesh.position.set(...pos);
-  mesh.castShadow = true;
-  mesh.receiveShadow = true;
-  return mesh;
+export interface OpeningDims {
+  width: number;
+  height: number;
+  bottomOffset: number;
 }
+
+export function extractMeshFromResult(
+  result: THREE.Mesh | THREE.Group | [THREE.Mesh | THREE.Group, unknown] | { mesh?: THREE.Mesh | THREE.Group } | null | undefined
+): THREE.Mesh | THREE.Group | null {
+  if (result && typeof result === 'object' && 'mesh' in result && result.mesh) return result.mesh;
+  if (Array.isArray(result) && result[0]) return result[0];
+  if (result instanceof THREE.Mesh || result instanceof THREE.Group) return result;
+  return null;
+}
+
+export function buildPolygonShape(outline: [number, number][]): THREE.Shape {
+  const shape = new THREE.Shape();
+  shape.moveTo(outline[0][0], outline[0][1]);
+  for (let i = 1; i < outline.length; i++) {
+    shape.lineTo(outline[i][0], outline[i][1]);
+  }
+  shape.closePath();
+  return shape;
+}
+
+export function getClosestEdgePoint(
+  point: THREE.Vector3,
+  outline: [number, number][]
+): { index: number; point: [number, number] } | null {
+  let best: { index: number; point: [number, number] } | null = null;
+  let bestDist = Infinity;
+  for (let i = 0; i < outline.length; i++) {
+    const p1 = new THREE.Vector3(outline[i][0], 0, outline[i][1]);
+    const p2 = new THREE.Vector3(outline[(i + 1) % outline.length][0], 0, outline[(i + 1) % outline.length][1]);
+    const closest = new THREE.Vector3();
+    const dir = new THREE.Vector3().subVectors(p2, p1);
+    const len = dir.length();
+    if (len < 0.001) continue;
+    dir.normalize();
+    const t = Math.max(0, Math.min(len, new THREE.Vector3().subVectors(point, p1).dot(dir)));
+    closest.copy(p1).add(dir.clone().multiplyScalar(t));
+    const d = point.distanceTo(closest);
+    if (d < bestDist) {
+      bestDist = d;
+      best = { index: i, point: [closest.x, closest.z] };
+    }
+  }
+  return best && bestDist < 0.5 ? best : null;
+}
+
+export function fitMeshToPreview(mesh: THREE.Mesh | THREE.Group, targetSize = 1.2): void {
+  const box = new THREE.Box3().setFromObject(mesh);
+  const center = new THREE.Vector3();
+  box.getCenter(center);
+  const size = new THREE.Vector3();
+  box.getSize(size);
+
+  const maxDim = Math.max(size.x, size.y, size.z);
+  const scale = maxDim > 0 ? targetSize / maxDim : 1;
+  mesh.scale.setScalar(scale);
+  mesh.position.sub(center.clone().multiplyScalar(scale));
+  mesh.position.y += (size.y * scale) / 2;
+}
+
+/**
+ * Calculate the structural bounding box of a furniture mesh for wall-opening purposes.
+ * Excludes decorative/parallax children (e.g. cityscape backdrops).
+ * Operates on a zeroed clone so rotation/position of the wrapper don't distort sizes.
+ */
+export function calculateMeshOpeningDims(mesh: THREE.Mesh | THREE.Group): OpeningDims {
+  const clone = mesh.clone();
+  clone.position.set(0, 0, 0);
+  clone.rotation.set(0, 0, 0);
+  clone.scale.set(1, 1, 1);
+
+  const box = new THREE.Box3();
+
+  function visit(node: THREE.Object3D): void {
+    if (node.userData?._parallax) return;
+    if ((node as THREE.Mesh).isMesh && (node as THREE.Mesh).geometry) {
+      box.expandByObject(node);
+    }
+    for (const child of node.children) {
+      visit(child);
+    }
+  }
+
+  visit(clone);
+
+  const size = new THREE.Vector3();
+  box.getSize(size);
+
+  return {
+    width: size.x,
+    height: size.y,
+    bottomOffset: box.min.y,
+  };
+}
+
+import type { Opening } from './editor-utils.js';
+
+export interface PlacedItem {
+  type: string;
+  mesh?: THREE.Mesh | THREE.Group;
+  config: {
+    position: [number, number, number];
+    _openingDims?: OpeningDims;
+  };
+}
+
+
+
+export function getCurrentOpenings(placed: PlacedItem[]): Opening[] {
+  return placed
+    .filter((p) => p.type === 'door' || p.type === 'window')
+    .map((p) => {
+      // Always recalculate from the live mesh so stale cached values (e.g. after
+      // calculateMeshOpeningDims bug fixes) do not corrupt wall geometry.
+      const dims: OpeningDims | null = p.mesh ? calculateMeshOpeningDims(p.mesh) : (p.config._openingDims ?? null);
+      const width = dims?.width ?? (p.type === 'door' ? 1.6 : 2.0);
+      const height = dims?.height ?? (p.type === 'door' ? 2.3 : 1.3);
+      const bottomOffset = dims?.bottomOffset ?? 0;
+      return {
+        x: p.config.position[0],
+        z: p.config.position[2],
+        width,
+        height,
+        bottom: p.config.position[1] + bottomOffset,
+      };
+    });
+}
+

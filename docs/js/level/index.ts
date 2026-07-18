@@ -3,22 +3,18 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { texWall, texFloor, texCeiling, texMetal, texConcrete } from '../assets/textures.js';
 import { makeBox, makeCylinder } from '../primitives.js';
 
-import { CFG, ROOM_LAYOUT } from '../core.js';
+import { CFG, ROOM_LAYOUT, DEFAULT_MAT, DEFAULT_WALL_T, DEFAULT_LULU_SPAWN } from '../core.js';
 import { FurnitureRegistry } from '../furniture/index.js';
 import { setupLighting, applyTimeOfDay } from './lighting.js';
 import { Pet } from '../domain/pet.js';
 import {
   extractMeshFromResult,
   calculateMeshOpeningDims,
-} from '../editor-utils.js';
+} from '../primitives.js';
 import { buildWallsFromOutline } from './room-geometry.js';
 import { loadMiniSchnauzer } from '../furniture/builders/mini-schnauzer.js';
 import { loadMacBook } from '../furniture/builders/macbook.js';
 import type { WorldState } from '../domain/world-state.js';
-
-function hexToInt(hex: string): number {
-  return parseInt(hex.replace('#', ''), 16);
-}
 
 function getWorldAABB(object: THREE.Object3D): THREE.Box3 {
   object.updateWorldMatrix(true, true);
@@ -28,8 +24,8 @@ function getWorldAABB(object: THREE.Object3D): THREE.Box3 {
 function buildPolygonRoom(scene: THREE.Scene, worldState: WorldState): { edges: unknown[] } {
   const outline = ROOM_LAYOUT.outline as [number, number][];
   const wallH = CFG.wallH;
-  const wallT = ROOM_LAYOUT.wallThickness || 0.2;
-  const mat = ROOM_LAYOUT.mat || { floor: '#1c1917', wall: '#44403c', ceiling: '#1c1917' };
+  const wallT = ROOM_LAYOUT.wallThickness || DEFAULT_WALL_T;
+  const mat = ROOM_LAYOUT.mat || DEFAULT_MAT;
 
   // Floor & Ceiling via ShapeGeometry
   let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
@@ -59,7 +55,7 @@ function buildPolygonRoom(scene: THREE.Scene, worldState: WorldState): { edges: 
     uvAttr.setXY(i, ux * floorTex.repeat.x, uy * floorTex.repeat.y);
   }
   floorGeo.attributes.uv.needsUpdate = true;
-  const floorMat = new THREE.MeshStandardMaterial({ color: hexToInt(mat.floor), map: floorTex, flatShading: true, roughness: 1, metalness: 0 });
+  const floorMat = new THREE.MeshStandardMaterial({ color: mat.floor, map: floorTex, flatShading: true, roughness: 1, metalness: 0 });
   const floor = new THREE.Mesh(floorGeo, floorMat);
   floor.rotation.x = -Math.PI / 2;
   floor.receiveShadow = true;
@@ -88,7 +84,7 @@ function buildPolygonRoom(scene: THREE.Scene, worldState: WorldState): { edges: 
   ceilingTex.wrapS = THREE.RepeatWrapping; ceilingTex.wrapT = THREE.RepeatWrapping;
   ceilingTex.repeat.set(roomW / 2, roomD / 2);
   const ceilingGeo = new THREE.BoxGeometry(roomW + wallT, 0.02, roomD + wallT);
-  const ceilingMat = new THREE.MeshStandardMaterial({ color: hexToInt(mat.ceiling), map: ceilingTex, flatShading: true, roughness: 1, metalness: 0 });
+  const ceilingMat = new THREE.MeshStandardMaterial({ color: mat.ceiling, map: ceilingTex, flatShading: true, roughness: 1, metalness: 0 });
   const ceiling = new THREE.Mesh(ceilingGeo, ceilingMat);
   ceiling.position.y = wallH - 0.01;
   ceiling.receiveShadow = true;
@@ -140,7 +136,7 @@ function buildPolygonRoom(scene: THREE.Scene, worldState: WorldState): { edges: 
 
   const wallTex = texWall.clone();
   wallTex.wrapS = THREE.RepeatWrapping; wallTex.wrapT = THREE.RepeatWrapping;
-  const wallMat = new THREE.MeshStandardMaterial({ color: hexToInt(mat.wall), map: wallTex, flatShading: true, roughness: 1, metalness: 0 });
+  const wallMat = new THREE.MeshStandardMaterial({ color: mat.wall, map: wallTex, flatShading: true, roughness: 1, metalness: 0 });
   const trimMat = new THREE.MeshStandardMaterial({ color: 0x292524, flatShading: true, roughness: 0.9, metalness: 0 });
   const edges = buildWallsFromOutline({
     outline,
@@ -226,7 +222,7 @@ export async function buildLevel(scene: THREE.Scene, worldState: WorldState): Pr
   applyTimeOfDay(scene, preset);
 
   // Pet
-  const ls = (ROOM_LAYOUT as any).luluSpawn || (ROOM_LAYOUT as any).ls || [0, 0];
+  const ls = (ROOM_LAYOUT as any).luluSpawn ?? (ROOM_LAYOUT as any).ls ?? DEFAULT_LULU_SPAWN;
   const luluPos = worldState.room.luluSpawn || { x: ls[0], z: ls[1] };
   const pet = new (Pet as any)({ position: { x: luluPos.x, y: 0, z: luluPos.z } });
   worldState.pet.model = pet;

@@ -4,6 +4,8 @@
 
 import { deserializeSeed } from './seed.js';
 
+export { DEFAULT_MAT, DEFAULT_WALL_T, DEFAULT_LULU_SPAWN } from './seed.js';
+
 // ── Types ───────────────────────────────────────────────────────
 
 export interface Vec3 {
@@ -24,13 +26,23 @@ export interface MovementVector {
   z: number;
 }
 
+export type TimeOfDayName = 'morning' | 'afternoon' | 'night';
+
+export interface ControlsLike {
+  isLocked: boolean;
+  lock(): void;
+  unlock(): void;
+  addEventListener(type: string, listener: () => void): void;
+  removeEventListener(type: string, listener: () => void): void;
+}
+
 // ── Configuration ───────────────────────────────────────────────
 
 export const CFG = Object.freeze({
   speed: 3.5,
   runSpeed: 6,
   playerHeight: 1.7,
-  radius: 0.25,
+  playerRadius: 0.35,
   wallH: 2.8,
   tile: 4,
 });
@@ -81,7 +93,7 @@ export function add(a: Vec3, b: Vec3): Vec3 {
 
 // ── Collision (pure AABB) ───────────────────────────────────────
 
-export function checkCollision(x: number, z: number, walls: readonly Wall[], radius = 0.35): boolean {
+export function checkCollision(x: number, z: number, walls: readonly Wall[], radius = CFG.playerRadius): boolean {
   for (const w of walls) {
     if (x > w.minX - radius && x < w.maxX + radius &&
         z > w.minZ - radius && z < w.maxZ + radius) {

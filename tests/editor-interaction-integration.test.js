@@ -13,7 +13,8 @@ import { EditorState } from '../docs/js/editor-modules/state.js';
 import { RoomBuilder } from '../docs/js/editor-modules/room-builder.js';
 import { FurnitureManager } from '../docs/js/editor-modules/furniture-manager.js';
 import { UndoManager } from '../docs/js/editor-modules/undo-manager.js';
-import { isSelfIntersecting, getClosestEdgePoint } from '../docs/js/editor-utils.js';
+import { isSelfIntersecting } from '../docs/js/editor-utils.js';
+import { getClosestEdgePoint } from '../docs/js/primitives.js';
 
 describe('InteractionManager integration', () => {
   let state, im, outlineEditor, furnitureManager, roomBuilder, mockControls;

@@ -2,7 +2,7 @@
  * @fileoverview Helper to offset door/window meshes from wall centerline to interior surface.
  */
 
-import { ROOM_LAYOUT } from '../../core.js';
+import { ROOM_LAYOUT, DEFAULT_WALL_T } from '../../core.js';
 
 /**
  * Compute interior-facing offset for a point on a polygon wall.
@@ -13,7 +13,7 @@ import { ROOM_LAYOUT } from '../../core.js';
  */
 export function getInteriorOffset(x: number, z: number, itemDepth: number): { x: number; z: number } {
   const outline = ROOM_LAYOUT.outline;
-  const wallT = ROOM_LAYOUT.wallThickness || 0.2;
+  const wallT = ROOM_LAYOUT.wallThickness || DEFAULT_WALL_T;
   if (!outline || outline.length < 2) return { x: 0, z: 0 };
 
   let minDist = Infinity;

@@ -5,19 +5,14 @@
  *      Organised by domain concern so each system receives only what it needs.
  */
 
-import type { Group, Object3D } from 'three';
+import type { Wall } from '../core.js';
 import { Player } from './player.js';
 import type { Pet } from './pet.js';
 
-export interface Wall {
-  minX: number;
-  maxX: number;
-  minZ: number;
-  maxZ: number;
-}
+export type { Wall };
 
 export interface Interactable {
-  mesh: Object3D;
+  mesh: unknown;
   type: string;
   panelId?: string;
   name: string;
@@ -27,7 +22,7 @@ export interface Interactable {
 export interface WorldState {
   player: Player;
   pet: {
-    mesh: Group | null;
+    mesh: unknown;
     model: Pet | null;
   };
   room: {

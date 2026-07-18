@@ -142,16 +142,12 @@ export const texFabric = makeTexture(64, 64, (ctx, w, h) => {
   }
 }, 'fabric');
 
-function lerp(a: number, b: number, t: number): number {
-  return a + (b - a) * t;
-}
-
 export const texMetal = makeTexture(64, 64, (ctx, w, h) => {
   const rand = rng(97531);
   // happy-dom canvas does not support createLinearGradient; emulate with bands.
   for (let y = 0; y < h; y++) {
     const t = y / (h - 1);
-    const v = t < 0.5 ? lerp(90, 122, t * 2) : lerp(122, 74, (t - 0.5) * 2);
+    const v = t < 0.5 ? THREE.MathUtils.lerp(90, 122, t * 2) : THREE.MathUtils.lerp(122, 74, (t - 0.5) * 2);
     ctx.fillStyle = `rgb(${v | 0},${v | 0},${(v + 4) | 0})`;
     ctx.fillRect(0, y, w, 1);
   }
@@ -212,16 +208,4 @@ export const texConcrete = makeTexture(64, 64, (ctx, w, h) => {
   }
 }, 'concrete');
 
-/** Convenience map for builder consumers. */
-export const TEXTURES: Record<string, THREE.CanvasTexture> = {
-  wall: texWall,
-  floor: texFloor,
-  ceiling: texCeiling,
-  terminal: texTerminal,
-  wood: texWood,
-  fabric: texFabric,
-  metal: texMetal,
-  plastic: texPlastic,
-  screenGlow: texScreenGlow,
-  concrete: texConcrete,
-};
+

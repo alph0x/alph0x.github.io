@@ -4,7 +4,7 @@
  */
 
 import * as THREE from 'three';
-import { getCurrentOpenings } from '../editor-utils.js';
+import { getCurrentOpenings } from '../primitives.js';
 import { EditorState, type MatConfig } from './state.js';
 import type { EditorColors, EditorGeometry } from './editor-config.js';
 

@@ -5,7 +5,7 @@
 
 import * as THREE from 'three';
 import { FurnitureRegistry } from '../furniture/registry.js';
-import { extractMeshFromResult, fitMeshToPreview } from '../editor-utils.js';
+import { extractMeshFromResult, fitMeshToPreview } from '../primitives.js';
 import type { FurnitureConfig } from '../seed.js';
 
 export interface PreviewConfig {

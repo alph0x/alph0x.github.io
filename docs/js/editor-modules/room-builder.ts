@@ -5,7 +5,7 @@
 
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { buildPolygonShape, hexToInt } from '../editor-utils.js';
+import { buildPolygonShape } from '../primitives.js';
 import { buildWallsFromOutline, type WallOpening } from '../level/room-geometry.js';
 import type { MatConfig } from './state.js';
 
@@ -81,7 +81,7 @@ export class RoomBuilder {
   private _createFloor(shape: THREE.Shape, colorHex: string): THREE.Mesh {
     const mesh = new THREE.Mesh(
       new THREE.ShapeGeometry(shape),
-      new THREE.MeshStandardMaterial({ color: hexToInt(colorHex), flatShading: true, roughness: 1, metalness: 0 }),
+      new THREE.MeshStandardMaterial({ color: colorHex, flatShading: true, roughness: 1, metalness: 0 }),
     );
     mesh.rotation.x = -Math.PI / 2;
     mesh.position.y = 0.001;
@@ -92,7 +92,7 @@ export class RoomBuilder {
   private _createCeiling(shape: THREE.Shape, colorHex: string): THREE.Mesh {
     const mesh = new THREE.Mesh(
       new THREE.ShapeGeometry(shape),
-      new THREE.MeshStandardMaterial({ color: hexToInt(colorHex), flatShading: true, roughness: 1, metalness: 0 }),
+      new THREE.MeshStandardMaterial({ color: colorHex, flatShading: true, roughness: 1, metalness: 0 }),
     );
     mesh.rotation.x = Math.PI / 2;
     mesh.position.y = this._config.wallH;
@@ -120,7 +120,7 @@ export class RoomBuilder {
   }
 
   private _buildWalls(outline: [number, number][], wallColorHex: string, openings: WallOpening[]): void {
-    this._wallMaterial = new THREE.MeshStandardMaterial({ color: hexToInt(wallColorHex), flatShading: true, roughness: 1, metalness: 0 });
+    this._wallMaterial = new THREE.MeshStandardMaterial({ color: wallColorHex, flatShading: true, roughness: 1, metalness: 0 });
     const edges = buildWallsFromOutline({
       outline,
       wallH: this._config.wallH,

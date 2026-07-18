@@ -2,6 +2,7 @@
  * @fileoverview Game orchestrator — wires systems together. No implementation logic.
  */
 
+import type { ControlsLike } from './core.js';
 import * as THREE from 'three';
 import { buildLevel } from './level/index.js';
 import { InputSystem } from './systems/input.js';
@@ -21,19 +22,13 @@ declare global {
   }
 }
 
-interface GameControls {
-  isLocked: boolean;
-  lock(): void;
-  unlock(): void;
-  addEventListener(type: string, listener: () => void): void;
-  removeEventListener(type: string, listener: () => void): void;
-}
+
 
 interface GameConfig {
   renderer: THREE.WebGLRenderer;
   scene: THREE.Scene;
   camera: THREE.PerspectiveCamera;
-  controls: GameControls;
+  controls: ControlsLike;
   worldState: WorldState;
   touchControls: TouchControls | null;
 }
@@ -68,7 +63,7 @@ export class Game {
   renderer: THREE.WebGLRenderer;
   scene: THREE.Scene;
   camera: THREE.PerspectiveCamera;
-  controls: GameControls;
+  controls: ControlsLike;
   worldState: WorldState;
   touchControls: TouchControls | null;
 
@@ -150,7 +145,7 @@ export class Game {
     this.loading.start([buildPromise]);
     buildPromise.then(() => {
       this.worldState.room.interactables.forEach((i: Interactable) => {
-        i.mesh.traverse((c) => { if (isMesh(c)) c.userData = { label: i.label }; });
+        (i.mesh as THREE.Object3D).traverse((c) => { if (isMesh(c)) c.userData = { label: i.label }; });
       });
       window.addEventListener('resize', () => this.onResize());
       document.querySelectorAll('.panel-close').forEach((btn) => {
@@ -168,7 +163,7 @@ export class Game {
       const tourBtn = document.getElementById('tour-btn');
       const tourSkip = document.getElementById('tour-skip');
       if (tourBtn) tourBtn.addEventListener('click', () => this.startTour());
-      if (tourSkip) tourSkip.addEventListener('click', () => this.skipTour());
+      if (tourSkip) tourSkip.addEventListener('click', () => this.stopTour());
 
       this._initScreenReflections();
     });
@@ -272,9 +267,6 @@ export class Game {
     return true;
   }
 
-  skipTour() {
-    return this.stopTour();
-  }
 
   _beginStop(stop: TourStop) {
     const tour = this.tour;

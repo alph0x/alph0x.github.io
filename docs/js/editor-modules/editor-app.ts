@@ -11,13 +11,12 @@ import { serializeLayout, deserializeSeed } from '../seed.js';
 
 import {
   snap as editorSnap,
-  getClosestEdgePoint,
   isSelfIntersecting,
-  getCurrentOpenings,
   calculateRoomDimensions,
   countAxisParallel,
   formatExportOutput,
 } from '../editor-utils.js';
+import { getClosestEdgePoint, getCurrentOpenings } from '../primitives.js';
 import { EditorState, type SeedLayout } from './state.js';
 import { RoomBuilder } from './room-builder.js';
 import { FurnitureManager } from './furniture-manager.js';

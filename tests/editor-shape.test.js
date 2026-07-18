@@ -5,7 +5,7 @@
 
 import { describe, it, expect } from 'vitest';
 import * as THREE from 'three';
-import { buildPolygonShape } from '../docs/js/editor-utils.js';
+import { buildPolygonShape } from '../docs/js/primitives.js';
 
 function shapeToVertices(shape) {
   const points = shape.getPoints();

@@ -6,7 +6,8 @@
 
 import * as THREE from 'three';
 import { FurnitureRegistry } from '../furniture/registry.js';
-import { extractMeshFromResult, normalizeRotation, calculateMeshOpeningDims } from '../editor-utils.js';
+import { normalizeRotation } from '../editor-utils.js';
+import { extractMeshFromResult, calculateMeshOpeningDims } from '../primitives.js';
 import type { FurnitureConfig } from '../seed.js';
 import { EditorState, type PlacedItem } from './state.js';
 import { UndoManager } from './undo-manager.js';

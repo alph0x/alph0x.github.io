@@ -3,28 +3,23 @@
  */
 
 import type { WorldState } from '../domain/world-state.js';
-
-interface PointerLockLike {
-  lock(): void;
-  unlock(): void;
-}
+import type { ControlsLike } from '../core.js';
 
 interface GameLike {
   worldState: WorldState;
-  controls: PointerLockLike;
+  controls: ControlsLike;
   interact(): void;
   closePanels(): void;
-  skipTour?(): void;
+  stopTour?(): boolean;
 }
 
 export class InputSystem {
   game: GameLike;
   input: WorldState['input'];
-  controls: PointerLockLike;
+  controls: ControlsLike;
 
   private _onKeyDown!: (e: KeyboardEvent) => void;
   private _onKeyUp!: (e: KeyboardEvent) => void;
-  private _onMouseDown?: (e: MouseEvent) => void;
 
   constructor({ game }: { game: GameLike }) {
     this.game = game;
@@ -98,7 +93,7 @@ export class InputSystem {
         case 'Escape':
           if (document.getElementById('legend')?.classList.contains('active')) {
             this._closeLegend();
-          } else if (this.game.skipTour && this.game.skipTour()) {
+          } else if (this.game.stopTour && this.game.stopTour()) {
             // handled active tour
           } else {
             this.game.closePanels();
@@ -135,8 +130,5 @@ export class InputSystem {
   unbind(): void {
     document.removeEventListener('keydown', this._onKeyDown);
     document.removeEventListener('keyup', this._onKeyUp);
-    if (this._onMouseDown) {
-      document.removeEventListener('mousedown', this._onMouseDown);
-    }
   }
 }

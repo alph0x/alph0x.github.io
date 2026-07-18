@@ -3,6 +3,8 @@
  * Isolated so the orchestrator can receive it via dependency injection.
  */
 
+import { CFG, DEFAULT_WALL_T } from '../core.js';
+
 import * as THREE from 'three';
 
 export interface PreviewConfig {
@@ -46,8 +48,8 @@ export interface EditorConfig {
 
 export const EDITOR_CONFIG: EditorConfig = {
   snap: 0.05,
-  wallH: 2.8,
-  wallT: 0.2,
+  wallH: CFG.wallH,
+  wallT: DEFAULT_WALL_T,
   viewSize: 6,
   cameraY: 8,
   preview: {

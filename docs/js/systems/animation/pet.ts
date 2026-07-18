@@ -13,7 +13,7 @@ import { getTimeOfDayPreset } from '../../level/lighting.js';
 import type { Pet } from '../../domain/pet.js';
 
 interface PetState {
-  mesh: THREE.Group | null;
+  mesh: unknown;
   model: Pet | null;
 }
 
@@ -23,5 +23,5 @@ export function updatePet(time: number, pet: PetState | null | undefined, camera
   const timeS = time * 0.001;
   const preset = getTimeOfDayPreset();
   updatePetAnimation(pet.model, camera.position, timeS, preset.name);
-  syncPetToThreeJS(pet.model, pet.mesh, camera.position);
+  syncPetToThreeJS(pet.model, pet.mesh as THREE.Group, camera.position);
 }

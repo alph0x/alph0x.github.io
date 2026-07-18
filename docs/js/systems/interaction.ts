@@ -5,25 +5,16 @@
 import * as THREE from 'three';
 import { enterTerminalMode, exitTerminalMode } from './alphgpt.js';
 
-import type { WorldState } from '../domain/world-state.js';
+import type { WorldState, Interactable } from '../domain/world-state.js';
+import type { ControlsLike } from '../core.js';
 
-interface PointerLockLike {
-  lock(): void;
-  unlock(): void;
-}
-
-interface Interactable {
-  mesh: THREE.Object3D;
-  panelId: string;
-  name: string;
-  type: string;
-}
+type ThreeInteractable = Interactable & { mesh: THREE.Object3D };
 
 
 export class InteractionSystem {
   camera: THREE.Camera;
   worldState: WorldState;
-  controls: PointerLockLike;
+  controls: ControlsLike;
   raycaster: THREE.Raycaster;
 
   private _terminalOriginalPos: THREE.Vector3 | null = null;
@@ -49,7 +40,7 @@ export class InteractionSystem {
   }: {
     camera: THREE.Camera;
     worldState: WorldState;
-    controls: PointerLockLike;
+    controls: ControlsLike;
   }) {
     this.camera = camera;
     this.worldState = worldState;
@@ -61,7 +52,7 @@ export class InteractionSystem {
     const { ui, room } = this.worldState;
     if (ui.isPanelOpen || this._terminalZoom?.active) return;
     this.raycaster.setFromCamera(new THREE.Vector2(0, 0), this.camera);
-    const interactables = room.interactables as Interactable[];
+    const interactables = room.interactables as ThreeInteractable[];
     const hits = this.raycaster.intersectObjects(interactables.map((i) => i.mesh), true);
     if (hits.length > 0 && hits[0].distance < 5) {
       const obj = interactables.find(
@@ -70,7 +61,7 @@ export class InteractionSystem {
       if (!obj) return;
       if (obj.panelId === 'panel-alphgpt') {
         this._startTerminalZoom(obj.panelId);
-      } else {
+      } else if (obj.panelId) {
         this.openPanel(obj.panelId);
       }
     }
@@ -181,7 +172,7 @@ export class InteractionSystem {
     }
 
     this.raycaster.setFromCamera(new THREE.Vector2(0, 0), this.camera);
-    const interactables = room.interactables as Interactable[];
+    const interactables = room.interactables as ThreeInteractable[];
     const hits = this.raycaster.intersectObjects(interactables.map((i) => i.mesh), true);
 
     if (hits.length > 0 && hits[0].distance < 5) {

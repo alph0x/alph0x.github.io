@@ -5,8 +5,8 @@
  *      All functions are deterministic and testable without mocks.
  */
 
-import type { Pet, Vec3 } from '../domain/pet.js';
-import type { TimeOfDayName } from '../level/lighting.js';
+import type { Pet } from '../domain/pet.js';
+import type { Vec3, TimeOfDayName } from '../core.js';
 
 const MAX_HEAD_TURN = 0.5;
 const SMOOTH_FACTOR = 0.12;

@@ -4,6 +4,8 @@
  * but this class knows nothing about DOM or Three.js.
  */
 
+import { DEFAULT_MAT } from '../core.js';
+
 import * as THREE from 'three';
 import type { FurnitureConfig } from '../seed.js';
 
@@ -83,7 +85,7 @@ export class EditorState {
       dragStartPos: null,
       raycaster: new THREE.Raycaster(),
       pointer: new THREE.Vector2(),
-      mat: { floor: '#1c1917', wall: '#44403c', ceiling: '#1c1917' },
+      mat: { ...DEFAULT_MAT },
       lastAction: null,
       snapEnabled: true,
       snapSize: 0.05,
