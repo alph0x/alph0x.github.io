@@ -50,6 +50,8 @@ describe('Desktop game smoke', () => {
     vi.resetModules();
     const { initGame } = await import('../docs/js/app.js');
     game = await initGame();
+    // FakeRenderer has no GL; stub the composer the same way renderer.render is faked
+    if (game.composer) game.composer.render = vi.fn();
   })
 
   it('creates a real Game instance', () => {

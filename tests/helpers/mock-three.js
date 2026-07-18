@@ -16,6 +16,9 @@ export function mockThreeModule(actual) {
     }
     setSize() {}
     setPixelRatio() {}
+    getPixelRatio() { return 1; }
+    getSize(v) { return v.set(800, 600); }
+    setRenderTarget() {}
     setClearColor() {}
     render() {}
     getContext() { return null; }

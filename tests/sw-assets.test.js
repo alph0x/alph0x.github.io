@@ -18,7 +18,7 @@ describe('service worker assets', () => {
       open: vi.fn(async () => ({ addAll: async (assets) => cacheAdds.push(...assets) })),
     });
 
-    await import('../docs/sw.js');
+    await import('../docs/public/sw.js');
 
     expect(typeof listeners.install).toBe('function');
     await listeners.install({ waitUntil: (p) => p });

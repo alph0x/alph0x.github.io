@@ -12,6 +12,7 @@ import { LoadingSystem } from './systems/loading.js';
 import { AudioSystem } from './systems/audio.js';
 import { TourSystem } from './systems/tour.js';
 import { ScreenReflections } from './systems/screen-reflections.js';
+import { buildComposer, isLowEndDevice, type GradedComposer } from './renderer/composer.js';
 import { AlphGPTContextProvider } from './systems/alphgpt-context.js';
 import { updatePlayerMovement } from './application/player-movement.js';
 import { extractCameraForwardXZ, syncPlayerToCamera } from './infrastructure/player-renderer.js';
@@ -45,6 +46,7 @@ export class Game {
   audio: AudioSystem;
   tour: TourSystem;
   reflections: ScreenReflections;
+  composer: GradedComposer | null;
   prevTime: number;
   private _boundAnimate: () => void;
   private alphgptContext: AlphGPTContextProvider;
@@ -67,6 +69,7 @@ export class Game {
     this.tour = new TourSystem(camera, worldState, controls, this.interaction);
     this.reflections = new ScreenReflections(scene, renderer);
     this.alphgptContext = new AlphGPTContextProvider(worldState);
+    this.composer = isLowEndDevice() ? null : buildComposer(renderer, scene, camera);
   }
 
   init() {
@@ -103,6 +106,7 @@ export class Game {
     this.camera.aspect = window.innerWidth / window.innerHeight;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(window.innerWidth, window.innerHeight, false);
+    this.composer?.setSize(window.innerWidth, window.innerHeight);
   }
 
   start() {
@@ -132,7 +136,12 @@ export class Game {
     }
     this.alphgptContext.update(delta, this.tour.active);
     this.reflections.update();
-    this.renderer.render(this.scene, this.camera);
+    if (this.composer) {
+      this.composer.gradePass.uniforms.time.value = time / 1000;
+      this.composer.render();
+    } else {
+      this.renderer.render(this.scene, this.camera);
+    }
   }
 
   _updateMovement(delta: number) {

@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const DOCS_ROOT = path.resolve(import.meta.dirname, '../docs');
+const DOCS_ROOT = path.resolve(import.meta.dirname, '../docs/public');
 
 describe('PWA manifest', () => {
   it('manifest.json is valid JSON with required fields', () => {
@@ -37,7 +37,7 @@ describe('PWA service worker', () => {
       clients: { claim: vi.fn() },
     });
 
-    await import('../docs/sw.js');
+    await import('../docs/public/sw.js');
     vi.unstubAllGlobals();
 
     expect(registered).toEqual(['install', 'activate', 'fetch']);

@@ -1,7 +1,7 @@
 {
   "framework": null,
   "buildCommand": null,
-  "outputDirectory": "docs",
+  "outputDirectory": "dist",
   "cleanUrls": true,
   "headers": [
     {

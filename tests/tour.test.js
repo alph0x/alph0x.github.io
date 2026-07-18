@@ -17,7 +17,7 @@ function makeCamera() {
 function makeGame(camera = makeCamera(), scene = { traverse: vi.fn() }) {
   const worldState = createWorldState({ playerSpawn: [0.5, 0.5], playerHeight: 1.7 });
   return new Game({
-    renderer: { render: vi.fn(), setSize: vi.fn() },
+    renderer: { render: vi.fn(), setSize: vi.fn(), getPixelRatio: () => 1, getSize: (v) => v.set(800, 600) },
     scene,
     camera,
     controls: { isLocked: false, lock: vi.fn(), unlock: vi.fn(), addEventListener: vi.fn() },
