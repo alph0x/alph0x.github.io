@@ -5,7 +5,7 @@
 
 import * as THREE from 'three';
 import { FurnitureRegistry } from '../furniture/registry.js';
-import { extractMeshFromResult, fitMeshToPreview } from '../primitives.js';
+import { extractMeshFromResult, fitMeshToPreview, disposeMesh } from '../primitives.js';
 import type { FurnitureConfig } from '../seed.js';
 
 export interface PreviewConfig {
@@ -81,6 +81,7 @@ export class PreviewManager {
 
   /** Hide and clear the preview. */
   clear(): void {
+    if (this._mesh) disposeMesh(this._mesh);
     this._group?.clear();
     this._mesh = null;
     if (this._container) this._container.style.display = 'none';
@@ -88,12 +89,10 @@ export class PreviewManager {
 
   /** Rotate and render the preview (call once per frame). */
   tick(): void {
-    if (this._mesh) {
-      this._mesh.rotation.y += this._config.rotationSpeed;
-    }
-    if (this._renderer && this._camera && this._scene) {
-      this._renderer.render(this._scene, this._camera);
-    }
+    // Nothing visible → skip render entirely (hidden preview rendered every frame before).
+    if (!this._mesh || !this._renderer || !this._camera || !this._scene) return;
+    this._mesh.rotation.y += this._config.rotationSpeed;
+    this._renderer.render(this._scene, this._camera);
   }
 
   private _buildMesh(type: string): THREE.Mesh | THREE.Group | null {

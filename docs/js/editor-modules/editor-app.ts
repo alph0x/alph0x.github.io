@@ -120,6 +120,7 @@ export class EditorApp {
   constructor(config: EditorAppConfig) {
     this.config = config;
     this.state = new EditorState();
+    this._boundAnimate = this._animate.bind(this);
   }
 
   init(): void {
@@ -449,11 +450,13 @@ export class EditorApp {
   // ── Loop ──────────────────────────────────────────────────────
 
   private _startLoop(): void {
-    this._animate();
+    this._boundAnimate();
   }
 
+  private _boundAnimate: () => void;
+
   private _animate(): void {
-    requestAnimationFrame(() => this._animate());
+    requestAnimationFrame(this._boundAnimate);
     this.cameraSystem.controls?.update();
     if (this.state.viewMode === '3d') {
       this.roomBuilder.updateCulling(this.cameraSystem.camera as THREE.Camera, this.state.viewMode);

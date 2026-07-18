@@ -10,6 +10,11 @@ import type { ControlsLike } from '../core.js';
 
 type ThreeInteractable = Interactable & { mesh: THREE.Object3D };
 
+const _center = new THREE.Vector2(0, 0); // scratch — avoids a per-frame allocation
+
+/** Prompt raycast interval (seconds). Hide/show stays responsive; only the raycast is throttled. */
+const PROMPT_RAYCAST_INTERVAL = 0.1;
+
 
 export class InteractionSystem {
   camera: THREE.Camera;
@@ -33,6 +38,18 @@ export class InteractionSystem {
   private readonly _terminalTargetPos = new THREE.Vector3(1.2, 1.35, -0.7);
   private readonly _terminalTargetLookAt = new THREE.Vector3(1.6, 0.9, -1.2);
 
+  // Cached DOM refs — resolved lazily, never re-queried per frame.
+  private _promptEl: HTMLElement | null = null;
+  private _crosshairEl: HTMLElement | null = null;
+  private _panelEls = new Map<string, HTMLElement | null>();
+
+  // Cached interactable mesh list — rebuilt only when the source array changes.
+  private _meshCache: THREE.Object3D[] = [];
+  private _meshCacheSrc: ThreeInteractable[] | null = null;
+  private _meshCacheLen = -1;
+
+  private _promptRaycastAccum = 0;
+
   constructor({
     camera,
     worldState,
@@ -48,12 +65,45 @@ export class InteractionSystem {
     this.raycaster = new THREE.Raycaster();
   }
 
+  private _prompt(): HTMLElement | null {
+    // ponytail: null is not cached so a late-mounted element is still picked up
+    if (!this._promptEl) {
+      this._promptEl = document.querySelector<HTMLElement>('#prompt');
+    }
+    return this._promptEl;
+  }
+
+  private _crosshair(): HTMLElement | null {
+    if (!this._crosshairEl) {
+      this._crosshairEl = document.querySelector<HTMLElement>('#crosshair');
+    }
+    return this._crosshairEl;
+  }
+
+  private _panel(id: string): HTMLElement | null {
+    let el = this._panelEls.get(id);
+    if (el === undefined) {
+      el = document.querySelector<HTMLElement>(`#${id}`);
+      this._panelEls.set(id, el);
+    }
+    return el;
+  }
+
+  private _interactableMeshes(interactables: ThreeInteractable[]): THREE.Object3D[] {
+    if (this._meshCacheSrc !== interactables || this._meshCacheLen !== interactables.length) {
+      this._meshCache = interactables.map((i) => i.mesh);
+      this._meshCacheSrc = interactables;
+      this._meshCacheLen = interactables.length;
+    }
+    return this._meshCache;
+  }
+
   interact(): void {
     const { ui, room } = this.worldState;
     if (ui.isPanelOpen || this._terminalZoom?.active) return;
-    this.raycaster.setFromCamera(new THREE.Vector2(0, 0), this.camera);
+    this.raycaster.setFromCamera(_center, this.camera);
     const interactables = room.interactables as ThreeInteractable[];
-    const hits = this.raycaster.intersectObjects(interactables.map((i) => i.mesh), true);
+    const hits = this.raycaster.intersectObjects(this._interactableMeshes(interactables), true);
     if (hits.length > 0 && hits[0].distance < 5) {
       const obj = interactables.find(
         (i) => i.mesh === hits[0].object || i.mesh === hits[0].object.parent
@@ -72,9 +122,9 @@ export class InteractionSystem {
     ui.isPanelOpen = true;
     this.controls.unlock();
     document.querySelectorAll('.info-panel').forEach((p) => p.classList.remove('active'));
-    const panel = document.getElementById(id);
+    const panel = this._panel(id);
     if (panel) panel.classList.add('active');
-    const crosshair = document.getElementById('crosshair');
+    const crosshair = this._crosshair();
     if (crosshair) crosshair.style.display = 'none';
   }
 
@@ -124,11 +174,11 @@ export class InteractionSystem {
 
     zoom.active = false;
     this.openPanel(zoom.panelId);
-    const panel = document.getElementById(zoom.panelId);
+    const panel = this._panel(zoom.panelId);
     if (panel) panel.classList.add('terminal-mode');
     enterTerminalMode();
     this._inTerminalMode = true;
-    const input = document.getElementById('alphgpt-input') as HTMLElement | null;
+    const input = document.querySelector<HTMLElement>('#alphgpt-input');
     if (input) input.focus();
   }
 
@@ -139,7 +189,7 @@ export class InteractionSystem {
       p.classList.remove('active');
       p.classList.remove('terminal-mode');
     });
-    const crosshair = document.getElementById('crosshair');
+    const crosshair = this._crosshair();
     if (crosshair) crosshair.style.display = 'block';
 
     if (this._terminalZoom?.active) {
@@ -161,19 +211,26 @@ export class InteractionSystem {
     this.controls.lock();
   }
 
-  updatePrompt(): void {
+  updatePrompt(delta?: number): void {
     const { ui, room } = this.worldState;
-    const prompt = document.getElementById('prompt') as HTMLElement | null;
+    const prompt = this._prompt();
     if (!prompt) return;
 
+    // Hide stays frame-responsive (panel open / terminal zoom).
     if (ui.isPanelOpen || this._terminalZoom?.active) {
       prompt.classList.remove('active');
       return;
     }
 
-    this.raycaster.setFromCamera(new THREE.Vector2(0, 0), this.camera);
+    // ponytail: 10Hz raycast is indistinguishable for a hover prompt.
+    // No delta passed (tests, one-shot calls) → always raycast.
+    this._promptRaycastAccum += delta ?? PROMPT_RAYCAST_INTERVAL;
+    if (this._promptRaycastAccum < PROMPT_RAYCAST_INTERVAL) return;
+    this._promptRaycastAccum = 0;
+
+    this.raycaster.setFromCamera(_center, this.camera);
     const interactables = room.interactables as ThreeInteractable[];
-    const hits = this.raycaster.intersectObjects(interactables.map((i) => i.mesh), true);
+    const hits = this.raycaster.intersectObjects(this._interactableMeshes(interactables), true);
 
     if (hits.length > 0 && hits[0].distance < 5) {
       const obj = interactables.find(
@@ -188,4 +245,3 @@ export class InteractionSystem {
     prompt.classList.remove('active');
   }
 }
-

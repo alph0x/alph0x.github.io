@@ -9,6 +9,7 @@
 import * as THREE from 'three';
 import { COLORS } from '../core.js';
 import { makeLight } from '../primitives.js';
+import { registerFlickerLight } from '../systems/animation/flicker.js';
 
 import type { TimeOfDayName } from '../core.js';
 export type { TimeOfDayName };
@@ -190,6 +191,7 @@ export function setupLighting(scene: THREE.Scene, options?: { now?: Date }): Tim
   tvLight.position.set(2.0, 1.4, 0);
   scene.add(tvLight);
   tvLight.userData = { flicker: true, baseIntensity: preset.tv, flickerSpeed: 8, flickerPhase: 0 };
+  registerFlickerLight(tvLight);
 
   const bedLight = new THREE.PointLight(0xffedd5, preset.bed, 3, 1);
   bedLight.position.set(-1.6, 1.8, -0.5);

@@ -11,13 +11,22 @@ interface ParallaxBase {
   z: number;
 }
 
-export function updateParallax(scene: THREE.Scene, camera: THREE.Camera): void {
+// ponytail: module registry filled at build time (furniture/builders/cityscape.ts);
+// avoids a full scene walk per frame. Stale entries from a rebuilt level would be
+// harmless no-ops (level is built once).
+const _parallaxTargets: THREE.Object3D[] = [];
+
+/** Register a parallax layer at build time (object must have userData._parallax set). */
+export function registerParallaxTarget(obj: THREE.Object3D): void {
+  _parallaxTargets.push(obj);
+}
+
+export function updateParallax(camera: THREE.Camera): void {
   if (!camera) return;
   const cx = camera.position.x;
   const cz = camera.position.z;
 
-  scene.traverse((obj: THREE.Object3D) => {
-    if (!obj.userData._parallax) return;
+  for (const obj of _parallaxTargets) {
     const factor = obj.userData._parallaxFactor || 0.03;
     // Find the reference window group by walking up past nested parallax groups.
     let windowGroup: THREE.Object3D | null = obj.parent;
@@ -36,5 +45,5 @@ export function updateParallax(scene: THREE.Scene, camera: THREE.Camera): void {
       obj.position.x = base.x + (cx - wx) * -factor;
       obj.position.z = base.z + (cz - wz) * -factor;
     }
-  });
+  }
 }

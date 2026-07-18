@@ -59,6 +59,12 @@ function isMesh(obj: THREE.Object3D): obj is THREE.Mesh {
   return (obj as unknown as THREE.Mesh).isMesh === true;
 }
 
+// Scratch objects for the reflection pass — avoids per-update allocations.
+const _srNormal = new THREE.Vector3();
+const _srPos = new THREE.Vector3();
+const _srQuat = new THREE.Quaternion();
+const _srLook = new THREE.Vector3();
+
 export class Game {
   renderer: THREE.WebGLRenderer;
   scene: THREE.Scene;
@@ -200,9 +206,9 @@ export class Game {
     if (this.tour.active) {
       this.updateTour(delta);
     } else {
-      this.interaction.updatePrompt();
+      this.interaction.updatePrompt(delta);
     }
-    this._updateAlphGPTContext();
+    this._updateAlphGPTContext(delta);
     this._updateScreenReflections();
     this.renderer.render(this.scene, this.camera);
   }
@@ -324,7 +330,16 @@ export class Game {
 
   // ── Screen Reflections ──────────────────────────────────────────
 
-  private _updateAlphGPTContext(): void {
+  private _alphgptContextAccum = 1; // 1 → context populated on the first frame
+  private _furnitureNames: string[] | null = null;
+
+  private _updateAlphGPTContext(delta: number): void {
+    // ponytail: 1Hz is plenty for a chat context string; skips a per-frame
+    // new Date + ICU toLocaleTimeString + filter/map.
+    this._alphgptContextAccum += delta;
+    if (this._alphgptContextAccum < 1) return;
+    this._alphgptContextAccum = 0;
+
     const { player, room, pet, input } = this.worldState;
     const now = new Date();
     const hour = now.getHours();
@@ -340,9 +355,13 @@ export class Game {
     const isMoving =
       input.moveForward || input.moveBackward || input.moveLeft || input.moveRight || player.isMoving;
 
-    const furnitureNames = room.interactables
-      .filter((i) => i.type !== 'playerSpawn' && i.type !== 'luluSpawn')
-      .map((i) => i.name || i.type);
+    // Room layout is static per build — compute the name list once.
+    if (!this._furnitureNames) {
+      this._furnitureNames = room.interactables
+        .filter((i) => i.type !== 'playerSpawn' && i.type !== 'luluSpawn')
+        .map((i) => i.name || i.type);
+    }
+    const furnitureNames = this._furnitureNames;
 
     window.__alphgptContext = {
       timeOfDay,
@@ -395,16 +414,17 @@ export class Game {
     if (!this.renderer.setRenderTarget) return;
 
     const oldTarget = this.renderer.getRenderTarget ? this.renderer.getRenderTarget() : null;
-    const normal = new THREE.Vector3(0, 0, 1);
-    const pos = new THREE.Vector3();
-    const quat = new THREE.Quaternion();
+    const normal = _srNormal;
+    const pos = _srPos;
+    const quat = _srQuat;
 
     for (const target of sr.targets) {
       target.mesh.getWorldPosition(pos);
       target.mesh.getWorldQuaternion(quat);
       normal.set(0, 0, 1).applyQuaternion(quat);
-      sr.reflectCam.position.copy(pos).add(normal.clone().multiplyScalar(0.1));
-      sr.reflectCam.lookAt(pos.clone().add(normal.multiplyScalar(2)));
+      sr.reflectCam.position.copy(pos).addScaledVector(normal, 0.1);
+      _srLook.copy(pos).addScaledVector(normal, 2);
+      sr.reflectCam.lookAt(_srLook);
       this.renderer.setRenderTarget(target.rt);
       this.renderer.render(this.scene, sr.reflectCam);
     }

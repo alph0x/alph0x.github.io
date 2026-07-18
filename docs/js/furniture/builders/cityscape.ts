@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { makeBox } from '../../primitives.js';
+import { registerParallaxTarget } from '../../systems/animation/parallax.js';
 
 /**
  * Deterministic seeded PRNG.
@@ -29,6 +30,7 @@ function buildLayer(
   const layer = new THREE.Group();
   layer.userData._parallax = true;
   layer.userData._parallaxFactor = factor;
+  registerParallaxTarget(layer);
   build(layer, rng);
   return layer;
 }
@@ -46,6 +48,7 @@ export function buildCityscape(cfg: { position: number[]; seed?: number }): THRE
   // Mark container so existing shallow parallax tests still find it; factor 0 keeps it static.
   cityGroup.userData._parallax = true;
   cityGroup.userData._parallaxFactor = 0;
+  registerParallaxTarget(cityGroup);
 
   // Background: tall thin towers with subtle emissive windows
   const background = buildLayer(rng, 0.015, (group) => {

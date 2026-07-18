@@ -11,12 +11,13 @@ import type { Player } from '../domain/player.js';
 /**
  * Extract the camera's forward direction, flattened to the XZ plane.
  */
+const _forward = new THREE.Vector3(); // scratch — avoids a per-frame allocation
+
 export function extractCameraForwardXZ(camera: THREE.Camera): { x: number; z: number } {
-  const forward = new THREE.Vector3();
-  camera.getWorldDirection(forward);
-  forward.y = 0;
-  forward.normalize();
-  return { x: forward.x, z: forward.z };
+  camera.getWorldDirection(_forward);
+  _forward.y = 0;
+  _forward.normalize();
+  return { x: _forward.x, z: _forward.z };
 }
 
 /**

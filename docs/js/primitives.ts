@@ -245,6 +245,17 @@ export function tiledTexture(tex: THREE.Texture, rx: number, ry: number): THREE.
   return t;
 }
 
+/** Dispose every geometry/material in a mesh subtree (GPU-resource cleanup on remove). */
+export function disposeMesh(root: THREE.Object3D): void {
+  root.traverse((obj) => {
+    const mesh = obj as THREE.Mesh;
+    if (mesh.geometry) mesh.geometry.dispose();
+    const mat = mesh.material as THREE.Material | THREE.Material[] | undefined;
+    if (Array.isArray(mat)) mat.forEach((m) => m.dispose());
+    else if (mat) mat.dispose();
+  });
+}
+
 export function rootGroup(cfg: { position: number[]; rotation?: number }): THREE.Group {
   const g = new THREE.Group();
   const [x, y, z] = cfg.position;

@@ -9,6 +9,8 @@ const JOYSTICK_MAX_RADIUS = 50; // px
 const LOOK_SENSITIVITY = 0.003;
 const DEADZONE = 10; // px
 
+const _euler = new THREE.Euler(); // scratch — avoids a per-frame allocation
+
 interface TouchElements {
   container: HTMLDivElement;
   joystickBase: HTMLElement;
@@ -221,7 +223,7 @@ export class TouchControls {
 
     // Look delta → camera rotation
     if (this._lookDelta.x !== 0 || this._lookDelta.y !== 0) {
-      const euler = new THREE.Euler().setFromQuaternion(this.camera.quaternion, 'YXZ');
+      const euler = _euler.setFromQuaternion(this.camera.quaternion, 'YXZ');
       euler.y -= this._lookDelta.x;
       euler.x -= this._lookDelta.y;
       // Clamp pitch to avoid flipping

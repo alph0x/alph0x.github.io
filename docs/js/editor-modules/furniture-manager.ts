@@ -7,7 +7,7 @@
 import * as THREE from 'three';
 import { FurnitureRegistry } from '../furniture/registry.js';
 import { normalizeRotation } from '../editor-utils.js';
-import { extractMeshFromResult, calculateMeshOpeningDims } from '../primitives.js';
+import { extractMeshFromResult, calculateMeshOpeningDims, disposeMesh } from '../primitives.js';
 import type { FurnitureConfig } from '../seed.js';
 import { EditorState, type PlacedItem } from './state.js';
 import { UndoManager } from './undo-manager.js';
@@ -111,12 +111,7 @@ export class FurnitureManager {
   clearAll(): void {
     for (const mesh of this._placedMeshes.values()) {
       this._scene.remove(mesh);
-      const outline = this._userData(mesh)._outline;
-      if (outline) {
-        outline.geometry.dispose();
-        const mat = outline.material as THREE.LineBasicMaterial;
-        mat.dispose();
-      }
+      disposeMesh(mesh); // disposes outline geometry/material too (outline is a child)
     }
     this._placedMeshes.clear();
     this._state.placed = [];
@@ -171,6 +166,7 @@ export class FurnitureManager {
     const mesh = this._placedMeshes.get(this._state.selectedId);
     if (mesh) {
       this._scene.remove(mesh);
+      disposeMesh(mesh);
       this._placedMeshes.delete(this._state.selectedId);
     }
     this._state.placed = this._state.placed.filter((p) => p.id !== this._state.selectedId);
@@ -343,6 +339,7 @@ export class FurnitureManager {
         const mesh = this._placedMeshes.get(action.id);
         if (mesh) {
           this._scene.remove(mesh);
+          disposeMesh(mesh);
           this._placedMeshes.delete(action.id);
         }
         this._state.placed = this._state.placed.filter((p) => p.id !== action.id);
@@ -428,6 +425,7 @@ export class FurnitureManager {
         const mesh = this._placedMeshes.get(action.id);
         if (mesh) {
           this._scene.remove(mesh);
+          disposeMesh(mesh);
           this._placedMeshes.delete(action.id);
         }
         this._state.placed = this._state.placed.filter((p) => p.id !== action.id);

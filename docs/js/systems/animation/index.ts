@@ -23,8 +23,8 @@ export class AnimationSystem {
 
   update(delta: number, time: number): void {
     const { pet } = this.worldState;
-    updateFlickerLights(this.scene, time);
+    updateFlickerLights(time);
     updatePet(time, pet, this.camera);
-    updateParallax(this.scene, this.camera);
+    updateParallax(this.camera);
   }
 }
