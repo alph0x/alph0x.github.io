@@ -58,6 +58,12 @@ export class Game {
     this.controls = controls;
     this.worldState = worldState;
     this.touchControls = touchControls;
+    // Composed default view: tighter FOV and a slight turn toward the window wall
+    // so the spawn frame holds desk + window + pet together.
+    camera.fov = 68;
+    camera.updateProjectionMatrix();
+    camera.rotation.order = 'YXZ';
+    camera.rotation.set(-0.05, 0.15, 0);
     this.prevTime = performance.now();
     this._boundAnimate = this.animate.bind(this);
 

@@ -6,6 +6,7 @@ import { makeBox, makeCylinder } from '../primitives.js';
 
 import { CFG, ROOM_LAYOUT, DEFAULT_MAT, DEFAULT_WALL_T, DEFAULT_LULU_SPAWN } from '../core.js';
 import { FurnitureRegistry, type BuilderResult } from '../furniture/index.js';
+import { setupAtmosphere } from './atmosphere.js';
 import { setupLighting, applyTimeOfDay } from './lighting.js';
 import { Pet } from '../domain/pet.js';
 import {
@@ -151,6 +152,7 @@ function buildPolygonRoom(scene: THREE.Scene, worldState: WorldState): { edges: 
 export async function buildLevel(scene: THREE.Scene, worldState: WorldState): Promise<void> {
   buildPolygonRoom(scene, worldState);
   const preset = setupLighting(scene);
+  setupAtmosphere(scene, preset);
 
   // Async load external models for Lulú and MacBook (game path only).
   const useExternal = shouldLoadExternalModels();

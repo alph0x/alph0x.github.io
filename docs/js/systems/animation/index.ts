@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import type { WorldState } from '../../domain/world-state.js';
+import { updateDust } from './dust.js';
 import { updateFlickerLights } from './flicker.js';
 import { updatePet } from './pet.js';
 import { updateParallax } from './parallax.js';
@@ -24,6 +25,7 @@ export class AnimationSystem {
   update(delta: number, time: number): void {
     const { pet } = this.worldState;
     updateFlickerLights(time);
+    updateDust(time);
     updatePet(time, pet, this.camera);
     updateParallax(this.camera);
   }

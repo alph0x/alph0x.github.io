@@ -5,7 +5,7 @@ import { CFG } from '../core.js';
 export function createSceneAndCamera(): { scene: THREE.Scene; camera: THREE.PerspectiveCamera } {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x1a1a2e);
-  scene.fog = new THREE.FogExp2(0x1a1a2e, 0.015);
+  // Fog is owned by the level atmosphere (tinted per time-of-day preset).
 
   const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
   camera.position.set(0, CFG.playerHeight, 0);
