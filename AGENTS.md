@@ -1,6 +1,6 @@
 # Agent Operating Procedures
 
-> **Methodology: Tackle 3.0.** One-page onboarding for this repo. Plan-local rules live in `docs/plans/portfolio-3d-hardening/AGENTS.md`.
+> **Methodology: Tackle 3.0.** One-page onboarding for this repo. Plan-local rules live in `docs/plans/codebase-quality-pass/` (active) and `docs/plans/portfolio-3d-hardening/` (closed).
 
 ## Project
 
@@ -60,7 +60,7 @@ tests/                      # Vitest + happy-dom
 
 ## Active plan
 
-See `docs/plans/portfolio-3d-hardening/` for the current Tackle initiative. Start with `README.md`, then `plan.md`, then `board.md`.
+See `docs/plans/codebase-quality-pass/` for the current Tackle initiative. Start with `README.md`, then `plan.md`, then `board.md`. The prior initiative `docs/plans/portfolio-3d-hardening/` is closed (26/26, verified 2026-07-18).
 
 ## Autonomy
 
