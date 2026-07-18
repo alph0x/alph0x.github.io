@@ -3,7 +3,7 @@
  * Caches the app shell on install; serves from cache when available, falls back to network.
  */
 
-const CACHE_NAME = 'alph0x-portfolio-v1';
+const CACHE_NAME = 'alph0x-portfolio-v2';
 const SHELL_ASSETS = [
   '/',
   '/index.html',
@@ -13,6 +13,8 @@ const SHELL_ASSETS = [
   '/icons/icon-192.png',
   '/icons/icon-512.png',
   '/icons/apple-touch-icon.png',
+  '/assets/models/lulu.glb',
+  '/assets/models/macbook.glb',
 ];
 
 self.addEventListener('install', (event) => {

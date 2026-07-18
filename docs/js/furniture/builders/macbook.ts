@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { register } from '../registry.js';
 import { makeStd, texMetal, texPlastic, texScreenGlow } from '../../assets/index.js';
 import { makeBox, makePlane, makeRoundedBox } from '../../primitives.js';
+import { loadGlb } from '../../assets/loader.js';
 import type { FurnitureConfig } from '../../seed.js';
 
 function buildMacBook(cfg: FurnitureConfig): { mesh: THREE.Group; type: string; panelId: string; label: string; room: string } {
@@ -55,6 +56,25 @@ function buildMacBook(cfg: FurnitureConfig): { mesh: THREE.Group; type: string; 
   g.add(makeBox(new THREE.MeshBasicMaterial({ color: 0x06b6d4, transparent: true, opacity: 0.12 }), [w, 0.001, d * 0.6], [0, 0.001, d * 0.15]));
 
   return { mesh: g, type: 'terminal', panelId: 'panel-alphgpt', label: 'MACBOOK', room: 'APT' };
+}
+
+export async function loadMacBook(cfg: FurnitureConfig): Promise<{ mesh: THREE.Group; type: string; panelId: string; label: string; room: string }> {
+  const group = await loadGlb('/assets/models/macbook.glb');
+  const [x, y, z] = cfg.position;
+  group.position.set(x, y, z);
+  group.rotation.y = cfg.rotation ?? 0;
+  // Scale to match existing procedural MacBook (~0.36m wide, ~0.25m deep).
+  const s = 0.36;
+  group.scale.set(s, s, s);
+
+  // If the GLB has a lid mesh, pose it open.
+  group.traverse((child) => {
+    if (child.name.toLowerCase().includes('lid')) {
+      child.rotation.x = -Math.PI / 2 - 0.55;
+    }
+  });
+
+  return { mesh: group, type: 'terminal', panelId: 'panel-alphgpt', label: 'MACBOOK', room: 'APT' };
 }
 
 register('macBook', buildMacBook);

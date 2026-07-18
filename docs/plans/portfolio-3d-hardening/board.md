@@ -29,6 +29,7 @@
 | **P-23 · Keyboard shortcut legend** | In-game and editor overlays for controls. | `points/P-23-keyboard-shortcut-legend.md` | P-01 | 🟢 done |
 | **P-24 · UI snapshot testing** | Playwright screenshot regression for key views. | `points/P-24-ui-snapshot-testing.md` | P-07, P-08, P-13, P-17, P-22 | 🟢 done |
 | **P-25 · Test consolidation + E2E smoke** | Coverage, deduplicate tests, revive Playwright smoke. | `points/P-25-test-consolidation-e2e-smoke.md` | P-05, P-24 | 🟢 done |
+| **P-26 · External selective assets** | Vendored low-poly GLB models for Lulú and MacBook. | `points/P-26-external-selective-assets.md` | P-08, P-22 | 🟢 done |
 
 ### Dependency graph
 
@@ -52,6 +53,9 @@ P-01 ──► P-02 ──► P-03 ──► P-04 ──► P-05 ──► P-06 
                                               │
                                               ▼
 P-17, P-22, P-07, P-08, P-13 ──► P-24 ──► P-25
+
+P-08 ──► P-26
+P-22 ──► P-26
 ```
 
 ## Legend

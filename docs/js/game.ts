@@ -146,32 +146,33 @@ export class Game {
   }
 
   init() {
-    buildLevel(this.scene, this.worldState);
-    this.worldState.room.interactables.forEach((i: Interactable) => {
-      i.mesh.traverse((c) => { if (isMesh(c)) c.userData = { label: i.label }; });
+    const buildPromise = buildLevel(this.scene, this.worldState);
+    this.loading.start([buildPromise]);
+    buildPromise.then(() => {
+      this.worldState.room.interactables.forEach((i: Interactable) => {
+        i.mesh.traverse((c) => { if (isMesh(c)) c.userData = { label: i.label }; });
+      });
+      window.addEventListener('resize', () => this.onResize());
+      document.querySelectorAll('.panel-close').forEach((btn) => {
+        btn.addEventListener('click', () => this.closePanels());
+      });
+      document.addEventListener('click', (e) => {
+        if (!this.worldState.ui.isPanelOpen) return;
+        const target = e.target as HTMLElement | null;
+        if (!target) return;
+        if (target.closest('.info-panel')) return;
+        if (target.tagName === 'CANVAS') return;
+        this.closePanels();
+      });
+
+      const tourBtn = document.getElementById('tour-btn');
+      const tourSkip = document.getElementById('tour-skip');
+      if (tourBtn) tourBtn.addEventListener('click', () => this.startTour());
+      if (tourSkip) tourSkip.addEventListener('click', () => this.skipTour());
+
+      this._initScreenReflections();
     });
     this.input.bind();
-    this.loading.start();
-    window.addEventListener('resize', () => this.onResize());
-    document.querySelectorAll('.panel-close').forEach((btn) => {
-      btn.addEventListener('click', () => this.closePanels());
-    });
-    document.addEventListener('click', (e) => {
-      if (!this.worldState.ui.isPanelOpen) return;
-      const target = e.target as HTMLElement | null;
-      if (!target) return;
-      if (target.closest('.info-panel')) return;
-      if (target.tagName === 'CANVAS') return;
-      this.closePanels();
-    });
-
-    const tourBtn = document.getElementById('tour-btn');
-    const tourSkip = document.getElementById('tour-skip');
-    if (tourBtn) tourBtn.addEventListener('click', () => this.startTour());
-    if (tourSkip) tourSkip.addEventListener('click', () => this.skipTour());
-
-    // ponytail: find screen meshes and set up reflection targets
-    this._initScreenReflections();
   }
 
   onResize() {

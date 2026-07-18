@@ -679,3 +679,90 @@ exit: 0
 - Resume from: run `/tackle-verify` or final plan close-out.
 
 
+## 2026-07-16 — planning session — P-26 added to plan
+
+### Intake
+- User requested adding a new point to the completed Tackle 3.0 plan.
+- Explored external free assets options (3D models, textures, audio, HDRI, fonts).
+- Narrowed scope to Option A: selective replacement with vendored GLB models.
+
+### Decisions
+- **P-26 · External selective assets**: add two vendored, low-poly, CC0-compatible GLB models — Lulú and MacBook — while keeping procedural builders as fallback.
+- Editor stays procedural; async GLB loader is generic but minimal.
+- Asset source: best design fit from CC0/low-poly collections (Quaternius, Kenney, Sketchfab CC0) at implementation time.
+
+### Did
+- Wrote design spec: `docs/superpowers/specs/2026-07-16-external-assets-selective-design.md`.
+- Created Tackle point brief: `docs/plans/portfolio-3d-hardening/points/P-26-external-selective-assets.md`.
+- Updated `docs/plans/portfolio-3d-hardening/board.md` — P-26 added as 🔴 not started.
+- Updated `docs/plans/portfolio-3d-hardening/plan.md` §5 — P-26 added to point decomposition and dependency graph.
+- Updated `docs/plans/portfolio-3d-hardening/README.md` stale status line.
+
+### Blockers / open questions
+- None. All Q-1, Q-2, Q-3 resolved in design spec.
+
+### Next
+- Run `/tackle-verify` to update plan canonical status, or pick up P-26 for implementation.
+
+### State snapshot (keep current in the newest entry only)
+- Done: P-01 … P-25 are 🟢.
+- Added: P-26 · External selective assets is 🔴 not started.
+- In flight: none.
+- Blocked on: nothing.
+- Resume from: implement P-26 or close initiative.
+
+
+## 2026-07-16 — session 10 — P-26 External selective assets implementation
+
+### Intake
+- Requirement: implement P-26 — replace Lulú and MacBook with vendored low-poly GLB models.
+- Docs read: `points/P-26-external-selective-assets.md`, design spec, `docs/js/level/index.ts`, `docs/js/game.ts`, `docs/js/systems/loading.ts`, `docs/sw.js`.
+- Scope: two models, async loader, fallback procedural, PWA precaching, real loading progress.
+
+### Did
+- Acquired models:
+  - **Lulú**: Shiba Inu by Quaternius (poly.pizza), CC0, 1,812 triangles, 832 KB.
+  - **MacBook**: Laptop/MacBook Pro by Alex Safayan (poly.pizza), CC-BY, 1,400 triangles, 103 KB.
+- Created `docs/assets/models/{lulu,macbook}.glb` and `ATTRIBUTION.md`.
+- Created `docs/js/assets/loader.ts` with `loadGlb()` and `createMockGlbGroup()`.
+- Added async loaders `loadMiniSchnauzer()` and `loadMacBook()` to existing builder files; kept procedural builders as fallback.
+- Made `buildLevel()` async; loads external models in game path, skips in test path (`navigator.webdriver`).
+- Made `Game.init()` async, passing the `buildLevel` promise to `LoadingSystem.start()`.
+- Updated `LoadingSystem` to track real promise settlement instead of fake interval.
+- Updated `docs/sw.js` to precache GLBs and bumped cache to `v2`.
+- Added tests: `tests/asset-loader.test.js`, `tests/external-assets.test.js`, `tests/sw-assets.test.js`.
+- Updated `tsconfig.json` lib to `ES2024` for `Promise.withResolvers()`.
+- Updated visual baselines with `npm run test:visual:update`.
+
+**Evidence** — `npm run typecheck && npm test -- --run && npm run test:visual`
+```
+> tsc --noEmit
+exit: 0
+
+Test Files  58 passed (58)
+Tests  504 passed (504)
+exit: 0
+
+4 passed (visual)
+exit: 0
+```
+
+### Decisions
+- D-23: use `navigator.webdriver` to detect test environment and skip external model loading in tests. This keeps tests fast and avoids network dependencies in happy-dom.
+- D-24: bump `tsconfig.json` lib to `ES2024` to use `Promise.withResolvers()` per project rules.
+
+### Blockers / open questions
+- None.
+
+### Next
+- Plan is complete. Run `/tackle-verify` and close the initiative.
+
+### State snapshot (keep current in the newest entry only)
+- Done: P-01 … P-26 are 🟢. All Tackle points complete.
+- In flight: none.
+- Blocked on: nothing.
+- Resume from: run `/tackle-verify` or final plan close-out.
+
+
+
+

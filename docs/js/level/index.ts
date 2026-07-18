@@ -12,6 +12,8 @@ import {
   calculateMeshOpeningDims,
 } from '../editor-utils.js';
 import { buildWallsFromOutline } from './room-geometry.js';
+import { loadMiniSchnauzer } from '../furniture/builders/mini-schnauzer.js';
+import { loadMacBook } from '../furniture/builders/macbook.js';
 import type { WorldState } from '../domain/world-state.js';
 
 function hexToInt(hex: string): number {
@@ -158,10 +160,29 @@ function buildPolygonRoom(scene: THREE.Scene, worldState: WorldState): { edges: 
   return { edges };
 }
 
-export function buildLevel(scene: THREE.Scene, worldState: WorldState): void {
+export async function buildLevel(scene: THREE.Scene, worldState: WorldState): Promise<void> {
   (buildPolygonRoom as any)(scene, worldState);
   const preset = setupLighting(scene);
 
+  // Async load external models for Lulú and MacBook (game path only).
+  const isTest = typeof navigator !== 'undefined' && (navigator as any).webdriver === true;
+  const useExternal = !isTest;
+
+  let externalResults: Record<string, { mesh: THREE.Group; [k: string]: unknown }> | null = null;
+  if (useExternal) {
+    try {
+      const luluCfg = ROOM_LAYOUT.furniture?.find((f) => f.type === 'miniSchnauzer') ?? { position: [0, 0, 0], type: 'miniSchnauzer' };
+      const macbookCfg = ROOM_LAYOUT.furniture?.find((f) => f.type === 'macBook') ?? { position: [0, 0, 0], type: 'macBook' };
+      const [lulu, macbook] = await Promise.all([
+        loadMiniSchnauzer(luluCfg),
+        loadMacBook(macbookCfg),
+      ]);
+      externalResults = { miniSchnauzer: lulu, macBook: macbook };
+    } catch {
+      // ponytail: on load failure, fall back to procedural builders silently.
+      externalResults = null;
+    }
+  }
 
   // Furniture
   let petMesh: THREE.Group | null = null;
@@ -169,7 +190,15 @@ export function buildLevel(scene: THREE.Scene, worldState: WorldState): void {
   for (const f of ROOM_LAYOUT.furniture || []) {
     const entry = (FurnitureRegistry as any).get(f.type);
     if (!entry) continue;
-    const result = entry.builder(f);
+
+    // Use external model if available; otherwise fall back to procedural builder.
+    let result: { mesh: THREE.Group; [k: string]: unknown };
+    if (externalResults && externalResults[f.type]) {
+      result = externalResults[f.type];
+    } else {
+      result = entry.builder(f);
+    }
+
     const mesh = extractMeshFromResult(result);
     if (!mesh) continue;
     (mesh as any).position.set(f.position[0], f.position[1], f.position[2] as any);

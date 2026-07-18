@@ -10,35 +10,50 @@ export interface PointerLockLike {
 
 export class LoadingSystem {
   controls: PointerLockLike;
+  private _loadInt: number | null = null;
+  private _resolved = false;
 
   constructor({ controls }: { controls: PointerLockLike }) {
     this.controls = controls;
   }
 
-  start(): void {
-    const loadBar = document.getElementById('loading-bar-fill') as HTMLElement;
-    let loadProg = 0;
-    const loadInt = setInterval(() => {
-      loadProg += 15;
-      loadBar.style.width = loadProg + '%';
-      if (loadProg >= 100) {
-        clearInterval(loadInt);
-        setTimeout(() => {
-          (document.getElementById('loading') as HTMLElement).style.display = 'none';
-          (document.getElementById('start-screen') as HTMLElement).style.display = 'flex';
-        }, 300);
+  /** Start the loading screen and track real asset load progress. */
+  start(promises: Promise<unknown>[] = []): void {
+    const loadBar = document.getElementById('loading-bar-fill') as HTMLElement | null;
+    const total = Math.max(1, promises.length);
+    let settled = 0;
+
+    const updateBar = () => {
+      settled++;
+      const pct = Math.min(100, Math.round((settled / total) * 100));
+      if (loadBar) loadBar.style.width = pct + '%';
+      if (pct >= 100 && !this._resolved) {
+        this._resolved = true;
+        setTimeout(() => this._showStart(), 300);
       }
-    }, 100);
+    };
+
+    for (const p of promises) {
+      p.then(updateBar, updateBar);
+    }
 
     // Safety timeout: if something silently fails, don't hang forever
     setTimeout(() => {
-      if ((document.getElementById('loading') as HTMLElement).style.display !== 'none') {
-        clearInterval(loadInt);
-        (document.getElementById('loading') as HTMLElement).style.display = 'none';
-        (document.getElementById('start-screen') as HTMLElement).style.display = 'flex';
+      if (!this._resolved) {
+        this._resolved = true;
+        this._showStart();
       }
     }, 8000);
 
+    this._bindStartBtn();
+  }
+
+  private _showStart(): void {
+    (document.getElementById('loading') as HTMLElement).style.display = 'none';
+    (document.getElementById('start-screen') as HTMLElement).style.display = 'flex';
+  }
+
+  private _bindStartBtn(): void {
     (document.getElementById('start-btn') as HTMLElement).addEventListener('click', () => {
       (document.getElementById('start-screen') as HTMLElement).style.display = 'none';
       if (typeof this.controls.lock === 'function') {
