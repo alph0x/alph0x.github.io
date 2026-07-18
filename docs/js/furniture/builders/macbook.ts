@@ -13,6 +13,7 @@ function buildMacBook(cfg: FurnitureConfig): { mesh: THREE.Group; type: string; 
   const dark = makeStd({ map: texPlastic, color: 0x1a1a1e, roughness: 0.7 });
   const keyMat = makeStd({ color: 0x111114, roughness: 0.8 });
   const screenGlow = new THREE.MeshBasicMaterial({ map: texScreenGlow });
+  screenGlow.color.multiplyScalar(4); // crosses the 0.85 bloom threshold
   const trackpadMat = makeStd({ map: texMetal, color: 0xd0d0d8, roughness: 0.3, metalness: 0.5 });
 
   const w = 0.36;

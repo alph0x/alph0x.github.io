@@ -19,8 +19,9 @@ function buildTV(cfg: FurnitureConfig): { mesh: THREE.Group; type: string; panel
   // inner bezel
   g.add(makeBox(bezelMat, [w - 0.04, h - 0.04, 0.005], [0, 0, d / 2 + 0.003]));
 
-  // Deterministic screen glow
+  // Deterministic screen glow — pushed past the 0.85 bloom threshold
   const screenMat = new THREE.MeshBasicMaterial({ map: texScreenGlow });
+  screenMat.color.multiplyScalar(4);
   g.add(makePlane(screenMat, [w - 0.05, h - 0.05], [0, 0, d / 2 + 0.006]));
 
   // Metal stand (also supports furniture placement)

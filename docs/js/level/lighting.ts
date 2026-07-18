@@ -34,30 +34,30 @@ const PRESETS: Record<TimeOfDayName, TimeOfDayPreset> = {
   morning: {
     name: 'morning',
     key: { color: 0xffd6a0, intensity: 30 },
-    fill: { color: 0x7fa0d0, intensity: 0.9 },
+    fill: { color: 0x7fa0d0, intensity: 1.2 },
     accent: 1.4,
     tv: 1.0,
-    windowGlow: { color: 0xffaa77, intensity: 0.25, spotIntensity: 1.2 },
+    windowGlow: { color: 0xffaa77, intensity: 5.0, spotIntensity: 1.2 },
     cityEmissiveMultiplier: 0.8,
     pcLedMultiplier: 1.0,
   },
   afternoon: {
     name: 'afternoon',
     key: { color: 0xffc890, intensity: 36 },
-    fill: { color: 0x8aa8d8, intensity: 1.1 },
+    fill: { color: 0x8aa8d8, intensity: 1.8 },
     accent: 1.6,
     tv: 1.2,
-    windowGlow: { color: 0x6688aa, intensity: 0.35, spotIntensity: 1.6 },
+    windowGlow: { color: 0x6688aa, intensity: 6.0, spotIntensity: 2.5 },
     cityEmissiveMultiplier: 1.0,
     pcLedMultiplier: 1.0,
   },
   night: {
     name: 'night',
-    key: { color: 0xffa860, intensity: 14 },
-    fill: { color: 0x405d94, intensity: 0.35 },
-    accent: 1.2,
-    tv: 1.0,
-    windowGlow: { color: 0x3344aa, intensity: 0.4, spotIntensity: 1.4 },
+    key: { color: 0xffa860, intensity: 26 },
+    fill: { color: 0x405d94, intensity: 0.55 },
+    accent: 1.6,
+    tv: 1.4,
+    windowGlow: { color: 0x4466cc, intensity: 8.0, spotIntensity: 3.0 },
     cityEmissiveMultiplier: 1.5,
     pcLedMultiplier: 1.2,
   },
@@ -121,10 +121,11 @@ export function applyTimeOfDay(scene: THREE.Object3D, preset: TimeOfDayPreset): 
 
       if (obj.userData._pcLed && 'color' in mat) {
         const basic = mat as THREE.MeshBasicMaterial;
+        // ponytail: Color, not hex — getHex() clamps HDR-boosted LED colors.
         if (obj.userData._pcLedBase === undefined) {
-          obj.userData._pcLedBase = basic.color.getHex();
+          obj.userData._pcLedBase = basic.color.clone();
         }
-        basic.color.setHex(obj.userData._pcLedBase as number).multiplyScalar(preset.pcLedMultiplier);
+        basic.color.copy(obj.userData._pcLedBase as THREE.Color).multiplyScalar(preset.pcLedMultiplier);
       }
 
       if (obj.userData._emissiveBase !== undefined && 'color' in mat) {

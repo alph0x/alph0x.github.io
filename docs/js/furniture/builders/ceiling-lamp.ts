@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { CFG, COLORS } from '../../core.js';
 import { register } from '../registry.js';
 import { makeStd, texMetal } from '../../assets/index.js';
-import { makeCylinder, makeSphere, rootGroup, configureShadow } from '../../primitives.js';
+import { makeCylinder, makeSphere, rootGroup } from '../../primitives.js';
 import type { FurnitureConfig } from '../../seed.js';
 
 function buildCeilingLamp(cfg: FurnitureConfig): { mesh: THREE.Group; label: string } {
@@ -31,10 +31,9 @@ function buildCeilingLamp(cfg: FurnitureConfig): { mesh: THREE.Group; label: str
   // emissive bulb hanging inside
   g.add(makeSphere(bulbMat, [0.07], [0, -0.32, 0], 16));
 
-  // warm downward light
+  // warm downward light (shadowless — the rig's key spot owns the shadows)
   const light = new THREE.PointLight(color, intensity, distance, 1);
   light.position.set(0, -0.38, 0);
-  configureShadow(light);
   g.add(light);
 
   return { mesh: g, label: 'Ceiling Lamp' };

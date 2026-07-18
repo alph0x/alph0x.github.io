@@ -9,7 +9,7 @@
 
 import { describe, it, expect } from 'vitest';
 import * as THREE from 'three';
-import { makeBox, makePlane, makeCylinder, makeCone, makeSphere, makeLight } from '../docs/js/primitives.js';
+import { makeBox, makePlane, makeCylinder, makeCone, makeSphere, makeLight, configureShadow } from '../docs/js/primitives.js';
 
 describe('makeBox', () => {
   const mat = new THREE.MeshBasicMaterial();
@@ -117,15 +117,17 @@ describe('makeLight', () => {
     expect(light.position.z).toBe(3);
   });
 
-  it('casts shadow with 256px map size', () => {
+  it('is shadowless by default (shadows are opt-in)', () => {
     const light = makeLight(0xff0000, 1, 5, [0, 0, 0]);
+    expect(light.castShadow).toBe(false);
+  });
+
+  it('configureShadow opts in with map size and negative bias', () => {
+    const light = makeLight(0xffffff, 1, 1, [0, 0, 0]);
+    configureShadow(light);
     expect(light.castShadow).toBe(true);
     expect(light.shadow.mapSize.width).toBe(256);
     expect(light.shadow.mapSize.height).toBe(256);
-  });
-
-  it('has negative shadow bias', () => {
-    const light = makeLight(0xffffff, 1, 1, [0, 0, 0]);
     expect(light.shadow.bias).toBe(-0.001);
   });
 });

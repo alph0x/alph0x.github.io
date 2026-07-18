@@ -34,7 +34,7 @@ function buildFairyLights(cfg: FurnitureConfig): { mesh: THREE.Group } {
   const bulbMat = makeStd({
     color: COLORS.warm,
     emissive: COLORS.orange,
-    emissiveIntensity: 1.2,
+    emissiveIntensity: 1.8,
     roughness: 0.2,
   });
 

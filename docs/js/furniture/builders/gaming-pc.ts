@@ -26,7 +26,7 @@ function buildGamingPC(cfg: FurnitureConfig): { mesh: THREE.Group } {
   // vertical RGB strip behind glass
   for (let i = 0; i < 5; i++) {
     const ledColor = i % 2 === 0 ? COLORS.accent : COLORS.cyan;
-    const ledMesh = makeBox(new THREE.MeshBasicMaterial({ color: ledColor }), [0.01, 0.12, 0.35], [0.3, 0.2 + i * 0.18, 0]);
+    const ledMesh = makeBox(new THREE.MeshBasicMaterial({ color: new THREE.Color(ledColor).multiplyScalar(2.5) }), [0.01, 0.12, 0.35], [0.3, 0.2 + i * 0.18, 0]);
     ledMesh.userData._pcLed = true;
     g.add(ledMesh);
   }
@@ -34,9 +34,11 @@ function buildGamingPC(cfg: FurnitureConfig): { mesh: THREE.Group } {
   // top and bottom RGB accents
   const topAccent = makeBox(M.glowPurple.clone(), [0.52, 0.02, 0.01], [0, 0.15, 0.26]);
   topAccent.userData._pcLed = true;
+  (topAccent.material as THREE.MeshBasicMaterial).color.multiplyScalar(2.5);
   g.add(topAccent);
   const bottomAccent = makeBox(M.glowCyan.clone(), [0.52, 0.02, 0.01], [0, 0.95, 0.26]);
   bottomAccent.userData._pcLed = true;
+  (bottomAccent.material as THREE.MeshBasicMaterial).color.multiplyScalar(2.5);
   g.add(bottomAccent);
 
   // front vents
@@ -50,7 +52,7 @@ function buildGamingPC(cfg: FurnitureConfig): { mesh: THREE.Group } {
 
   // GPU / motherboard cards visible through glass
   g.add(makeBox(metalMat, [0.35, 0.02, 0.08], [0, 0.5, 0.1]));
-  g.add(makeBox(makeStd({ map: texScreenGlow, color: COLORS.accent, emissive: COLORS.accent, emissiveIntensity: 0.8 }), [0.25, 0.06, 0.02], [0, 0.55, 0.12]));
+  g.add(makeBox(makeStd({ map: texScreenGlow, color: COLORS.accent, emissive: COLORS.accent, emissiveIntensity: 1.6 }), [0.25, 0.06, 0.02], [0, 0.55, 0.12]));
 
   // feet
   for (const lx of [-0.2, 0.2]) {

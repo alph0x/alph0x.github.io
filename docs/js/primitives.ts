@@ -15,7 +15,7 @@ export function makeBox(
 ): THREE.Mesh {
   const mesh = new THREE.Mesh(new THREE.BoxGeometry(...size), material);
   mesh.position.set(...pos);
-  mesh.castShadow = true; mesh.receiveShadow = true;
+  mesh.castShadow = mesh.receiveShadow = true;
   return mesh;
 }
 
@@ -40,7 +40,7 @@ export function makeCylinder(
   const lp = [params[0], params[1], params[2], segments] as const;
   const mesh = new THREE.Mesh(new THREE.CylinderGeometry(...lp), material);
   mesh.position.set(...pos);
-  mesh.castShadow = true; mesh.receiveShadow = true;
+  mesh.castShadow = mesh.receiveShadow = true;
   return mesh;
 }
 
@@ -54,7 +54,7 @@ export function makeCone(
   const lp = [params[0], params[1], segments] as const;
   const mesh = new THREE.Mesh(new THREE.ConeGeometry(...lp), material);
   mesh.position.set(...pos);
-  mesh.castShadow = true; mesh.receiveShadow = true;
+  mesh.castShadow = mesh.receiveShadow = true;
   return mesh;
 }
 
@@ -68,7 +68,7 @@ export function makeSphere(
   const lp = [params[0], segments, Math.max(4, Math.floor(segments * 0.75))] as const;
   const mesh = new THREE.Mesh(new THREE.SphereGeometry(...lp), material);
   mesh.position.set(...pos);
-  mesh.castShadow = true; mesh.receiveShadow = true;
+  mesh.castShadow = mesh.receiveShadow = true;
   return mesh;
 }
 
@@ -80,7 +80,7 @@ export function makeLight(
 ): THREE.PointLight {
   const light = new THREE.PointLight(color, intensity, distance, 1);
   light.position.set(...pos);
-  configureShadow(light);
+  // ponytail: shadows are opt-in via configureShadow; ≤2 casters total (VR-03 rig).
   return light;
 }
 
@@ -101,7 +101,7 @@ export function makeRoundedBox(
   const geo = new RoundedBoxGeometry(size[0], size[1], size[2], segments, radius);
   const mesh = new THREE.Mesh(geo, material);
   mesh.position.set(...pos);
-  mesh.castShadow = true; mesh.receiveShadow = true;
+  mesh.castShadow = mesh.receiveShadow = true;
   return mesh;
 }
 
