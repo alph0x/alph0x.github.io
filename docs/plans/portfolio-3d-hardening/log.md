@@ -766,3 +766,28 @@ exit: 0
 
 
 
+
+---
+
+## 2026-07-18 — Session: /tackle-verify red-team + initiative close-out
+
+### Verify findings (independent reviewer agent)
+
+Surround half: `npm test -- --run` PASS (504/504, 58 files) · `npm run typecheck` PASS · `npm run test:visual` PASS (4/4).
+Done-signal honesty: all 26 done-signals are literal runnable commands — no prose gates, no `test -f`.
+Seal integrity: every `SEALED:` id is D-21, present in `decisions.md:110`.
+Spot-checks P-14, P-18, P-22, P-24, P-26: code matches claims (grounded in the reviewer transcript).
+Harness-agnostic: clean.
+
+- [MEDIUM] Point-specific acceptance checkboxes left unchecked in all points — done status rests on the runnable done-signal + surround suite. Accepted at close (D-25): the done-signal is the gate; the box was redundant.
+- [MEDIUM] P-24 stale Touches/approach metadata (`*.spec.js`, `tests/__snapshots__`, `playwright.config.js`, pixelmatch). Fixed in place: Touches now matches reality (`snapshots.spec.cjs`, `snapshots.spec.cjs-snapshots/`, `playwright.config.cjs`); Playwright's built-in `toHaveScreenshot` is the diff engine.
+- [LOW] P-26 vendored GLBs exceed stated size targets (lulu.glb 851 KB vs ≤200 KB target; macbook.glb 105 KB vs ≤100 KB). Sizes were targets, not acceptance criteria; accepted (D-25), revisit only if SW precache weight becomes a real problem.
+- [LOW] P-18…P-26 done without SEALED markers. Accepted (D-25): seal convention adopted mid-initiative; closing without retroactive seals.
+
+### Verdict
+
+CLOSE-READY: yes — every done-signal verified runnable and green; remaining findings are cosmetic metadata drift, not implementation gaps.
+
+### Status
+
+**Initiative closed.** All 26 points 🟢, verified, accepted.
