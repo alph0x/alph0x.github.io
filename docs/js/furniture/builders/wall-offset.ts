@@ -11,9 +11,13 @@ import { ROOM_LAYOUT, DEFAULT_WALL_T } from '../../core.js';
  * @param itemDepth — depth of the item (m)
  * @returns offset in world space
  */
-export function getInteriorOffset(x: number, z: number, itemDepth: number): { x: number; z: number } {
-  const outline = ROOM_LAYOUT.outline;
-  const wallT = ROOM_LAYOUT.wallThickness || DEFAULT_WALL_T;
+export function getInteriorOffset(
+  x: number,
+  z: number,
+  itemDepth: number,
+  outline: readonly number[][] = ROOM_LAYOUT.outline,
+  wallT: number = ROOM_LAYOUT.wallThickness || DEFAULT_WALL_T
+): { x: number; z: number } {
   if (!outline || outline.length < 2) return { x: 0, z: 0 };
 
   let minDist = Infinity;

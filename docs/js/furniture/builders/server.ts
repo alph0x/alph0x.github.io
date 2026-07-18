@@ -2,14 +2,11 @@ import * as THREE from 'three';
 import { COLORS } from '../../core.js';
 import { register } from '../registry.js';
 import { makeStd } from '../../assets/index.js';
-import { makeBox } from '../../primitives.js';
+import { makeBox, rootGroup } from '../../primitives.js';
 import type { FurnitureConfig } from '../../seed.js';
 
 function buildServer(cfg: FurnitureConfig): { mesh: THREE.Group } {
-  const [x, y, z] = cfg.position;
-  const g = new THREE.Group();
-  g.position.set(x, y, z);
-  g.rotation.y = cfg.rotation ?? 0;
+  const g = rootGroup(cfg);
   const caseMat = makeStd({ color: 0x2a2a30 });
   g.add(makeBox(caseMat, [0.4, 0.8, 0.4], [0, 0.4, 0]));
   for (let i = 0; i < 6; i++) {

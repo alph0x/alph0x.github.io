@@ -2,14 +2,11 @@ import * as THREE from 'three';
 import { COLORS } from '../../core.js';
 import { register } from '../registry.js';
 import { makeStd } from '../../assets/index.js';
-import { makeBox } from '../../primitives.js';
+import { makeBox, rootGroup } from '../../primitives.js';
 import type { FurnitureConfig } from '../../seed.js';
 
 function buildDrone(cfg: FurnitureConfig): { mesh: THREE.Group } {
-  const [x, y, z] = cfg.position;
-  const g = new THREE.Group();
-  g.position.set(x, y, z);
-  g.rotation.y = cfg.rotation ?? 0;
+  const g = rootGroup(cfg);
   const bodyMat = makeStd({ color: 0x4a4a55 });
   g.add(makeBox(bodyMat, [0.15, 0.06, 0.1], [0, 0, 0]));
   for (const lx of [-0.12, 0.12]) {

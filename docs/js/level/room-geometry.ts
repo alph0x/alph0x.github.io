@@ -41,6 +41,13 @@ export interface BuildWallsOptions {
 }
 
 /** Compute world-space AABB ensuring ancestor matrices are up to date. */
+function addTrim(parent: THREE.Object3D, trimMaterial: THREE.Material, wallT: number, wallH: number, len: number, yOrigin: number): void {
+  const bbH = 0.08;
+  parent.add(makeBox(trimMaterial, [wallT + 0.03, bbH, len], [0, yOrigin + bbH / 2, 0]));
+  const ctH = 0.05;
+  parent.add(makeBox(trimMaterial, [wallT + 0.03, ctH, len], [0, yOrigin + wallH - ctH / 2, 0]));
+}
+
 export function getWorldAABB(object: THREE.Object3D): THREE.Box3 {
   object.updateWorldMatrix(true, true);
   return new THREE.Box3().setFromObject(object);
@@ -81,12 +88,7 @@ export function buildWallsFromOutline(options: BuildWallsOptions): WallEdge[] {
       }
       edges.push({ p1, p2, midX, midZ, angle, len, mesh });
       if (trimMaterial) {
-        const bbH = 0.08;
-        const baseboard = makeBox(trimMaterial, [wallT + 0.03, bbH, len], [0, -wallH / 2 + bbH / 2, 0]);
-        mesh.add(baseboard);
-        const ctH = 0.05;
-        const crown = makeBox(trimMaterial, [wallT + 0.03, ctH, len], [0, wallH / 2 - ctH / 2, 0]);
-        mesh.add(crown);
+        addTrim(mesh, trimMaterial, wallT, wallH, len, -wallH / 2);
       }
       continue;
     }
@@ -155,12 +157,7 @@ export function buildWallsFromOutline(options: BuildWallsOptions): WallEdge[] {
     }
 
     if (trimMaterial) {
-      const bbH = 0.08;
-      const baseboard = makeBox(trimMaterial, [wallT + 0.03, bbH, len], [0, bbH / 2, 0]);
-      group.add(baseboard);
-      const ctH = 0.05;
-      const crown = makeBox(trimMaterial, [wallT + 0.03, ctH, len], [0, wallH - ctH / 2, 0]);
-      group.add(crown);
+      addTrim(group, trimMaterial, wallT, wallH, len, 0);
     }
 
     edges.push({ p1, p2, midX, midZ, angle, len, mesh: group });

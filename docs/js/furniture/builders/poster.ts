@@ -50,7 +50,7 @@ function buildPoster(cfg: FurnitureConfig): { mesh: THREE.Mesh } {
     opacity: 0.95,
     side: THREE.DoubleSide,
     roughness: 0.8,
-  } as unknown as Parameters<typeof makeStd>[0]);
+  });
   const paper = new THREE.Mesh(paperGeo, paperMat);
 
   // wooden frame border

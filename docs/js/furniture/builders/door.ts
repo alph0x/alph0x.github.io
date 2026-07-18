@@ -6,15 +6,13 @@
 import * as THREE from 'three';
 import { register } from '../registry.js';
 import { makeStd, texMetal, texWood } from '../../assets/index.js';
-import { makeRoundedBox, makeBox, makeCylinder } from '../../primitives.js';
+import { makeRoundedBox, makeBox, makeCylinder, rootGroup } from '../../primitives.js';
 import { getInteriorOffset } from './wall-offset.js';
 import type { FurnitureConfig } from '../../seed.js';
 
 function buildDoor(cfg: FurnitureConfig): { mesh: THREE.Group; label: string } {
   const [x, y, z] = cfg.position;
-  const wrapper = new THREE.Group();
-  wrapper.position.set(x, y, z);
-  wrapper.rotation.y = cfg.rotation ?? 0;
+  const wrapper = rootGroup(cfg);
 
   const door = new THREE.Group();
 

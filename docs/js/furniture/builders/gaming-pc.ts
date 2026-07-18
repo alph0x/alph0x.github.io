@@ -2,14 +2,11 @@ import * as THREE from 'three';
 import { COLORS } from '../../core.js';
 import { register } from '../registry.js';
 import { M, makeStd, texMetal, texPlastic, texScreenGlow } from '../../assets/index.js';
-import { makeBox, makeCylinder, makeLight, makePlane, makeRoundedBox } from '../../primitives.js';
+import { makeBox, makeCylinder, makeLight, makePlane, makeRoundedBox, rootGroup } from '../../primitives.js';
 import type { FurnitureConfig } from '../../seed.js';
 
 function buildGamingPC(cfg: FurnitureConfig): { mesh: THREE.Group } {
-  const [x, y, z] = cfg.position;
-  const g = new THREE.Group();
-  g.position.set(x, y, z);
-  g.rotation.y = cfg.rotation ?? 0;
+  const g = rootGroup(cfg);
 
   const caseMat = makeStd({ map: texPlastic, color: 0x1c1c1f, roughness: 0.4, metalness: 0.3 });
   const metalMat = makeStd({ map: texMetal, color: 0x2a2a30, roughness: 0.4, metalness: 0.6 });

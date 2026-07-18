@@ -13,7 +13,7 @@ function buildTerminal(cfg: FurnitureConfig): { mesh: THREE.Group; type: string;
   const screenMat = colorKey === 'yellow' ? M.terminal : colorKey === 'pink' ? M.terminalPink : colorKey === 'cyan' ? M.terminalCyan : M.terminalGreen;
   // Desktop monitor proportions (~27")
   const w = 0.65, h = 0.42, d = 0.04;
-  group.add(new THREE.Mesh(new THREE.BoxGeometry(w, h, d), screenMat));
+  group.add(makeBox(screenMat, [w, h, d], [0, 0, 0]));
   const frameMat = new THREE.MeshBasicMaterial({ color: 0x1a1a1e });
   group.add(makeBox(frameMat, [w + 0.02, 0.015, d + 0.01], [0, h / 2 + 0.008, 0]));
   group.add(makeBox(frameMat, [w + 0.02, 0.015, d + 0.01], [0, -(h / 2 + 0.008), 0]));

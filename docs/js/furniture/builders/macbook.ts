@@ -1,15 +1,13 @@
 import * as THREE from 'three';
 import { register } from '../registry.js';
 import { makeStd, texMetal, texPlastic, texScreenGlow } from '../../assets/index.js';
-import { makeBox, makePlane, makeRoundedBox } from '../../primitives.js';
+import { makeBox, makePlane, makeRoundedBox, rootGroup } from '../../primitives.js';
 import { loadGlb } from '../../assets/loader.js';
 import type { FurnitureConfig } from '../../seed.js';
 
 function buildMacBook(cfg: FurnitureConfig): { mesh: THREE.Group; type: string; panelId: string; label: string; room: string } {
   const [x, y, z] = cfg.position;
-  const g = new THREE.Group();
-  g.position.set(x, y, z);
-  g.rotation.y = cfg.rotation ?? 0;
+  const g = rootGroup(cfg);
 
   const aluminum = makeStd({ map: texMetal, color: 0xc0c0c8, roughness: 0.3, metalness: 0.6 });
   const dark = makeStd({ map: texPlastic, color: 0x1a1a1e, roughness: 0.7 });

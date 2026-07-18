@@ -1,14 +1,11 @@
 import * as THREE from 'three';
 import { register } from '../registry.js';
 import { makeStd } from '../../assets/index.js';
-import { makeBox } from '../../primitives.js';
+import { makeBox, rootGroup } from '../../primitives.js';
 import type { FurnitureConfig } from '../../seed.js';
 
 function buildDeskChair(cfg: FurnitureConfig): { mesh: THREE.Group } {
-  const [x, y, z] = cfg.position;
-  const g = new THREE.Group();
-  g.position.set(x, y, z);
-  g.rotation.y = cfg.rotation ?? 0;
+  const g = rootGroup(cfg);
   const frameMat = makeStd({ color: 0x3a3a45 });
   const seatMat = makeStd({ color: 0x4a3a3a });
   g.add(makeBox(frameMat, [0.06, 0.5, 0.06], [0, 0.25, 0]));

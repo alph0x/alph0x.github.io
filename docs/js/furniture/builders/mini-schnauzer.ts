@@ -1,15 +1,13 @@
 import * as THREE from 'three';
 import { register } from '../registry.js';
 import { makeStd, texFabric } from '../../assets/index.js';
-import { makeRoundedBox, makeCylinder, makeSphere, makeCone, makeBox } from '../../primitives.js';
+import { makeRoundedBox, makeCylinder, makeSphere, makeCone, makeBox, rootGroup } from '../../primitives.js';
 import { loadGlb } from '../../assets/loader.js';
 import type { FurnitureConfig } from '../../seed.js';
 
 function buildMiniSchnauzer(cfg: FurnitureConfig): { mesh: THREE.Group; label: string } {
   const [x, y, z] = cfg.position;
-  const g = new THREE.Group();
-  g.position.set(x, y, z);
-  g.rotation.y = cfg.rotation ?? 0;
+  const g = rootGroup(cfg);
   const s = 1.6;
   g.scale.set(s, s, s);
 

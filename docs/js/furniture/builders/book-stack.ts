@@ -1,14 +1,11 @@
 import * as THREE from 'three';
 import { register } from '../registry.js';
 import { makeStd } from '../../assets/index.js';
-import { makeBox } from '../../primitives.js';
+import { makeBox, rootGroup } from '../../primitives.js';
 import type { FurnitureConfig } from '../../seed.js';
 
 function buildBookStack(cfg: FurnitureConfig): { mesh: THREE.Group } {
-  const [x, y, z] = cfg.position;
-  const g = new THREE.Group();
-  g.position.set(x, y, z);
-  g.rotation.y = cfg.rotation ?? 0;
+  const g = rootGroup(cfg);
   const colors = [0x552222, 0x225533, 0x223355, 0x554422, 0x333355];
   for (let i = 0; i < (cfg.count || 3); i++) {
     const bw = 0.15 + Math.random() * 0.05;

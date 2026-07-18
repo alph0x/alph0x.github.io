@@ -80,11 +80,15 @@ export function makeLight(
 ): THREE.PointLight {
   const light = new THREE.PointLight(color, intensity, distance, 1);
   light.position.set(...pos);
-  light.castShadow = true;
-  light.shadow.mapSize.width = 256;
-  light.shadow.mapSize.height = 256;
-  light.shadow.bias = -0.001;
+  configureShadow(light);
   return light;
+}
+
+export function configureShadow(light: THREE.PointLight | THREE.SpotLight | THREE.DirectionalLight, size = 256): void {
+  light.castShadow = true;
+  light.shadow.mapSize.width = size;
+  light.shadow.mapSize.height = size;
+  light.shadow.bias = -0.001;
 }
 
 export function makeRoundedBox(
@@ -239,4 +243,12 @@ export function tiledTexture(tex: THREE.Texture, rx: number, ry: number): THREE.
   t.wrapT = THREE.RepeatWrapping;
   t.repeat.set(rx, ry);
   return t;
+}
+
+export function rootGroup(cfg: { position: number[]; rotation?: number }): THREE.Group {
+  const g = new THREE.Group();
+  const [x, y, z] = cfg.position;
+  g.position.set(x, y, z);
+  g.rotation.y = cfg.rotation ?? 0;
+  return g;
 }

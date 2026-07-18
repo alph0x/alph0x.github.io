@@ -7,16 +7,13 @@
 import * as THREE from 'three';
 import { register } from '../registry.js';
 import { makeStd, texWood, texMetal } from '../../assets/index.js';
-import { makeRoundedBox, makeBox, makeCylinder } from '../../primitives.js';
-import { buildCityscape } from '../../level/cityscape.js';
+import { makeRoundedBox, makeBox, makeCylinder, rootGroup, configureShadow } from '../../primitives.js';
+import { buildCityscape } from './cityscape.js';
 import { getInteriorOffset } from './wall-offset.js';
 import type { FurnitureConfig } from '../../seed.js';
 
 function buildWindow(cfg: FurnitureConfig): { mesh: THREE.Group; label: string } {
-  const [x, y, z] = cfg.position;
-  const wrapper = new THREE.Group();
-  wrapper.position.set(x, y, z);
-  wrapper.rotation.y = cfg.rotation ?? 0;
+  const wrapper = rootGroup(cfg);
 
   const winW = 1.8;
   const winH = 1.2;
@@ -33,7 +30,7 @@ function buildWindow(cfg: FurnitureConfig): { mesh: THREE.Group; label: string }
     roughness: 0.1,
     metalness: 0.3,
     side: THREE.DoubleSide,
-  } as unknown as Parameters<typeof makeStd>[0]);
+  });
 
   const frame = new THREE.Group();
 
@@ -63,7 +60,7 @@ function buildWindow(cfg: FurnitureConfig): { mesh: THREE.Group; label: string }
     transparent: true,
     opacity: 0.15,
     side: THREE.DoubleSide,
-  } as unknown as Parameters<typeof makeStd>[0]);
+  });
   const glowMesh = makeBox(glowMat, [winW - 0.05, winH - 0.05, 0.005], [0, 0, 0.008]);
   glowMesh.userData._windowGlow = true;
   frame.add(glowMesh);
@@ -72,10 +69,8 @@ function buildWindow(cfg: FurnitureConfig): { mesh: THREE.Group; label: string }
   const winSpot = new THREE.SpotLight(0x6688aa, 1.2, 8, Math.PI / 4, 0.6, 1);
   winSpot.position.set(0, 0.5, 0.3);
   winSpot.target.position.set(0, 0, 3);
-  winSpot.castShadow = true;
-  winSpot.shadow.mapSize.width = 256;
+  configureShadow(winSpot);
   winSpot.userData._windowSpot = true;
-  winSpot.shadow.mapSize.height = 256;
   frame.add(winSpot);
   frame.add(winSpot.target);
 

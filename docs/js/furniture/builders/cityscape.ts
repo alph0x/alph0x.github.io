@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { makeBox } from '../primitives.js';
+import { makeBox } from '../../primitives.js';
 
 /**
  * Deterministic seeded PRNG.

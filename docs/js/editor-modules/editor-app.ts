@@ -5,7 +5,8 @@
  */
 
 import * as THREE from 'three';
-import { FurnitureRegistry } from '../furniture/registry.js';
+import '../furniture/index.js';
+import { FurnitureRegistry } from '../furniture/index.js';
 import { DEFAULT_SEED } from '../core.js';
 import { serializeLayout, deserializeSeed } from '../seed.js';
 

@@ -2,14 +2,12 @@ import * as THREE from 'three';
 import { CFG, COLORS } from '../../core.js';
 import { register } from '../registry.js';
 import { makeStd, texMetal } from '../../assets/index.js';
-import { makeCylinder, makeSphere } from '../../primitives.js';
+import { makeCylinder, makeSphere, rootGroup, configureShadow } from '../../primitives.js';
 import type { FurnitureConfig } from '../../seed.js';
 
 function buildCeilingLamp(cfg: FurnitureConfig): { mesh: THREE.Group; label: string } {
   const [x, y, z] = cfg.position;
-  const g = new THREE.Group();
-  g.position.set(x, y, z);
-  g.rotation.y = cfg.rotation ?? 0;
+  const g = rootGroup(cfg);
 
   const color = cfg.color || COLORS.warm;
   const intensity = cfg.intensity || 4;
@@ -36,9 +34,7 @@ function buildCeilingLamp(cfg: FurnitureConfig): { mesh: THREE.Group; label: str
   // warm downward light
   const light = new THREE.PointLight(color, intensity, distance, 1);
   light.position.set(0, -0.38, 0);
-  light.castShadow = true;
-  light.shadow.mapSize.width = 256;
-  light.shadow.mapSize.height = 256;
+  configureShadow(light);
   g.add(light);
 
   return { mesh: g, label: 'Ceiling Lamp' };

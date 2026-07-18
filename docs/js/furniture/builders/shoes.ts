@@ -1,14 +1,11 @@
 import * as THREE from 'three';
 import { register } from '../registry.js';
 import { makeStd } from '../../assets/index.js';
-import { makeBox } from '../../primitives.js';
+import { makeBox, rootGroup } from '../../primitives.js';
 import type { FurnitureConfig } from '../../seed.js';
 
 function buildShoes(cfg: FurnitureConfig): { mesh: THREE.Group } {
-  const [x, y, z] = cfg.position;
-  const g = new THREE.Group();
-  g.position.set(x, y, z);
-  g.rotation.y = cfg.rotation ?? 0;
+  const g = rootGroup(cfg);
   const shoeMat = makeStd({ color: 0x2a2a30 });
   const soleMat = makeStd({ color: 0xdddddd });
   for (const [sx, sz] of [[-0.08, 0], [0.08, 0.05]]) {

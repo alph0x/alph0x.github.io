@@ -2,14 +2,11 @@ import * as THREE from 'three';
 import { COLORS } from '../../core.js';
 import { register } from '../registry.js';
 import { makeStd, texMetal, texPlastic, texScreenGlow } from '../../assets/index.js';
-import { makeBox, makeCylinder, makeLight, makePlane, makeRoundedBox } from '../../primitives.js';
+import { makeBox, makeCylinder, makeLight, makePlane, makeRoundedBox, rootGroup } from '../../primitives.js';
 import type { FurnitureConfig } from '../../seed.js';
 
 function buildTV(cfg: FurnitureConfig): { mesh: THREE.Group; type: string; panelId?: string; label: string; room: string } {
-  const [x, y, z] = cfg.position;
-  const g = new THREE.Group();
-  g.position.set(x, y, z);
-  g.rotation.y = cfg.rotation ?? 0;
+  const g = rootGroup(cfg);
 
   const frameMat = makeStd({ map: texPlastic, color: 0x111114, roughness: 0.6, metalness: 0.1 });
   const bezelMat = makeStd({ color: 0x0a0a0e, roughness: 0.7 });
