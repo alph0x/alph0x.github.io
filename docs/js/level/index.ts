@@ -131,8 +131,7 @@ export async function buildLevel(scene: THREE.Scene, worldState: WorldState): Pr
   const preset = setupLighting(scene);
 
   // Async load external models for Lulú and MacBook (game path only).
-  const isTest = typeof navigator !== 'undefined' && (navigator).webdriver === true;
-  const useExternal = !isTest;
+  const useExternal = shouldLoadExternalModels();
 
   let externalResults: Record<string, BuilderResult> | null = null;
   if (useExternal) {
