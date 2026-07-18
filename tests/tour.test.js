@@ -59,7 +59,7 @@ describe('Portfolio tour', () => {
     const startPos = camera.position.clone();
     const game = makeGame(camera);
     game.startTour();
-    game.updateTour(0.5);
+    game.tour.update(0.5);
     expect(camera.position.distanceTo(startPos)).toBeGreaterThan(0);
     expect(camera.position.distanceTo(game.tour.stops[0].position)).toBeLessThan(startPos.distanceTo(game.tour.stops[0].position));
   });
@@ -69,7 +69,7 @@ describe('Portfolio tour', () => {
     game.startTour();
     // Step through the move and dwell cycle for the first stop
     for (let i = 0; i < 80; i += 1) {
-      game.updateTour(0.05);
+      game.tour.update(0.05);
     }
     expect(document.getElementById('panel-profile').classList.contains('active')).toBe(true);
     expect(game.worldState.ui.isPanelOpen).toBe(true);
@@ -96,7 +96,7 @@ describe('Portfolio tour', () => {
     game.startTour();
     // Fast-forward through all stops
     for (let i = 0; i < 2000; i += 1) {
-      game.updateTour(0.05);
+      game.tour.update(0.05);
     }
     expect(game.tour.active).toBe(false);
     expect(game.tour.index).toBe(0);

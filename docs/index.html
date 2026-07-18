@@ -817,6 +817,7 @@
   </script>
   <script type="module">
     import { askAlphGPT, processTerminalCommand, isTerminalMode } from './js/systems/alphgpt.js';
+    import { getAlphGPTContext } from './js/systems/alphgpt-context.js';
 
 
     const messagesEl = document.getElementById('alphgpt-messages');
@@ -855,7 +856,7 @@
     function handleSend() {
       const text = inputEl.value.trim();
       if (!text) return;
-      const context = window.__alphgptContext || undefined;
+      const context = getAlphGPTContext();
 
       if (isTerminalMode()) {
         const result = processTerminalCommand(text, lastIntent, context);
