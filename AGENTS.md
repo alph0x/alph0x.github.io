@@ -1,6 +1,6 @@
 # Agent Operating Procedures
 
-> **Methodology: Tackle 3.0.** One-page onboarding for this repo. Plan-local rules live in `docs/plans/codebase-quality-pass/` (active) and `docs/plans/portfolio-3d-hardening/` (closed).
+> **Methodology: Tackle 3.0.** One-page onboarding for this repo. Plans live under `docs/plans/`, which is gitignored on purpose — they are local working state. **Tracked files (commits, docs, this file) MUST NOT reference plan paths, point ids, or plan-local decisions.**
 
 ## Project
 
@@ -34,18 +34,6 @@ docs/
     ├── systems/            # input, interaction, loading, audio, animation
     ├── level/              # Room geometry, window, cityscape, lighting
     └── furniture/          # Registry + builders (one file per item)
-docs/plans/portfolio-3d-hardening/  # Tackle 3.0 plan
-├── README.md               # Index and reading order
-├── plan.md                 # Objective, points, acceptance criteria
-├── board.md                # Canonical status board
-├── points/                 # One self-contained briefing per point
-├── log.md                  # Append-only session log
-├── decisions.md            # Closed decisions (D-01 …)
-├── questions.md            # Open questions
-├── reference.md            # Current code state with file:line
-├── design-contract.md      # Authoritative API/state/error surface
-├── execution-strategy.md   # Waves + quality gate
-└── AGENTS.md               # Plan-local workspace contract
 tests/                      # Vitest + happy-dom
 ```
 
@@ -57,10 +45,6 @@ tests/                      # Vitest + happy-dom
 - **Tests**: write the failing test first; never mark done without `npm test -- --run`.
 - **No uncommitted drift**: run preflight; document or stash existing changes.
 - **Decision log**: every non-obvious choice gets a `Decision: ... / Principle: ... / Trade-off: ...` entry.
-
-## Active plan
-
-See `docs/plans/codebase-quality-pass/` for the current Tackle initiative. Start with `README.md`, then `plan.md`, then `board.md`. The prior initiative `docs/plans/portfolio-3d-hardening/` is closed (26/26, verified 2026-07-18).
 
 ## Autonomy
 
