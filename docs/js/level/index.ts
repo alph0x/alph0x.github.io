@@ -125,12 +125,18 @@ function buildPolygonRoom(scene: THREE.Scene, worldState: WorldState): { edges: 
     metalness: 0,
   });
   const trimMat = new THREE.MeshStandardMaterial({ color: 0x292524, flatShading: true, roughness: 0.9, metalness: 0 });
+  // ponytail: window-only openings; door stays walled so door collision/tests are untouched.
+  const openings = (ROOM_LAYOUT.furniture || [])
+    .filter((f) => f.type === 'window')
+    .map((f) => ({ x: f.position[0], z: f.position[2], width: 1.9, height: 1.3, bottom: f.position[1] - 0.65 }));
+
   const edges = buildWallsFromOutline({
     outline,
     wallH,
     wallT,
     material: wallMat,
     trimMaterial: trimMat,
+    openings,
     collisionHeight: 2.0,
     collisionWalls: worldState.room.walls,
   });

@@ -65,7 +65,7 @@ export const COLORS = Object.freeze({
 
 export const DEFAULT_SEED = 'eyJ2IjoyLCJvdXRsaW5lIjpbWy0yLjI1LC0xLjc1XSxbMi4yNSwtMS43NV0sWzIuMjUsMS43NV0sWy0yLjI1LDEuNzVdXSwiZiI6W3sidCI6ImJlZCIsInAiOlstMS4xLDAsLTAuOV0sInIiOjYuMjgzfSx7InQiOiJuaWdodHN0YW5kIiwicCI6Wy0xLjksMCwwLjFdLCJyIjoxLjU3MX0seyJ0IjoiZGVzayIsInAiOlsxLjIsMCwtMS4xNV0sInIiOjYuMjg0fSx7InQiOiJtYWNCb29rIiwicCI6WzEuNiwwLjgyLC0xLjJdLCJyIjo1Ljc2fSx7InQiOiJtaW5pU2NobmF1emVyIiwicCI6Wy0wLjg1LDAuODksLTAuODVdLCJyIjo1LjM0fSx7InQiOiJjZWlsaW5nTGFtcCIsInAiOlswLDIuNywwXSwiY29sIjoxNjExOTI4NCwiaSI6MiwiZHN0Ijo4fSx7InQiOiJ3aW5kb3ciLCJwIjpbMCwxLjUsLTEuODVdfSx7InQiOiJkb29yIiwicCI6WzAsMCwxLjldfV0sInBzIjpbMC41LDAuNV0sImxzIjpbLTAuOSwtMC42NV0sIm1hdCI6eyJmbG9vciI6IiMxYzE5MTciLCJ3YWxsIjoiIzQ0NDAzYyIsImNlaWxpbmciOiIjMWMxOTE3In0sImRlYyI6W119';
 
-export const ROOM_LAYOUT = deserializeSeed(DEFAULT_SEED);
+export const ROOM_LAYOUT = { ...deserializeSeed(DEFAULT_SEED) };
 
 // ── Vector Math (plain objects, no Three.js) ────────────────────
 

@@ -7,7 +7,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { serializeLayout, deserializeSeed } from '../docs/js/seed.ts';
+import { serializeLayout, deserializeSeed, applySeedFromUrl } from '../docs/js/seed.ts';
+import { DEFAULT_SEED } from '../docs/js/core.ts';
 
 // ── serializeLayout ─────────────────────────────────────────────
 
@@ -356,5 +357,24 @@ describe('seed boundary contracts', () => {
     const data = deserializeSeed(out);
     const tv = data.furniture.find((f) => f.type === 'tv');
     expect(tv.rotation ?? 0).toBe(0);
+  });
+});
+
+describe('applySeedFromUrl', () => {
+  it('applies a URL seed onto the target layout (regression: frozen SeedData broke this)', () => {
+    const target = { ...deserializeSeed(DEFAULT_SEED) };
+    const custom = serializeLayout({
+      outline: [[-3, -3], [3, -3], [3, 3], [-3, 3]],
+      placed: [{ type: 'rug', config: { position: [0, 0, 0] } }],
+      playerSpawn: { x: 1, z: 1 },
+      luluSpawn: { x: 2, z: 2 },
+      mat: null,
+    });
+    const ok = applySeedFromUrl(`?seed=${encodeURIComponent(custom)}`, target);
+    expect(ok).toBe(true);
+    expect(target.width).toBe(6);
+    expect(target.furniture.some((f) => f.type === 'rug')).toBe(true);
+    expect(target.playerSpawn).toEqual([1, 1]);
+    expect(target.luluSpawn).toEqual([2, 2]);
   });
 });
