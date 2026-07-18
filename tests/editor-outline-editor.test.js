@@ -8,7 +8,8 @@ import * as THREE from 'three';
 import { OutlineEditor } from '../docs/js/editor-modules/outline-editor.js';
 import { EditorState } from '../docs/js/editor-modules/state.js';
 import { RoomBuilder } from '../docs/js/editor-modules/room-builder.js';
-import { isSelfIntersecting, getClosestEdgePoint } from '../docs/js/editor-utils.js';
+import { isSelfIntersecting } from '../docs/js/editor-utils.js';
+import { getClosestEdgePoint } from '../docs/js/primitives.js';
 
 describe('OutlineEditor', () => {
   let scene, roomGroup, roomBuilder, state, outlineGroup, editor;

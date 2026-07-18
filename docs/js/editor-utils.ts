@@ -98,13 +98,6 @@ function segmentsIntersect(
 
 
 /**
- * Extract architectural openings (doors/windows) from placed furniture list.
- * Dimensions are read from the cached _openingDims config when available;
- * otherwise computed dynamically from the mesh bounding box.
- * Pure function — no side effects.
- */
-
-/**
  * Count how many edges of an outline are axis-parallel (horizontal or vertical).
  * Pure function — no side effects.
  */
