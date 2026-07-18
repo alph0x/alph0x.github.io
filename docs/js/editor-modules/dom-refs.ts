@@ -55,6 +55,14 @@ export type DomRefId = RequiredDomRefId | OptionalDomRefId;
 
 export type EditorDomRefs = Record<RequiredDomRefId, HTMLElement> & Record<OptionalDomRefId, HTMLElement | null>;
 
+/**
+ * Lazy, non-throwing lookup for editor chrome by id.
+ * Unlike getEditorDomRefs(), safe when the element may be absent (e.g. unit tests).
+ */
+export function getEditorEl<T extends HTMLElement = HTMLElement>(id: string): T | null {
+  return document.getElementById(id) as T | null;
+}
+
 export function getEditorDomRefs(): EditorDomRefs {
   const refs = {} as EditorDomRefs;
 

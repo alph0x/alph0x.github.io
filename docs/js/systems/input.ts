@@ -4,6 +4,7 @@
 
 import type { WorldState } from '../domain/world-state.js';
 import type { ControlsLike } from '../core.js';
+import { isLegendBlocking, isLegendOpen, isTypingTarget } from './input-utils.js';
 
 interface GameLike {
   worldState: WorldState;
@@ -25,17 +26,6 @@ export class InputSystem {
     this.game = game;
     this.input = game.worldState.input;
     this.controls = game.controls;
-  }
-
-  private _isTypingTarget(e: KeyboardEvent): boolean {
-    const target = e.target as HTMLElement | null;
-    if (!target) return false;
-    return (
-      target.tagName === 'INPUT' ||
-      target.tagName === 'TEXTAREA' ||
-      target.tagName === 'SELECT' ||
-      target.isContentEditable
-    );
   }
 
   private _toggleLegend(): void {
@@ -63,9 +53,8 @@ export class InputSystem {
 
   bind(): void {
     this._onKeyDown = (e) => {
-      if (this._isTypingTarget(e)) return;
-      const legendActive = document.getElementById('legend')?.classList.contains('active');
-      if (legendActive && e.code !== 'Escape' && e.code !== 'KeyH' && e.code !== 'Slash') return;
+      if (isTypingTarget(e)) return;
+      if (isLegendBlocking(e)) return;
       switch (e.code) {
         case 'KeyW':
         case 'ArrowUp':
@@ -91,7 +80,7 @@ export class InputSystem {
           this._toggleLegend();
           break;
         case 'Escape':
-          if (document.getElementById('legend')?.classList.contains('active')) {
+          if (isLegendOpen()) {
             this._closeLegend();
           } else if (this.game.stopTour && this.game.stopTour()) {
             // handled active tour

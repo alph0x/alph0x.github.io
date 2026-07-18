@@ -4,6 +4,7 @@
  */
 
 import * as THREE from 'three';
+import { closeLegend, isLegendBlocking, isTypingTarget, pointerNDC, toggleLegend } from '../systems/input-utils.js';
 import { EditorState } from './state.js';
 import type { FurnitureManager } from './furniture-manager.js';
 import type { OutlineEditor } from './outline-editor.js';
@@ -260,14 +261,13 @@ export class InteractionManager {
       return;
     }
     if (e.code === 'Escape' || e.key === 'Escape') {
-      this._closeLegend();
+      closeLegend();
       return;
     }
-    if (this._isTypingTarget(e)) return;
-    const legend = document.getElementById('legend');
-    if (legend?.classList.contains('active') && e.code !== 'Escape' && e.code !== 'KeyH' && e.code !== 'Slash') return;
+    if (isTypingTarget(e)) return;
+    if (isLegendBlocking(e)) return;
     if (e.code === 'KeyH' || e.code === 'Slash') {
-      this._toggleLegend();
+      toggleLegend();
       return;
     }
     if (e.key === 'Delete' || e.key === 'Backspace') {
@@ -279,28 +279,6 @@ export class InteractionManager {
     } else if (e.key === 'r' || e.key === 'R') {
       this._furnitureManager.rotateSelected(45);
     }
-  }
-
-  private _isTypingTarget(e: KeyboardEvent): boolean {
-    const target = e.target as HTMLElement | null;
-    return (
-      target != null &&
-      (target.tagName === 'INPUT' ||
-        target.tagName === 'TEXTAREA' ||
-        target.tagName === 'SELECT' ||
-        target.isContentEditable)
-    );
-  }
-
-  private _toggleLegend(): void {
-    const legend = document.getElementById('legend');
-    if (!legend) return;
-    legend.classList.toggle('active');
-  }
-
-  private _closeLegend(): void {
-    const legend = document.getElementById('legend');
-    if (legend) legend.classList.remove('active');
   }
 
   // ── Private controls helpers ────────────────────────────────────
@@ -321,23 +299,15 @@ export class InteractionManager {
 
   // ── Private raycasting ──────────────────────────────────────────
 
-  private _getPointerNDC(e: PointerEvent): THREE.Vector2 {
-    const rect = this._renderer.domElement.getBoundingClientRect();
-    return new THREE.Vector2(
-      ((e.clientX - rect.left) / rect.width) * 2 - 1,
-      -((e.clientY - rect.top) / rect.height) * 2 + 1
-    );
-  }
-
   private _intersectFloor(e: PointerEvent): THREE.Vector3 | null {
-    const ndc = this._getPointerNDC(e);
+    const ndc = pointerNDC(e, this._renderer.domElement);
     this._state.raycaster.setFromCamera(ndc, this._getCamera());
     const hits = this._state.raycaster.intersectObject(this._floorPlane);
     return hits.length > 0 ? hits[0].point : null;
   }
 
   private _intersectSpawn(e: PointerEvent): string | null {
-    const ndc = this._getPointerNDC(e);
+    const ndc = pointerNDC(e, this._renderer.domElement);
     this._state.raycaster.setFromCamera(ndc, this._getCamera());
     const spawnManager = this._spawnManager as unknown as { _group: THREE.Group };
     const group = spawnManager._group;
@@ -359,7 +329,7 @@ export class InteractionManager {
   }
 
   private _tryStartFurnitureDrag(e: PointerEvent): boolean {
-    const ndc = this._getPointerNDC(e);
+    const ndc = pointerNDC(e, this._renderer.domElement);
     this._state.raycaster.setFromCamera(ndc, this._getCamera());
     const placedHit = this._furnitureManager.hitTest(
       this._state.raycaster,

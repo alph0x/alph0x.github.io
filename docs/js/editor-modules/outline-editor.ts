@@ -4,14 +4,13 @@
  */
 
 import * as THREE from 'three';
-import { getCurrentOpenings } from '../primitives.js';
+import { getClosestEdgePoint, getCurrentOpenings } from '../primitives.js';
+import { isSelfIntersecting } from '../editor-utils.js';
+import { pointerNDC } from '../systems/input-utils.js';
 import { EditorState, type MatConfig } from './state.js';
-import type { EditorColors, EditorGeometry } from './editor-config.js';
+import type { EDITOR_CONFIG } from './editor-config.js';
 
-interface OutlineEditorConfig {
-  colors: EditorColors;
-  geometry: EditorGeometry;
-}
+type OutlineEditorConfig = Pick<typeof EDITOR_CONFIG, 'colors' | 'geometry'>;
 
 interface RoomBuilderLike {
   rebuild(outline: number[][], materials: MatConfig, openings?: unknown[]): void;
@@ -39,11 +38,6 @@ export class OutlineEditor {
   private _config: OutlineEditorConfig;
   private _getCamera: () => THREE.Camera;
   private _snap: (v: number) => number;
-  private _isSelfIntersecting: (outline: [number, number][]) => boolean;
-  private _getClosestEdgePoint: (
-    point: THREE.Vector3,
-    outline: [number, number][]
-  ) => { index: number; point: [number, number] } | null;
   private _onRebuild?: () => void;
 
   /**
@@ -53,8 +47,6 @@ export class OutlineEditor {
    * @param config — editor config (colors + geometry)
    * @param camera — camera or accessor returning camera
    * @param snap — snap function
-   * @param isSelfIntersecting — polygon validation
-   * @param getClosestEdgePoint — edge projection utility
    */
   constructor(
     outlineGroup: THREE.Group,
@@ -62,12 +54,7 @@ export class OutlineEditor {
     roomBuilder: RoomBuilderLike,
     config: OutlineEditorConfig,
     camera: THREE.Camera | (() => THREE.Camera),
-    snap: (v: number) => number,
-    isSelfIntersecting: (outline: [number, number][]) => boolean,
-    getClosestEdgePoint: (
-      point: THREE.Vector3,
-      outline: [number, number][]
-    ) => { index: number; point: [number, number] } | null
+    snap: (v: number) => number
   ) {
     this._group = outlineGroup;
     this._state = state;
@@ -75,11 +62,6 @@ export class OutlineEditor {
     this._config = config;
     this._getCamera = typeof camera === 'function' ? camera : () => camera;
     this._snap = snap;
-    this._isSelfIntersecting = isSelfIntersecting as (outline: number[][]) => boolean;
-    this._getClosestEdgePoint = getClosestEdgePoint as (
-      point: THREE.Vector3,
-      outline: number[][]
-    ) => { index: number; point: [number, number] } | null;
   }
 
   /** Rebuild all visual handles from current outline. */
@@ -116,7 +98,7 @@ export class OutlineEditor {
     }
     const pt = intersectFloorFn(e);
     if (pt) {
-      const edge = this._getClosestEdgePoint(pt, this._state.outline as [number, number][]);
+      const edge = getClosestEdgePoint(pt, this._state.outline as [number, number][]);
       if (edge) {
         this._addVertex(edge.index, [this._snap(edge.point[0]), this._snap(edge.point[1])]);
         return true;
@@ -217,7 +199,7 @@ export class OutlineEditor {
   }
 
   private _intersectHandle(e: PointerEvent): THREE.Object3D | null {
-    const ndc = this._getNDC(e);
+    const ndc = pointerNDC(e, e.target as HTMLElement);
     this._state.raycaster.setFromCamera(ndc, this._getCamera());
     const hits = this._state.raycaster.intersectObjects(this._group.children, true);
     for (const hit of hits) {
@@ -225,14 +207,6 @@ export class OutlineEditor {
       if (data.isEdge || data.isVertex) return hit.object;
     }
     return null;
-  }
-
-  private _getNDC(e: PointerEvent): THREE.Vector2 {
-    const rect = (e.target as HTMLElement).getBoundingClientRect();
-    return new THREE.Vector2(
-      ((e.clientX - rect.left) / rect.width) * 2 - 1,
-      -((e.clientY - rect.top) / rect.height) * 2 + 1
-    );
   }
 
   private _addVertex(edgeIndex: number, point: number[]): void {
@@ -244,7 +218,7 @@ export class OutlineEditor {
   private _updateVertex(index: number, x: number, z: number): void {
     const newOutline = [...this._state.outline];
     newOutline[index] = [x, z];
-    if (this._isSelfIntersecting(newOutline as [number, number][])) return;
+    if (isSelfIntersecting(newOutline as [number, number][])) return;
     this._state.outline = newOutline;
     this._roomBuilder.rebuild(this._state.outline, this._state.mat, getCurrentOpenings(this._state.placed as unknown as CurrentOpeningsPlaced));
     this.rebuild();
@@ -365,7 +339,7 @@ export class OutlineEditor {
     const newOutline = [...this._state.outline];
     newOutline[i] = [this._snap(v0[0] + dx), this._snap(v0[1] + dz)];
     newOutline[j] = [this._snap(v1[0] + dx), this._snap(v1[1] + dz)];
-    if (this._isSelfIntersecting(newOutline as [number, number][])) return;
+    if (isSelfIntersecting(newOutline as [number, number][])) return;
     this._state.outline = newOutline;
     this._updateVisualHandles();
     this._highlightEdge(i);
@@ -377,17 +351,9 @@ export class OutlineEditor {
     const idx = s.dragVertexIndex;
     const newOutline = [...this._state.outline];
     newOutline[idx] = [this._snap(pt.x), this._snap(pt.z)];
-    if (this._isSelfIntersecting(newOutline as [number, number][])) return;
+    if (isSelfIntersecting(newOutline as [number, number][])) return;
     this._state.outline = newOutline;
     this._updateVisualHandles();
     this._highlightVertex(idx);
-  }
-
-  private _intersectFloor(e: PointerEvent): null {
-    const ndc = this._getNDC(e);
-    this._state.raycaster.setFromCamera(ndc, this._getCamera());
-    // Floor plane is not accessible here; caller should provide it.
-    // This is a fallback that returns null.
-    return null;
   }
 }

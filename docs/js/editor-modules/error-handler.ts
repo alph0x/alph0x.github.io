@@ -3,6 +3,8 @@
  * Listens to window errors and unhandled rejections, rendering them into a DOM element.
  */
 
+import { getEditorEl } from './dom-refs.js';
+
 export class EditorErrorHandler {
   private _displayId: string;
 
@@ -25,7 +27,7 @@ export class EditorErrorHandler {
   }
 
   private _show(msg: string): void {
-    const el = document.getElementById(this._displayId);
+    const el = getEditorEl(this._displayId);
     if (!el) return;
     el.style.display = 'block';
     el.textContent = String(msg);

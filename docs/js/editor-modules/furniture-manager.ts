@@ -11,6 +11,7 @@ import { extractMeshFromResult, calculateMeshOpeningDims } from '../primitives.j
 import type { FurnitureConfig } from '../seed.js';
 import { EditorState, type PlacedItem } from './state.js';
 import { UndoManager } from './undo-manager.js';
+import { getEditorEl } from './dom-refs.js';
 
 interface MeshUserData {
   _outline?: THREE.LineSegments;
@@ -74,10 +75,7 @@ export class FurnitureManager {
     this._attachOutline(mesh, id, cfg.type);
 
     // Cache bounding-box volume for smarter raycast selection
-    const bb = new THREE.Box3().setFromObject(mesh);
-    const bbSize = new THREE.Vector3();
-    bb.getSize(bbSize);
-    this._userData(mesh)._hitSize = bbSize.x * bbSize.y * bbSize.z;
+    this._cacheHitSize(mesh);
 
     this._scene.add(mesh);
     this._placedMeshes.set(id, mesh);
@@ -129,24 +127,11 @@ export class FurnitureManager {
   /** Load items from a deserialized seed layout. */
   loadFromSeed(layout: { furniture?: FurnitureConfig[] }): void {
     for (const item of layout.furniture || []) {
-      const cfg: FurnitureConfig = {
-        type: item.type,
-        position: [...item.position],
-        rotation: item.rotation || 0,
-      };
-      if (item.text != null) cfg.text = item.text;
-      if (item.color != null) cfg.color = item.color;
-      if (item.intensity != null) {
-        cfg.intensity = item.intensity;
-        cfg.distance = item.distance;
-      }
-      if (item.name != null) cfg.name = item.name;
-      if (item.panelId != null) cfg.panelId = item.panelId;
-      if (item.coat != null) cfg.coat = item.coat;
-      if (item.pose != null) cfg.pose = item.pose;
-      if (item.noCollision != null) cfg.noCollision = item.noCollision;
-      if (item.count != null) cfg.count = item.count;
-      this.placeConfig(cfg, true, true);
+      this.placeConfig(
+        { ...item, position: [...item.position], rotation: item.rotation || 0 },
+        true,
+        true
+      );
     }
     this.select(null);
     this._updatePlacedList();
@@ -168,7 +153,7 @@ export class FurnitureManager {
       this._updateSelectionInfo();
       this._syncSelectionControls();
     } else {
-      const el = document.getElementById('selectionInfo');
+      const el = getEditorEl('selectionInfo');
       if (el) el.classList.remove('visible');
     }
   }
@@ -391,10 +376,7 @@ export class FurnitureManager {
             mesh.position.set(x, y, z);
             mesh.rotation.y = cfg.rotation ?? 0;
             this._attachOutline(mesh, action.id, cfg.type);
-            const bb = new THREE.Box3().setFromObject(mesh);
-            const bbSize = new THREE.Vector3();
-            bb.getSize(bbSize);
-            this._userData(mesh)._hitSize = bbSize.x * bbSize.y * bbSize.z;
+            this._cacheHitSize(mesh);
             this._scene.add(mesh);
             this._placedMeshes.set(action.id, mesh);
             this._state.placed.push({
@@ -473,14 +455,21 @@ export class FurnitureManager {
   }
 
   private _syncUndoRedoButtons(): void {
-    const undoBtn = document.getElementById('btnUndo') as HTMLButtonElement | null;
-    const redoBtn = document.getElementById('btnRedo') as HTMLButtonElement | null;
+    const undoBtn = getEditorEl<HTMLButtonElement>('btnUndo');
+    const redoBtn = getEditorEl<HTMLButtonElement>('btnRedo');
     if (undoBtn) undoBtn.disabled = !this.canUndo;
     if (redoBtn) redoBtn.disabled = !this.canRedo;
   }
 
   private _userData(mesh: THREE.Object3D): MeshUserData {
     return mesh.userData as MeshUserData;
+  }
+
+  private _cacheHitSize(mesh: THREE.Object3D): void {
+    const bb = new THREE.Box3().setFromObject(mesh);
+    const bbSize = new THREE.Vector3();
+    bb.getSize(bbSize);
+    this._userData(mesh)._hitSize = bbSize.x * bbSize.y * bbSize.z;
   }
 
   private _attachOutline(mesh: THREE.Object3D, editorId: number, type: string): void {
@@ -514,7 +503,7 @@ export class FurnitureManager {
   }
 
   private _updateSelectionInfo(): void {
-    const info = document.getElementById('selectionInfo');
+    const info = getEditorEl('selectionInfo');
     if (!info) return;
     if (this._state.selectedId === null) {
       info.classList.remove('visible');
@@ -538,11 +527,11 @@ export class FurnitureManager {
   private _syncSelectionControls(): void {
     const mesh =
       this._state.selectedId !== null ? this._placedMeshes.get(this._state.selectedId) : null;
-    const xInput = document.getElementById('selX') as HTMLInputElement | null;
-    const zInput = document.getElementById('selZ') as HTMLInputElement | null;
-    const yNum = document.getElementById('selY') as HTMLInputElement | null;
-    const yRange = document.getElementById('selYRange') as HTMLInputElement | null;
-    const rotInput = document.getElementById('selRot') as HTMLInputElement | null;
+    const xInput = getEditorEl<HTMLInputElement>('selX');
+    const zInput = getEditorEl<HTMLInputElement>('selZ');
+    const yNum = getEditorEl<HTMLInputElement>('selY');
+    const yRange = getEditorEl<HTMLInputElement>('selYRange');
+    const rotInput = getEditorEl<HTMLInputElement>('selRot');
     if (xInput) xInput.value = mesh ? mesh.position.x.toFixed(2) : '0';
     if (zInput) zInput.value = mesh ? mesh.position.z.toFixed(2) : '0';
     const yVal = mesh ? mesh.position.y.toFixed(2) : '0';
@@ -550,7 +539,7 @@ export class FurnitureManager {
     if (yRange) yRange.value = yVal;
     const rotDeg = mesh ? ((mesh.rotation.y * 180) / Math.PI).toFixed(0) : '0';
     if (rotInput) rotInput.value = rotDeg;
-    const nameInput = document.getElementById('selName') as HTMLInputElement | null;
+    const nameInput = getEditorEl<HTMLInputElement>('selName');
     const item =
       this._state.selectedId !== null
         ? this._state.placed.find((p) => p.id === this._state.selectedId)
@@ -559,7 +548,7 @@ export class FurnitureManager {
   }
 
   private _updatePlacedList(): void {
-    const list = document.getElementById('placedList');
+    const list = getEditorEl('placedList');
     if (!list) return;
     if (this._state.placed.length === 0) {
       list.innerHTML = '<em>None</em>';

@@ -1,52 +1,12 @@
 /**
  * @fileoverview Default configuration for the Room Layout Editor.
- * Isolated so the orchestrator can receive it via dependency injection.
  */
 
 import { CFG, DEFAULT_WALL_T } from '../core.js';
 
 import * as THREE from 'three';
 
-export interface PreviewConfig {
-  size: number;
-  targetMeshSize: number;
-  rotationSpeed: number;
-  cameraPos: THREE.Vector3;
-  lookAt: THREE.Vector3;
-}
-
-export interface EditorColors {
-  vertex: number;
-  vertexSelected: number;
-  edgeHandle: number;
-  edgeHandleSelected: number;
-  edgeLine: number;
-  outlineOpacity: number;
-  playerSpawn: number;
-  luluSpawn: number;
-}
-
-export interface EditorGeometry {
-  vertexRadius: number;
-  edgeHandleSize: number;
-  spawnPlayerRadius: number;
-  spawnPlayerHeight: number;
-  spawnLuluRadius: number;
-  spawnLuluHeight: number;
-}
-
-export interface EditorConfig {
-  snap: number;
-  wallH: number;
-  wallT: number;
-  viewSize: number;
-  cameraY: number;
-  preview: PreviewConfig;
-  colors: EditorColors;
-  geometry: EditorGeometry;
-}
-
-export const EDITOR_CONFIG: EditorConfig = {
+export const EDITOR_CONFIG = {
   snap: 0.05,
   wallH: CFG.wallH,
   wallT: DEFAULT_WALL_T,

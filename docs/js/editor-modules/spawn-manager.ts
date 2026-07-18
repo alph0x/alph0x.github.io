@@ -38,29 +38,18 @@ export class SpawnManager {
     this._group.add(this._createLuluMesh());
   }
 
-  /** Set spawn position and rebuild visuals. */
-  setSpawn(type: SpawnType, x: number, z: number): void {
-    if (type === 'player') {
-      this._state.playerSpawn.x = x;
-      this._state.playerSpawn.z = z;
-    } else if (type === 'lulu') {
-      this._state.luluSpawn.x = x;
-      this._state.luluSpawn.z = z;
-    }
+  /** Set spawn position and rebuild visuals. Pass isDrag for drag moves (keeps activeTool). */
+  setSpawn(type: SpawnType, x: number, z: number, isDrag = false): void {
+    const spawn = type === 'player' ? this._state.playerSpawn : this._state.luluSpawn;
+    spawn.x = x;
+    spawn.z = z;
     this.rebuild();
-    this._state.activeTool = null;
+    if (!isDrag) this._state.activeTool = null;
   }
 
   /** Update spawn position during drag (no activeTool change). */
   moveDrag(type: SpawnType, x: number, z: number): void {
-    if (type === 'player') {
-      this._state.playerSpawn.x = x;
-      this._state.playerSpawn.z = z;
-    } else if (type === 'lulu') {
-      this._state.luluSpawn.x = x;
-      this._state.luluSpawn.z = z;
-    }
-    this.rebuild();
+    this.setSpawn(type, x, z, true);
   }
 
   // ── Private mesh builders ───────────────────────────────────────

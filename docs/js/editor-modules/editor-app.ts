@@ -11,12 +11,11 @@ import { serializeLayout, deserializeSeed } from '../seed.js';
 
 import {
   snap as editorSnap,
-  isSelfIntersecting,
   calculateRoomDimensions,
   countAxisParallel,
   formatExportOutput,
 } from '../editor-utils.js';
-import { getClosestEdgePoint, getCurrentOpenings } from '../primitives.js';
+import { getCurrentOpenings } from '../primitives.js';
 import { EditorState, type SeedLayout } from './state.js';
 import { RoomBuilder } from './room-builder.js';
 import { FurnitureManager } from './furniture-manager.js';
@@ -31,7 +30,11 @@ import { EditorUIManager } from './ui-manager.js';
 import { EditorErrorHandler } from './error-handler.js';
 import { getEditorDomRefs } from './dom-refs.js';
 import type { SeedData, SerializeLayoutInput } from '../seed.js';
-import type { EditorColors, EditorGeometry, PreviewConfig } from './editor-config.js';
+import type { PreviewConfig } from './preview-manager.js';
+import type { EDITOR_CONFIG } from './editor-config.js';
+
+type EditorColors = (typeof EDITOR_CONFIG)['colors'];
+type EditorGeometry = (typeof EDITOR_CONFIG)['geometry'];
 
 export interface EditorAppConfig {
   snap: number;
@@ -203,9 +206,7 @@ export class EditorApp {
       this.roomBuilder,
       this.config,
       () => this.cameraSystem.camera as THREE.Camera,
-      editorSnap,
-      isSelfIntersecting,
-      getClosestEdgePoint
+      editorSnap
     );
 
     this.previewManager = new PreviewManager(this.config.preview, this._domRefs['preview-wrap']);
@@ -372,25 +373,22 @@ export class EditorApp {
   }
 
   exportLayout(): void {
-    const seed = serializeLayout({
+    const output = this._domRefs.exportOutput as HTMLInputElement | HTMLTextAreaElement;
+    output.value = formatExportOutput(this._serializeCurrent());
+  }
+
+  private _serializeCurrent(): string {
+    return serializeLayout({
       outline: this.state.outline,
       placed: this.state.placed,
       playerSpawn: this.state.playerSpawn,
       luluSpawn: this.state.luluSpawn,
       mat: this.state.mat,
     } as SerializeLayoutInput);
-    const output = this._domRefs.exportOutput as HTMLInputElement | HTMLTextAreaElement;
-    output.value = formatExportOutput(seed);
   }
 
   private _copyShareableLink(): void {
-    const seed = serializeLayout({
-      outline: this.state.outline,
-      placed: this.state.placed,
-      playerSpawn: this.state.playerSpawn,
-      luluSpawn: this.state.luluSpawn,
-      mat: this.state.mat,
-    } as SerializeLayoutInput);
+    const seed = this._serializeCurrent();
     const url = `${window.location.origin}${window.location.pathname}?seed=${encodeURIComponent(seed)}`;
     navigator.clipboard.writeText(url).catch(() => {
       // Ignore clipboard failures.
@@ -400,13 +398,7 @@ export class EditorApp {
   }
 
   private _saveSlot(slot: string | number): void {
-    const seed = serializeLayout({
-      outline: this.state.outline,
-      placed: this.state.placed,
-      playerSpawn: this.state.playerSpawn,
-      luluSpawn: this.state.luluSpawn,
-      mat: this.state.mat,
-    } as SerializeLayoutInput);
+    const seed = this._serializeCurrent();
     localStorage.setItem(`editor-slot-${slot}`, seed);
     const output = this._domRefs.exportOutput as HTMLInputElement | HTMLTextAreaElement;
     output.value = `Saved to slot ${slot}`;
