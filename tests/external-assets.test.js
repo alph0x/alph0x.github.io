@@ -19,8 +19,8 @@ describe('external asset loaders', () => {
     expect(mock.children[0]).toBeInstanceOf(THREE.Mesh);
   });
 
-  it('loadMiniSchnauzer rejects with the specific loader error when fetch fails', async () => {
-    const { loadMiniSchnauzer } = await import('../docs/js/furniture/builders/mini-schnauzer.js');
-    await expect(loadMiniSchnauzer({ position: [0, 0, 0] })).rejects.toThrow('network down');
+  it('loadMacBook rejects with the specific loader error when fetch fails', async () => {
+    const { loadMacBook } = await import('../docs/js/furniture/builders/macbook.js');
+    await expect(loadMacBook({ position: [0, 0, 0] })).rejects.toThrow('network down');
   });
 });

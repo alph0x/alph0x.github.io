@@ -16,7 +16,6 @@ import {
 import { getWorldAABB } from './room-geometry.js';
 import { shouldLoadExternalModels } from '../assets/loader.js';
 import { buildWallsFromOutline } from './room-geometry.js';
-import { loadMiniSchnauzer } from '../furniture/builders/mini-schnauzer.js';
 import { loadMacBook } from '../furniture/builders/macbook.js';
 import type { WorldState } from '../domain/world-state.js';
 
@@ -153,13 +152,9 @@ export async function buildLevel(scene: THREE.Scene, worldState: WorldState): Pr
   let externalResults: Record<string, BuilderResult> | null = null;
   if (useExternal) {
     try {
-      const luluCfg = ROOM_LAYOUT.furniture?.find((f) => f.type === 'miniSchnauzer') ?? { position: [0, 0, 0], type: 'miniSchnauzer' };
       const macbookCfg = ROOM_LAYOUT.furniture?.find((f) => f.type === 'macBook') ?? { position: [0, 0, 0], type: 'macBook' };
-      const [lulu, macbook] = await Promise.all([
-        loadMiniSchnauzer(luluCfg),
-        loadMacBook(macbookCfg),
-      ]);
-      externalResults = { miniSchnauzer: lulu, macBook: macbook };
+      const macbook = await loadMacBook(macbookCfg);
+      externalResults = { macBook: macbook };
     } catch {
       // ponytail: on load failure, fall back to procedural builders silently.
       externalResults = null;

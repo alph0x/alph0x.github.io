@@ -5,7 +5,7 @@ import { describe, it, expect, vi } from 'vitest';
 // ponytail: SHELL_ASSETS is not exported (classic worker script) — stubbing the
 // SW runtime is the smallest behavioral seam that needs no source change.
 describe('service worker assets', () => {
-  it('precaches the app shell including both GLB models on install', async () => {
+  it('precaches the app shell including the MacBook model on install', async () => {
     const listeners = {};
     const cacheAdds = [];
     vi.stubGlobal('self', {
@@ -24,7 +24,7 @@ describe('service worker assets', () => {
     await listeners.install({ waitUntil: (p) => p });
     vi.unstubAllGlobals();
 
-    expect(cacheAdds).toContain('/assets/models/lulu.glb');
+    expect(cacheAdds).toContain('/assets/models/macbook.glb');
     expect(cacheAdds).toContain('/assets/models/macbook.glb');
   });
 });

@@ -2,7 +2,6 @@ import * as THREE from 'three';
 import { register } from '../registry.js';
 import { makeStd, texFabric } from '../../assets/index.js';
 import { makeRoundedBox, makeCylinder, makeSphere, makeCone, makeBox, rootGroup } from '../../primitives.js';
-import { loadGlb } from '../../assets/loader.js';
 import type { FurnitureConfig } from '../../seed.js';
 
 function buildMiniSchnauzer(cfg: FurnitureConfig): { mesh: THREE.Group; label: string } {
@@ -124,29 +123,6 @@ function buildMiniSchnauzer(cfg: FurnitureConfig): { mesh: THREE.Group; label: s
   g.add(makeSphere(coatDark, [0.018], [-0.22, 0.13, 0], 6)); // tail tip
 
   return { mesh: g, label: 'Lulú' };
-}
-
-export async function loadMiniSchnauzer(cfg: FurnitureConfig): Promise<{ mesh: THREE.Group; label: string }> {
-  const group = await loadGlb('/assets/models/lulu.glb');
-  const [x, y, z] = cfg.position;
-  group.position.set(x, y, z);
-  group.rotation.y = cfg.rotation ?? 0;
-  // Scale to match existing procedural Lulú (~0.25m shoulder, ~0.5m long).
-  const s = 0.25;
-  group.scale.set(s, s, s);
-
-  // Map animation-critical names by searching the scene graph.
-  group.name = 'lulu';
-  group.traverse((child) => {
-    const name = child.name.toLowerCase();
-    if (name.includes('body') || name.includes('torso')) child.name = 'body';
-    if (name.includes('head') || name.includes('cranium')) child.name = 'head';
-    if (name.includes('tail')) child.name = 'tail';
-    if (name.includes('ear') || name.includes('earl')) child.name = 'earL';
-    if (name.includes('ear') || name.includes('earr')) child.name = 'earR';
-  });
-
-  return { mesh: group, label: 'Lulú' };
 }
 
 register('miniSchnauzer', buildMiniSchnauzer);
