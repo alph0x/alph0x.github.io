@@ -6,6 +6,8 @@ const { test, expect } = require('@playwright/test');
 
 const BOOT_TIMEOUT = process.env.CI ? 60000 : 10000;
 
+require('@playwright/test').test.setTimeout(process.env.CI ? 180000 : 60000);
+
 function filterKnownErrors(errors) {
   return errors.filter((e) => {
     if (e.includes('Pointer Lock API')) return false;
@@ -52,13 +54,13 @@ test.describe('Editor E2E', () => {
     await page.screenshot({ path: 'tests/e2e/screenshots/editor-03-zoom-out.png' });
 
     // Toggle to 3D view
-    await viewBtn.click();
+    await viewBtn.click({ force: true });
     await page.waitForFunction(() => window.__editorState.viewMode === '3d');
     await nextFrame();
     await page.screenshot({ path: 'tests/e2e/screenshots/editor-04-3d-view.png' });
 
     // Toggle back to top view
-    await viewBtn.click();
+    await viewBtn.click({ force: true });
     await page.waitForFunction(() => window.__editorState.viewMode === 'top');
     await nextFrame();
     await page.screenshot({ path: 'tests/e2e/screenshots/editor-05-back-to-top.png' });

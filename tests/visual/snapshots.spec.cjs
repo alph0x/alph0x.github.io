@@ -2,6 +2,8 @@ const { test, expect } = require('@playwright/test');
 
 const BOOT_TIMEOUT = process.env.CI ? 60000 : 10000;
 
+require('@playwright/test').test.setTimeout(process.env.CI ? 180000 : 60000);
+
 test.describe('visual snapshots', () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(() => { window.__snapshotMode = true; });

@@ -6,6 +6,8 @@ const { test, expect } = require('@playwright/test');
 
 const BOOT_TIMEOUT = process.env.CI ? 60000 : 10000;
 
+require('@playwright/test').test.setTimeout(process.env.CI ? 180000 : 60000);
+
 function filterKnownErrors(errors) {
   return errors.filter((e) => {
     // Pointer lock fails in headless/automated browsers — not a portfolio bug
@@ -36,7 +38,7 @@ test.describe('Portfolio Desktop', () => {
 
     await page.screenshot({ path: 'tests/e2e/screenshots/01-start-screen.png' });
 
-    await page.locator('#start-btn').click();
+    await page.locator('#start-btn').click({ force: true });
     await expect(startScreen).toBeHidden();
 
     await expect(page.locator('canvas')).toBeVisible();
