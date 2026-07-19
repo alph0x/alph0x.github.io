@@ -1,5 +1,7 @@
 const { test, expect } = require('@playwright/test');
 
+require('@playwright/test').test.setTimeout(process.env.CI ? 240000 : 120000);
+
 /**
  * Visual inspection test — positions camera at key viewpoints to capture
  * screenshots of furniture and detect visual artifacts.

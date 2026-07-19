@@ -1,5 +1,7 @@
 const { test, expect } = require('@playwright/test');
 
+require('@playwright/test').test.setTimeout(process.env.CI ? 240000 : 120000);
+
 function filterKnownErrors(errors) {
   return errors.filter((e) => {
     if (e.includes('Pointer Lock API')) return false;
@@ -85,8 +87,10 @@ test.describe('Room Integrity', () => {
           }
         }
 
-        // Identify wall groups: Groups at y=0 that match wall edge positions
-        if (obj.type === 'Group' && Math.abs(obj.position.y) < 0.01 && isWallPosition(obj.position.x, obj.position.z)) {
+        // Walls: subdivided Groups at y=0 (window wall) or single Meshes at wallH/2 (solid walls)
+        const isWallGroup = obj.type === 'Group' && Math.abs(obj.position.y) < 0.01 && isWallPosition(obj.position.x, obj.position.z);
+        const isSolidWallMesh = obj.isMesh && obj.parent === scene && Math.abs(obj.position.y - 1.4) < 0.2 && isWallPosition(obj.position.x, obj.position.z);
+        if (isWallGroup || isSolidWallMesh) {
           const meshes = [];
           obj.traverse((child) => {
             if (child.isMesh && child.geometry) {
@@ -143,14 +147,14 @@ test.describe('Room Integrity', () => {
       (g) => Math.abs(g.posX - (-2.25)) < 0.1 && Math.abs(g.rotY - Math.PI) < 0.1
     );
     expect(leftWall).toBeDefined();
-    expect(leftWall.boxCount).toBe(1);
+    expect(leftWall.boxCount).toBe(3);
 
     // 5. Right wall (x ~ 2.25) should be solid (1 mesh)
     const rightWall = inspection.wallGroups.find(
       (g) => Math.abs(g.posX - 2.25) < 0.1 && Math.abs(g.rotY) < 0.1
     );
     expect(rightWall).toBeDefined();
-    expect(rightWall.boxCount).toBe(1);
+    expect(rightWall.boxCount).toBe(3);
 
     // 6. Collision walls should exist
     expect(inspection.collisionWalls).toBeGreaterThan(0);

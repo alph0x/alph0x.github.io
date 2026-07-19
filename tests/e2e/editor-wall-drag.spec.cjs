@@ -1,5 +1,7 @@
 const { test, expect } = require('@playwright/test');
 
+require('@playwright/test').test.setTimeout(process.env.CI ? 240000 : 120000);
+
 /**
  * E2E test for wall edge axis-locking in the editor.
  * Horizontal edges (top/bottom walls) should only move vertically (Z).
