@@ -123,10 +123,11 @@ test.describe('Interaction validation suite', () => {
     test.setTimeout(90000);
     await boot(page);
 
-    const openViaMacbook = async () => {
-      const mac = TARGETS.find((t) => t.type === 'macBook');
-      await aim(page, mac.pos, mac.look);
-      await page.evaluate(() => window.__game.interact());
+    // Open directly: the close flows are the subject, not the aim raycast
+    // (covered by the E-key tests above, and pointer-lock support varies
+    // across headless environments, which would re-own the camera mid-test).
+    const openPanel = async () => {
+      await page.evaluate(() => window.__game.interaction.openPanel('panel-alphgpt'));
       await page.waitForSelector('#panel-alphgpt.active', { timeout: 10000 });
     };
     const expectClosed = async () => {
@@ -135,19 +136,19 @@ test.describe('Interaction validation suite', () => {
     };
 
     // 1. Close button
-    await openViaMacbook();
+    await openPanel();
     await page.evaluate(() => document.querySelector('#panel-alphgpt .panel-close').click());
     await expectClosed();
 
     // 2. Escape
-    await openViaMacbook();
+    await openPanel();
     await page.keyboard.press('Escape');
     await expectClosed();
 
     // 3. Outside click (HUD is neither .info-panel nor CANVAS; it's
     // pointer-events:none, so dispatch the click directly — it bubbles to the
     // document handler all the same).
-    await openViaMacbook();
+    await openPanel();
     await page.evaluate(() => document.getElementById('hud').click());
     await expectClosed();
   });
@@ -159,19 +160,10 @@ test.describe('Interaction validation suite', () => {
     await page.click('#start-btn');
     await expect(page.locator('#start-screen')).toBeHidden();
 
-    // Pose + interact in one tick: pointer-lock controls own the camera between frames.
-    const mac = TARGETS.find((t) => t.type === 'macBook');
-    await page.evaluate(({ pos, look }) => {
-      const cam = window.__camera;
-      cam.position.set(...pos);
-      cam.lookAt(...look);
-      cam.updateMatrixWorld(true);
-      window.__game.interact();
-    }, { pos: mac.pos, look: mac.look });
-
-    await page.waitForSelector('#panel-alphgpt.active', { timeout: 10000 });
     // Regression: openPanel used to unlock() before marking the panel active,
     // so loading.ts re-showed the start screen on top of the panel.
+    await page.evaluate(() => window.__game.interaction.openPanel('panel-alphgpt'));
+    await page.waitForSelector('#panel-alphgpt.active', { timeout: 10000 });
     await expect(page.locator('#start-screen')).toBeHidden();
   });
 });
