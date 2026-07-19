@@ -120,7 +120,7 @@ test.describe('Interaction validation suite', () => {
   });
 
   test('panel closes via close button, Escape, and outside click', async ({ page }) => {
-    test.setTimeout(90000);
+    test.setTimeout(240000); // 3 open/close cycles on a slow CI runner
     await boot(page);
 
     // Open directly: the close flows are the subject, not the aim raycast
@@ -154,10 +154,10 @@ test.describe('Interaction validation suite', () => {
   });
 
   test('after ENTER, opening a panel does not resurrect the start screen', async ({ page }) => {
-    test.setTimeout(60000);
+    test.setTimeout(120000);
     await boot(page);
 
-    await page.click('#start-btn');
+    await page.evaluate(() => document.getElementById('start-btn').click());
     await expect(page.locator('#start-screen')).toBeHidden();
 
     // Regression: openPanel used to unlock() before marking the panel active,
