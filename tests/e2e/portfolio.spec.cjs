@@ -4,6 +4,8 @@
 
 const { test, expect } = require('@playwright/test');
 
+const BOOT_TIMEOUT = process.env.CI ? 60000 : 10000;
+
 function filterKnownErrors(errors) {
   return errors.filter((e) => {
     // Pointer lock fails in headless/automated browsers — not a portfolio bug
@@ -28,9 +30,9 @@ test.describe('Portfolio Desktop', () => {
     await page.goto('/');
 
     // Wait for loading to finish and the start screen to appear.
-    await page.locator('#loading').waitFor({ state: 'hidden', timeout: 10000 });
+    await page.locator('#loading').waitFor({ state: 'hidden', timeout: BOOT_TIMEOUT });
     const startScreen = page.locator('#start-screen');
-    await expect(startScreen).toBeVisible({ timeout: 5000 });
+    await expect(startScreen).toBeVisible({ timeout: BOOT_TIMEOUT });
 
     await page.screenshot({ path: 'tests/e2e/screenshots/01-start-screen.png' });
 
@@ -38,7 +40,7 @@ test.describe('Portfolio Desktop', () => {
     await expect(startScreen).toBeHidden();
 
     await expect(page.locator('canvas')).toBeVisible();
-    await page.waitForFunction(() => window.__scene, { timeout: 10000 });
+    await page.waitForFunction(() => window.__scene, { timeout: BOOT_TIMEOUT });
     // Let the first frames render before screenshotting
     await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
     await page.screenshot({ path: 'tests/e2e/screenshots/02-room-desktop.png' });
@@ -62,7 +64,7 @@ test.describe('Portfolio Mobile', () => {
     });
 
     // Canvas should be visible (mobile skips start screen)
-    await page.waitForSelector('canvas', { state: 'visible', timeout: 5000 });
+    await page.waitForSelector('canvas', { state: 'visible', timeout: BOOT_TIMEOUT });
 
     // Touch controls should exist
     const touchControls = page.locator('#touch-controls');

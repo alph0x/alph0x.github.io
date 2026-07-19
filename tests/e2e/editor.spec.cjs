@@ -4,6 +4,8 @@
 
 const { test, expect } = require('@playwright/test');
 
+const BOOT_TIMEOUT = process.env.CI ? 60000 : 10000;
+
 function filterKnownErrors(errors) {
   return errors.filter((e) => {
     if (e.includes('Pointer Lock API')) return false;
