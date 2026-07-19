@@ -71,6 +71,14 @@ jobs:
       - name: Run visual snapshot tests
         run: npm run test:visual
 
+      - name: Upload test results on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-test-results
+          path: test-results/
+          retention-days: 3
+
   audit:
     name: Dependency Audit
     runs-on: ubuntu-latest
@@ -118,6 +126,14 @@ jobs:
 
       - name: Run E2E smoke tests
         run: npm run test:e2e
+
+      - name: Upload test results on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-test-results
+          path: test-results/
+          retention-days: 3
 
   coverage:
     name: Coverage Gate
