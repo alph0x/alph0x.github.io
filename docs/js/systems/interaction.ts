@@ -98,6 +98,17 @@ export class InteractionSystem {
     return this._meshCache;
   }
 
+  // GLB roots nest meshes several levels deep — walk ancestors, not just parent.
+  private _findInteractable(interactables: ThreeInteractable[], object: THREE.Object3D): ThreeInteractable | undefined {
+    let node: THREE.Object3D | null = object;
+    while (node) {
+      const hit = interactables.find((i) => i.mesh === node);
+      if (hit) return hit;
+      node = node.parent;
+    }
+    return undefined;
+  }
+
   interact(): void {
     const { ui, room } = this.worldState;
     if (ui.isPanelOpen || this._terminalZoom?.active) return;
@@ -105,9 +116,7 @@ export class InteractionSystem {
     const interactables = room.interactables as ThreeInteractable[];
     const hits = this.raycaster.intersectObjects(this._interactableMeshes(interactables), true);
     if (hits.length > 0 && hits[0].distance < 5) {
-      const obj = interactables.find(
-        (i) => i.mesh === hits[0].object || i.mesh === hits[0].object.parent
-      );
+      const obj = this._findInteractable(interactables, hits[0].object);
       if (!obj) return;
       if (obj.panelId === 'panel-alphgpt') {
         this._startTerminalZoom(obj.panelId);
@@ -120,10 +129,12 @@ export class InteractionSystem {
   openPanel(id: string): void {
     const { ui } = this.worldState;
     ui.isPanelOpen = true;
-    this.controls.unlock();
     document.querySelectorAll('.info-panel').forEach((p) => p.classList.remove('active'));
     const panel = this._panel(id);
     if (panel) panel.classList.add('active');
+    // unlock AFTER the panel is active: loading.ts re-shows the start screen
+    // on unlock when no panel is open.
+    this.controls.unlock();
     const crosshair = this._crosshair();
     if (crosshair) crosshair.style.display = 'none';
   }
@@ -148,11 +159,6 @@ export class InteractionSystem {
       panelId,
     };
 
-    try {
-      this.controls.unlock();
-    } catch {
-      /* pointer lock may not be available */
-    }
     this._tickTerminalZoom();
   }
 
@@ -233,9 +239,7 @@ export class InteractionSystem {
     const hits = this.raycaster.intersectObjects(this._interactableMeshes(interactables), true);
 
     if (hits.length > 0 && hits[0].distance < 5) {
-      const obj = interactables.find(
-        (i) => i.mesh === hits[0].object || i.mesh === hits[0].object.parent
-      );
+      const obj = this._findInteractable(interactables, hits[0].object);
       if (obj) {
         prompt.textContent = `[E] ${obj.name || obj.type}`;
         prompt.classList.add('active');

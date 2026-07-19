@@ -52,8 +52,10 @@ export class EditorSceneSetup {
   }
 
   private _addLights(): void {
-    this._scene.add(new THREE.AmbientLight(0xffffff, 0.6));
-    const dir = new THREE.DirectionalLight(0xffffff, 0.5);
+    // Brighter than the in-game mood lighting on purpose: the editor has no
+    // environment map, so the ambient/fill must carry interior legibility.
+    this._scene.add(new THREE.AmbientLight(0xffffff, 1.5));
+    const dir = new THREE.DirectionalLight(0xffffff, 1.2);
     dir.position.set(5, 10, 5);
     this._scene.add(dir);
   }

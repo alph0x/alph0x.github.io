@@ -6,24 +6,35 @@
  */
 
 import type { Pet } from '../domain/pet.js';
-import type { Vec3, TimeOfDayName } from '../core.js';
+import type { Vec3 } from '../core.js';
 
 const MAX_HEAD_TURN = 0.5;
 const SMOOTH_FACTOR = 0.12;
 const EXCITE_DISTANCE = 1.0;
 const LOSE_INTEREST_DISTANCE = 2.5;
+// Sleep is decoupled from the coarse light preset: the pet sleeps only in the
+// small hours [0, 6); evenings (18–24) it stays awake and keeps tracking.
+const SLEEP_END_HOUR = 6;
+// A player this close wakes the pet; it drifts back to sleep only beyond
+// RESUME_SLEEP_DISTANCE (hysteresis so the boundary doesn't flicker).
+const NOTICE_DISTANCE = 1.5;
+const RESUME_SLEEP_DISTANCE = 2.0;
 
 export function updatePetAnimation(
   pet: Pet,
   playerPosition: Vec3,
   timeS: number,
-  timeOfDay: TimeOfDayName = 'afternoon'
+  hour = 12
 ): void {
   const dx = playerPosition.x - pet.position.x;
   const dz = playerPosition.z - pet.position.z;
   pet.distToPlayer = Math.sqrt(dx * dx + dz * dz);
   pet.isExcited = pet.distToPlayer < EXCITE_DISTANCE;
-  pet.isSleeping = timeOfDay === 'night';
+  pet.isSleeping =
+    hour < SLEEP_END_HOUR &&
+    (pet.isSleeping
+      ? pet.distToPlayer >= NOTICE_DISTANCE
+      : pet.distToPlayer >= RESUME_SLEEP_DISTANCE);
 
   updateBreathing(pet, timeS);
   updateTail(pet, timeS);

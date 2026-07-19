@@ -81,9 +81,11 @@ export class SpawnManager {
     );
     const mat = new THREE.MeshBasicMaterial({ color: this._config.colors.luluSpawn });
     const mesh = new THREE.Mesh(geo, mat);
+    // Capsule center sits radius + half the mid-length above its bottom cap;
+    // using only the radius sank the marker ~6 cm through the floor plane.
     mesh.position.set(
       this._state.luluSpawn.x,
-      this._config.geometry.spawnLuluRadius,
+      this._config.geometry.spawnLuluHeight / 2 + this._config.geometry.spawnLuluRadius,
       this._state.luluSpawn.z
     );
     mesh.userData = { spawnType: 'lulu' };

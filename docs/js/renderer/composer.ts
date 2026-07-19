@@ -78,8 +78,10 @@ export function buildComposer(
 
   composer.addPass(new RenderPass(scene, camera));
 
-  // Threshold-driven bloom; VR-03's emissive materials will feed it.
-  const bloom = new UnrealBloomPass(new THREE.Vector2(size.x, size.y), 0.4, 0.3, 0.85);
+  // Threshold-driven bloom; emissive materials will feed it. Threshold sits
+  // above lit-diffuse luminance so bright white surfaces (bed, pet coat) don't
+  // bloom into glowing blobs — only true emissives (lamps, LEDs, window) do.
+  const bloom = new UnrealBloomPass(new THREE.Vector2(size.x, size.y), 0.35, 0.3, 1.4);
   composer.addPass(bloom);
 
   const ssao = new SSAOPass(scene, camera, size.x, size.y);

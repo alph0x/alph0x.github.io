@@ -510,7 +510,9 @@ export class FurnitureManager {
     const item = this._state.placed.find((p) => p.id === this._state.selectedId);
     if (!item) return;
     const m = item.mesh;
-    const deg = Math.round((m.rotation.y * 180) / Math.PI);
+    // Display normalized: a 2π (or 6.283) rad rotation is 0°, not 360°.
+    const degRaw = Math.round((m.rotation.y * 180) / Math.PI);
+    const deg = ((degRaw % 360) + 360) % 360;
     const displayName = item.name
       ? `${item.name} <span style="color:#78716c;font-size:11px;">(${item.type})</span>`
       : `<strong>${item.type}</strong>`;
@@ -535,7 +537,8 @@ export class FurnitureManager {
     const yVal = mesh ? mesh.position.y.toFixed(2) : '0';
     if (yNum) yNum.value = yVal;
     if (yRange) yRange.value = yVal;
-    const rotDeg = mesh ? ((mesh.rotation.y * 180) / Math.PI).toFixed(0) : '0';
+    const rotDegRaw = mesh ? Math.round((mesh.rotation.y * 180) / Math.PI) : 0;
+    const rotDeg = String(((rotDegRaw % 360) + 360) % 360);
     if (rotInput) rotInput.value = rotDeg;
     const nameInput = getEditorEl<HTMLInputElement>('selName');
     const item =

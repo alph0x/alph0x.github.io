@@ -5,6 +5,17 @@
 
 import { getEditorEl } from './dom-refs.js';
 
+/**
+ * True for rejections originating from browser extensions (e.g. MetaMask), not app code.
+ * Duplicated inline in docs/index.html (plain script tag cannot import).
+ */
+export function isThirdPartyRejection(reason: unknown): boolean {
+  const msg = reason instanceof Error ? `${reason.name} ${reason.message}` : String(reason);
+  if (/metamask|ethereum|chrome-extension|moz-extension|\binpage\b/i.test(msg)) return true;
+  const stack = (reason as { stack?: unknown } | null | undefined)?.stack;
+  return typeof stack === 'string' && /chrome-extension:\/\/|moz-extension:\/\//.test(stack);
+}
+
 export class EditorErrorHandler {
   private _displayId: string;
 
@@ -16,9 +27,10 @@ export class EditorErrorHandler {
     window.addEventListener('error', (e: ErrorEvent) =>
       this._show(`${e.message}  @${e.lineno}:${e.colno}`)
     );
-    window.addEventListener('unhandledrejection', (e: PromiseRejectionEvent) =>
-      this._show(`Unhandled rejection: ${e.reason}`)
-    );
+    window.addEventListener('unhandledrejection', (e: PromiseRejectionEvent) => {
+      if (isThirdPartyRejection(e.reason)) return;
+      this._show(`Unhandled rejection: ${e.reason}`);
+    });
   }
 
   showError(err: unknown): void {

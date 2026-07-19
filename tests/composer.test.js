@@ -49,8 +49,10 @@ describe('buildComposer', () => {
   it('uses conservative threshold-driven bloom', () => {
     const composer = buildComposer(mockRenderer(), new THREE.Scene(), new THREE.PerspectiveCamera());
     const bloom = composer.passes.find((p) => p instanceof UnrealBloomPass);
-    expect(bloom.threshold).toBeCloseTo(0.85);
-    expect(bloom.strength).toBeCloseTo(0.4);
+    // Threshold above lit-diffuse luminance: only true emissives bloom,
+    // bright white surfaces (bed, pet coat) must not.
+    expect(bloom.threshold).toBeCloseTo(1.4);
+    expect(bloom.strength).toBeCloseTo(0.35);
     expect(bloom.radius).toBeCloseTo(0.3);
   });
 });

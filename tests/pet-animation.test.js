@@ -107,12 +107,24 @@ describe('updatePet', () => {
     });
   });
 
-  describe('sleeping at night', () => {
-    it('marks pet as sleeping when time-of-day is night', () => {
+  describe('sleep window', () => {
+    it('sleeps only in the small hours (hour < 6)', () => {
+      for (const [hour, expected] of [[0, true], [3, true], [5, true], [6, false], [18, false], [23, false]]) {
+        const { pet, camera } = createPetAndCamera({ x: 0, y: 1, z: 10 }, { x: 0, z: 0 }, 0);
+        window.__TIME_OF_DAY_NOW__ = new Date(`2026-06-22T${String(hour).padStart(2, '0')}:00:00`);
+        updatePet(0, pet, camera);
+        expect(pet.model.isSleeping).toBe(expected);
+        delete window.__TIME_OF_DAY_NOW__;
+      }
+    });
+
+    it('is awake in the evening (hour 23) and still tracks the player', () => {
       const { pet, camera } = createPetAndCamera({ x: 0, y: 1, z: 2 }, { x: 0, z: 0 }, 0);
       window.__TIME_OF_DAY_NOW__ = new Date('2026-06-22T23:00:00');
-      updatePet(0, pet, camera);
-      expect(pet.model.isSleeping).toBe(true);
+      simulate(pet, camera);
+      expect(pet.model.isSleeping).toBe(false);
+      const head = pet.mesh.getObjectByName('head');
+      expect(head.rotation.y).toBeLessThan(-0.45); // tracking player at +Z
       delete window.__TIME_OF_DAY_NOW__;
     });
 
@@ -126,7 +138,7 @@ describe('updatePet', () => {
 
     it('keeps tail still when sleeping', () => {
       const { pet, camera } = createPetAndCamera({ x: 0, y: 1, z: 2 }, { x: 0, z: 0 }, 0);
-      window.__TIME_OF_DAY_NOW__ = new Date('2026-06-22T23:00:00');
+      window.__TIME_OF_DAY_NOW__ = new Date('2026-06-22T03:00:00');
       updatePet(0, pet, camera);
       updatePet(500, pet, camera);
       const tail = pet.mesh.getObjectByName('tail');
@@ -137,10 +149,36 @@ describe('updatePet', () => {
 
     it('lowers head when sleeping', () => {
       const { pet, camera } = createPetAndCamera({ x: 0, y: 1, z: 2 }, { x: 0, z: 0 }, 0);
-      window.__TIME_OF_DAY_NOW__ = new Date('2026-06-22T23:00:00');
+      window.__TIME_OF_DAY_NOW__ = new Date('2026-06-22T03:00:00');
       updatePet(0, pet, camera);
       const head = pet.mesh.getObjectByName('head');
       expect(head.rotation.x).toBeLessThan(-0.3);
+      delete window.__TIME_OF_DAY_NOW__;
+    });
+  });
+
+  describe('proximity notice', () => {
+    it('wakes, raises head and tracks when the player comes within ~1.5m during sleep hours', () => {
+      const { pet, camera } = createPetAndCamera({ x: 0, y: 1, z: 1.2 }, { x: 0, z: 0 }, 0);
+      window.__TIME_OF_DAY_NOW__ = new Date('2026-06-22T03:00:00');
+      simulate(pet, camera);
+      expect(pet.model.isSleeping).toBe(false);
+      const head = pet.mesh.getObjectByName('head');
+      expect(head.rotation.x).toBe(0); // head raised
+      expect(head.rotation.y).toBeLessThan(-0.45); // tracking player at +Z
+      delete window.__TIME_OF_DAY_NOW__;
+    });
+
+    it('falls back to sleep when the player leaves', () => {
+      const { pet, camera } = createPetAndCamera({ x: 0, y: 1, z: 1.2 }, { x: 0, z: 0 }, 0);
+      window.__TIME_OF_DAY_NOW__ = new Date('2026-06-22T03:00:00');
+      simulate(pet, camera);
+      expect(pet.model.isSleeping).toBe(false);
+      camera.position.set(0, 1, 10);
+      simulate(pet, camera);
+      expect(pet.model.isSleeping).toBe(true);
+      const head = pet.mesh.getObjectByName('head');
+      expect(head.rotation.x).toBeLessThan(-0.3); // head lowered again
       delete window.__TIME_OF_DAY_NOW__;
     });
   });

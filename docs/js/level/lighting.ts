@@ -9,7 +9,6 @@
 
 import * as THREE from 'three';
 import { COLORS } from '../core.js';
-import { registerFlickerLight } from '../systems/animation/flicker.js';
 
 import type { TimeOfDayName } from '../core.js';
 export type { TimeOfDayName };
@@ -22,8 +21,6 @@ export interface TimeOfDayPreset {
   fill: { color: number; intensity: number };
   /** Shared intensity for the small RGB accent points. */
   accent: number;
-  /** TV wall-wash flicker intensity. */
-  tv: number;
   windowGlow: { color: number; intensity: number; spotIntensity: number };
   cityEmissiveMultiplier: number;
   pcLedMultiplier: number;
@@ -33,30 +30,27 @@ export interface TimeOfDayPreset {
 const PRESETS: Record<TimeOfDayName, TimeOfDayPreset> = {
   morning: {
     name: 'morning',
-    key: { color: 0xffd6a0, intensity: 30 },
+    key: { color: 0xffd6a0, intensity: 20 },
     fill: { color: 0x7fa0d0, intensity: 1.2 },
     accent: 1.4,
-    tv: 1.0,
-    windowGlow: { color: 0xffaa77, intensity: 5.0, spotIntensity: 1.2 },
+    windowGlow: { color: 0xffaa77, intensity: 2.8, spotIntensity: 1.2 },
     cityEmissiveMultiplier: 0.8,
     pcLedMultiplier: 1.0,
   },
   afternoon: {
     name: 'afternoon',
-    key: { color: 0xffc890, intensity: 36 },
+    key: { color: 0xffc890, intensity: 24 },
     fill: { color: 0x8aa8d8, intensity: 1.8 },
     accent: 1.6,
-    tv: 1.2,
     windowGlow: { color: 0x6688aa, intensity: 6.0, spotIntensity: 2.5 },
     cityEmissiveMultiplier: 1.0,
     pcLedMultiplier: 1.0,
   },
   night: {
     name: 'night',
-    key: { color: 0xffa860, intensity: 26 },
+    key: { color: 0xffa860, intensity: 18 },
     fill: { color: 0x405d94, intensity: 0.55 },
     accent: 1.6,
-    tv: 1.4,
     windowGlow: { color: 0x4466cc, intensity: 8.0, spotIntensity: 3.0 },
     cityEmissiveMultiplier: 1.5,
     pcLedMultiplier: 1.2,
@@ -69,7 +63,7 @@ declare global {
   }
 }
 
-function resolveNow(): Date {
+export function resolveNow(): Date {
   if (typeof window !== 'undefined' && window.__TIME_OF_DAY_NOW__) {
     return window.__TIME_OF_DAY_NOW__;
   }
@@ -164,21 +158,19 @@ export function setupLighting(scene: THREE.Scene, options?: { now?: Date }): Tim
   fill.position.set(0, 1.8, -4);
   scene.add(fill, fill.target);
 
+  // Lift unlit surfaces (door wall, ceiling) off pitch-black without
+  // flattening the preset mood.
+  scene.add(new THREE.AmbientLight(0x8899bb, 0.32));
+
   // RGB accents — small, shadowless local glow.
   const deskGlow = new THREE.PointLight(COLORS.cyan, preset.accent, 3.5, 1.8);
   deskGlow.position.set(1.4, 1.2, -0.9);
   scene.add(deskGlow);
 
-  const cornerGlow = new THREE.PointLight(COLORS.magenta, preset.accent * 0.7, 4, 1.8);
-  cornerGlow.position.set(-2.0, 1.6, 1.0);
+  // Kept off the wall: hugging it produced a source-less hotspot orb.
+  const cornerGlow = new THREE.PointLight(COLORS.magenta, preset.accent * 0.45, 4, 1.8);
+  cornerGlow.position.set(-1.6, 1.5, 0.6);
   scene.add(cornerGlow);
-
-  // TV wall-wash with the existing flicker system.
-  const tvLight = new THREE.PointLight(COLORS.accent, preset.tv, 4, 1.8);
-  tvLight.position.set(2.0, 1.4, 0);
-  tvLight.userData = { flicker: true, baseIntensity: preset.tv, flickerSpeed: 8, flickerPhase: 0 };
-  registerFlickerLight(tvLight);
-  scene.add(tvLight);
 
   return preset;
 }

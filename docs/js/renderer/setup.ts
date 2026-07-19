@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
+import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
 import { CFG } from '../core.js';
 
 export function createSceneAndCamera(): { scene: THREE.Scene; camera: THREE.PerspectiveCamera } {
@@ -22,7 +22,7 @@ export function createWebGLRenderer(): THREE.WebGLRenderer {
   renderer.setSize(window.innerWidth, window.innerHeight, false);
   renderer.setPixelRatio(dpr);
   renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.shadowMap.type = THREE.PCFShadowMap;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.25;
   document.body.appendChild(renderer.domElement);
@@ -31,7 +31,7 @@ export function createWebGLRenderer(): THREE.WebGLRenderer {
 
 // Dusk HDRI → PMREM → scene.environment at low intensity so practicals dominate.
 export function setupEnvironment(renderer: THREE.WebGLRenderer, scene: THREE.Scene, intensity = 0.3): void {
-  new RGBELoader().load('/assets/env/dusk_1k.hdr', (tex) => {
+  new HDRLoader().load('/assets/env/dusk_1k.hdr', (tex) => {
     const pmrem = new THREE.PMREMGenerator(renderer);
     scene.environment = pmrem.fromEquirectangular(tex).texture;
     scene.environmentIntensity = intensity;

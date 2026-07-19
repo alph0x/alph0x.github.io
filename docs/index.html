@@ -802,6 +802,11 @@
       window.addEventListener('unhandledrejection', function(e) {
         const msg = String(e.reason);
         if (msg.includes('pointer lock') || msg.includes('PointerLock') || msg.includes('WrongDocumentError')) return;
+        // ponytail: duplicated from docs/js/editor-modules/error-handler.ts (this plain script tag cannot import)
+        const r = e.reason;
+        const rm = r instanceof Error ? r.name + ' ' + r.message : String(r);
+        if (/metamask|ethereum|chrome-extension|moz-extension|\binpage\b/i.test(rm)) return;
+        if (r && typeof r.stack === 'string' && /chrome-extension:\/\/|moz-extension:\/\//.test(r.stack)) return;
         showErr('UNHANDLED: ' + msg);
         e.preventDefault();
       });

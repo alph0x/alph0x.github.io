@@ -84,6 +84,72 @@ describe('AudioSystem', () => {
     expect(mockBufferSource.start).toHaveBeenCalled();
   });
 
+  it('does not create AudioContext before a user gesture', () => {
+    const ctorSpy = vi.fn(function () { return {
+      sampleRate: 48000,
+      currentTime: 0,
+      state: 'running',
+      createOscillator: vi.fn(() => ({ start: vi.fn(), stop: vi.fn(), connect: vi.fn(), frequency: { value: 0 }, type: '' })),
+      createGain: vi.fn(() => ({ connect: vi.fn(), gain: { setValueAtTime: vi.fn(), value: 0 } })),
+      destination: {},
+      resume: vi.fn(() => Promise.resolve()),
+    }; });
+    vi.stubGlobal('AudioContext', ctorSpy);
+    try {
+      audio.setMoving(true);
+      audio.startAmbient();
+      audio.update(0.5);
+      expect(ctorSpy).not.toHaveBeenCalled();
+      expect(audio._ctx).toBeNull();
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it('creates AudioContext on the first update after a user gesture', () => {
+    const ctorSpy = vi.fn(function () { return {
+      sampleRate: 48000,
+      currentTime: 0,
+      state: 'running',
+      createOscillator: vi.fn(() => ({ start: vi.fn(), stop: vi.fn(), connect: vi.fn(), frequency: { value: 0 }, type: '' })),
+      createGain: vi.fn(() => ({ connect: vi.fn(), gain: { setValueAtTime: vi.fn(), value: 0 } })),
+      destination: {},
+      resume: vi.fn(() => Promise.resolve()),
+    }; });
+    vi.stubGlobal('AudioContext', ctorSpy);
+    try {
+      document.dispatchEvent(new Event('pointerdown'));
+      audio.startAmbient();
+      expect(ctorSpy).toHaveBeenCalledTimes(1);
+      expect(audio._ambientNode).not.toBeNull();
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it('defers startAmbient requested before the gesture until after it', () => {
+    const ctorSpy = vi.fn(function () { return {
+      sampleRate: 48000,
+      currentTime: 0,
+      state: 'running',
+      createOscillator: vi.fn(() => ({ start: vi.fn(), stop: vi.fn(), connect: vi.fn(), frequency: { value: 0 }, type: '' })),
+      createGain: vi.fn(() => ({ connect: vi.fn(), gain: { setValueAtTime: vi.fn(), value: 0 } })),
+      destination: {},
+      resume: vi.fn(() => Promise.resolve()),
+    }; });
+    vi.stubGlobal('AudioContext', ctorSpy);
+    try {
+      audio.startAmbient(); // requested pre-gesture (game start at module init)
+      expect(audio._ambientNode).toBeNull();
+      document.dispatchEvent(new Event('pointerdown'));
+      audio.update(0.016); // next frame picks it up
+      expect(ctorSpy).toHaveBeenCalledTimes(1);
+      expect(audio._ambientNode).not.toBeNull();
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
   it('creates ambient nodes when started (with mocked AudioContext)', () => {
     const mockOsc = { start: vi.fn(), stop: vi.fn(), connect: vi.fn(), frequency: { value: 0 }, type: '' };
     const mockGain = { connect: vi.fn(), gain: { value: 0 } };

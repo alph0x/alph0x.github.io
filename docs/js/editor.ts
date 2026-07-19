@@ -9,6 +9,7 @@ import { EDITOR_CONFIG } from './editor-modules/editor-config.js';
 import { EditorApp } from './editor-modules/editor-app.js';
 import type { EditorState } from './editor-modules/state.js';
 import type { FurnitureManager } from './editor-modules/furniture-manager.js';
+import type { EditorCameraSystem } from './editor-modules/camera-system.js';
 
 const app = new EditorApp(EDITOR_CONFIG);
 app.init();
@@ -29,6 +30,7 @@ window.__editorProject = (x: number, z: number) => {
 };
 window.__furnitureManager = app.furnitureManager as FurnitureManager;
 window.__scene = app.scene;
+window.__cameraSystem = app.cameraSystem;
 if (!app.cameraSystem.camera) throw new Error('Editor camera not initialized');
 window.__camera = app.cameraSystem.camera;
 
@@ -39,6 +41,7 @@ declare global {
     __editorProject: (x: number, z: number) => { x: number; y: number };
     __furnitureManager: FurnitureManager;
     __scene: THREE.Scene;
+    __cameraSystem: EditorCameraSystem;
     __camera: THREE.Camera;
   }
 }

@@ -36,6 +36,7 @@ import './builders/fairy-lights.js';
 import './builders/door.js';
 import './builders/window.js';
 import './builders/mini-schnauzer.js';
+import './builders/trash.js';
 import './builders/macbook.js';
 
 import './meta.js';

@@ -19,7 +19,8 @@ export class AudioSystem {
   private _stepTimer: number;
   private _stepInterval: number;
   private _isMoving: boolean;
-  private _resumeHandler: (() => void) | null;
+  private _hasGestured: boolean;
+  private _ambientWanted: boolean;
 
   constructor() {
     this._ctx = null;
@@ -27,7 +28,15 @@ export class AudioSystem {
     this._stepTimer = 0;
     this._stepInterval = 0.42;
     this._isMoving = false;
-    this._resumeHandler = null;
+    this._hasGestured = false;
+    this._ambientWanted = false;
+
+    // Autoplay policy: no AudioContext until the first user gesture.
+    const onGesture = () => {
+      this._hasGestured = true;
+    };
+    document.addEventListener('pointerdown', onGesture, { once: true });
+    document.addEventListener('keydown', onGesture, { once: true });
   }
 
   // ── Public API ──────────────────────────────────────────────────
@@ -39,6 +48,11 @@ export class AudioSystem {
 
   /** Update loop — call every frame with delta time. */
   update(delta: number): void {
+    // Ambient requested before the first gesture starts on the next frame after it.
+    if (this._ambientWanted && !this._ambientNode && this._ensureContext()) {
+      this._buildAmbient();
+    }
+
     if (!this._isMoving) {
       this._stepTimer = 0;
       return;
@@ -57,11 +71,29 @@ export class AudioSystem {
     }
   }
 
-  /** Start ambient drone (idempotent). */
+  /** Start ambient drone (idempotent; deferred until first user gesture). */
   startAmbient(): void {
-    if (!this._ensureContext()) return;
-    if (this._ambientNode) return;
+    this._ambientWanted = true;
+    if (!this._ensureContext() || this._ambientNode) return;
+    this._buildAmbient();
+  }
 
+  /** Stop ambient drone. */
+  stopAmbient(): void {
+    this._ambientWanted = false;
+    if (!this._ambientNode) return;
+    try {
+      this._ambientNode.osc1.stop();
+      this._ambientNode.osc2.stop();
+    } catch {
+      /* may already be stopped */
+    }
+    this._ambientNode = null;
+  }
+
+  // ── Private ─────────────────────────────────────────────────────
+
+  private _buildAmbient(): void {
     const ctx = this._ctx!;
     const master = ctx.createGain();
     master.gain.value = 0.025;
@@ -92,22 +124,15 @@ export class AudioSystem {
     this._ambientNode = { master, osc1, osc2, gain1, gain2 };
   }
 
-  /** Stop ambient drone. */
-  stopAmbient(): void {
-    if (!this._ambientNode) return;
-    try {
-      this._ambientNode.osc1.stop();
-      this._ambientNode.osc2.stop();
-    } catch {
-      /* may already be stopped */
-    }
-    this._ambientNode = null;
-  }
-
-  // ── Private ─────────────────────────────────────────────────────
-
   private _ensureContext(): boolean {
-    if (this._ctx) return true;
+    if (this._ctx) {
+      // Safety net: a context created in a gesture handler may still be suspended.
+      if (this._ctx.state === 'suspended') {
+        this._ctx.resume().catch(() => {});
+      }
+      return true;
+    }
+    if (!this._hasGestured) return false;
     if (typeof AudioContext === 'undefined' && typeof webkitAudioContext === 'undefined') {
       return false;
     }
@@ -115,16 +140,6 @@ export class AudioSystem {
     if (!AC) return false;
 
     this._ctx = new AC();
-
-    // Auto-resume on first user interaction (browser autoplay policy)
-    this._resumeHandler = () => {
-      if (this._ctx && this._ctx.state === 'suspended') {
-        this._ctx.resume().catch(() => {});
-      }
-    };
-    document.addEventListener('pointerdown', this._resumeHandler, { once: true });
-    document.addEventListener('keydown', this._resumeHandler, { once: true });
-
     return true;
   }
 

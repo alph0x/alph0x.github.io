@@ -67,6 +67,21 @@ describe('FurnitureManager', () => {
     expect(state.placed[0].config.rotation).toBeCloseTo(Math.PI, 5);
   });
 
+  it('selection info shows ~2π rad as 0°, not 360°', () => {
+    const info = document.createElement('div');
+    info.id = 'selectionInfo';
+    document.body.appendChild(info);
+    try {
+      // 6.283 rad = truncated 2π as stored in seeds; 359.998° must not round to 360°
+      manager.place('bed', 1, 0, 2, 6.283);
+      manager.select(state.placed[0].id);
+      expect(info.textContent).toContain('rot: 0°');
+      expect(info.textContent).not.toContain('360°');
+    } finally {
+      info.remove();
+    }
+  });
+
   it('setY clamps to wall height', () => {
     manager.place('bed', 1, 0, 2, 0);
     manager.select(state.placed[0].id);

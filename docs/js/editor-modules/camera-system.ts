@@ -17,6 +17,7 @@ export class EditorCameraSystem {
   private _renderer: THREE.WebGLRenderer;
   camera: THREE.OrthographicCamera | THREE.PerspectiveCamera | null = null;
   controls: OrbitControls | null = null;
+  private _controlsTarget = new THREE.Vector3(0, 0, 0);
 
   constructor(container: HTMLElement, config: CameraConfig, renderer: THREE.WebGLRenderer) {
     this._container = container;
@@ -77,14 +78,18 @@ export class EditorCameraSystem {
     );
     this.camera.position.set(0, this._config.cameraY, 0);
     this.camera.up.set(0, 0, 1);
+    this._controlsTarget.set(0, 0, 0);
     this.camera.lookAt(0, 0, 0);
   }
 
   private _setup3DCamera(): void {
     const aspect = this._container.clientWidth / this._container.clientHeight;
     this.camera = new THREE.PerspectiveCamera(50, aspect, 0.1, 100);
-    this.camera.position.set(5, 4, 5);
-    this.camera.lookAt(0, 1, 0);
+    // Open inside the room (raised corner looking across) — the ceiling and
+    // wall exteriors hide the interior from any outside start position.
+    this.camera.position.set(2.05, 2.45, 1.5);
+    this._controlsTarget.set(0, 0.6, 0);
+    this.camera.lookAt(this._controlsTarget);
   }
 
   private _attachControls(enableRotate: boolean): void {
@@ -99,7 +104,7 @@ export class EditorCameraSystem {
       };
       this.controls.zoomToCursor = true;
     }
-    this.controls.target.set(0, 0, 0);
+    this.controls.target.copy(this._controlsTarget);
     this.controls.update();
   }
 

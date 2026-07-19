@@ -16,9 +16,9 @@ function buildDoor(cfg: FurnitureConfig): { mesh: THREE.Group; label: string } {
 
   const door = new THREE.Group();
 
-  const frameMat = makeStd({ map: texWood, color: 0x4a3a30, roughness: 0.75 });
-  const panelMat = makeStd({ map: texWood, color: 0x5c4a3e, roughness: 0.7 });
-  const insetMat = makeStd({ map: texWood, color: 0x3e322a, roughness: 0.8 });
+  const frameMat = makeStd({ map: texWood, color: 0x5e4c40, roughness: 0.75 });
+  const panelMat = makeStd({ map: texWood, color: 0x6e5a4c, roughness: 0.7 });
+  const insetMat = makeStd({ map: texWood, color: 0x4e4036, roughness: 0.8 });
   const metalMat = makeStd({ map: texMetal, color: 0x55514d, roughness: 0.4, metalness: 0.6 });
 
   const doorW = 1.5;

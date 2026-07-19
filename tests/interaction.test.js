@@ -105,3 +105,68 @@ describe('Game click-outside-to-close wiring', () => {
     expect(document.querySelectorAll('.info-panel.active').length).toBe(0);
   });
 });
+
+describe('nested mesh hierarchies (GLB models)', () => {
+  it('prompt and interact resolve interactables through deep ancestors', () => {
+    document.body.innerHTML = '<div id="prompt"></div><div id="panel-deep" class="info-panel"></div><div id="crosshair"></div>';
+    const camera = new THREE.PerspectiveCamera();
+    camera.position.set(0, 0, 0);
+    camera.lookAt(0, 0, -2);
+    camera.updateMatrixWorld(true);
+    const worldState = { ui: { isPanelOpen: false }, room: { interactables: [] } };
+    const controls = { lock: () => {}, unlock: () => {} };
+    const system = new InteractionSystem({ camera, worldState, controls });
+
+    // Mimic a GLB: root group > intermediate group > mesh (depth 2).
+    const root = new THREE.Group();
+    const inner = new THREE.Group();
+    const leaf = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial());
+    inner.add(leaf);
+    root.add(inner);
+    root.position.set(0, 0, -2);
+    root.updateMatrixWorld(true);
+    worldState.room.interactables.push({ mesh: root, type: 'glbType', panelId: 'panel-deep', name: 'GLB Thing' });
+
+    system.updatePrompt();
+    expect(document.getElementById('prompt').textContent).toBe('[E] GLB Thing');
+
+    system.interact();
+    expect(document.getElementById('panel-deep').classList.contains('active')).toBe(true);
+  });
+});
+
+describe('openPanel ordering (loading.ts unlock handler)', () => {
+  it('marks the panel active before controls.unlock() fires', () => {
+    document.body.innerHTML = '<div id="panel-profile" class="info-panel"></div><div id="crosshair"></div>';
+    const worldState = { ui: { isPanelOpen: false }, room: { interactables: [] } };
+    let panelActiveAtUnlock = null;
+    // Mirror loading.ts: the unlock handler re-shows the start screen unless a
+    // panel is already active at that moment.
+    const controls = { lock: () => {}, unlock: () => { panelActiveAtUnlock = document.querySelectorAll('.info-panel.active').length > 0; } };
+    const system = new InteractionSystem({ camera: {}, worldState, controls });
+
+    system.openPanel('panel-profile');
+    expect(panelActiveAtUnlock).toBe(true);
+  });
+});
+
+describe('terminal zoom (panel-alphgpt)', () => {
+  it('does not unlock pointer at zoom start (start screen would flash over the room)', () => {
+    document.body.innerHTML = '<div id="prompt"></div><div id="panel-alphgpt" class="info-panel"></div><div id="crosshair"></div>';
+    const camera = new THREE.PerspectiveCamera();
+    camera.position.set(0, 0, 0);
+    camera.lookAt(0, 0, -2);
+    camera.updateMatrixWorld(true);
+    const worldState = { ui: { isPanelOpen: false }, room: { interactables: [] } };
+    const controls = { lock: vi.fn(), unlock: vi.fn() };
+    const system = new InteractionSystem({ camera, worldState, controls });
+
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial());
+    mesh.position.set(0, 0, -2);
+    mesh.updateMatrixWorld();
+    worldState.room.interactables.push({ mesh, type: 'macBook', panelId: 'panel-alphgpt', name: 'MACBOOK' });
+
+    system.interact(); // starts the zoom; unlock must wait for openPanel
+    expect(controls.unlock).not.toHaveBeenCalled();
+  });
+});

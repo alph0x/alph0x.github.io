@@ -14,30 +14,6 @@ import type { TimeOfDayPreset } from './lighting.js';
 const SHAFT_LEN = 2.0;
 const DUST_COUNT = 200;
 
-/** Luminance ramp: bright at the window edge, fading along the shaft and at the sides.
- *  Per-pixel fillRect (not canvas gradients) — same stub-ctx-safe pattern as textures.ts.
- *  Used as alphaMap (green channel) — never as `map`, so screen-reflections
- *  (which retargets Mesh + MeshBasicMaterial + CanvasTexture) ignores the shaft. */
-function shaftTexture(): THREE.CanvasTexture {
-  const tex = makeTexture(32, 128, (ctx, w, h) => {
-    for (let y = 0; y < h; y++) {
-      const v = y / (h - 1); // 0 at the window edge
-      const ramp = Math.min(1, v / 0.06); // soft hinge — no hard edge at the window
-      const along = v < 0.45 ? 0.55 : 0.55 * (1 - (v - 0.45) / 0.55);
-      for (let x = 0; x < w; x++) {
-        const u = Math.abs(x / (w - 1) - 0.5) * 2; // 0 centre → 1 edge
-        const side = u < 0.5 ? 1 : 1 - (u - 0.5) * 2;
-        const lum = Math.round(along * side * ramp * 255);
-        ctx.fillStyle = `rgb(${lum},${lum},${lum})`;
-        ctx.fillRect(x, y, 1, 1);
-      }
-    }
-  }, 'window-shaft');
-  tex.magFilter = THREE.LinearFilter;
-  tex.minFilter = THREE.LinearFilter;
-  return tex;
-}
-
 /** Soft radial sprite for a single dust mote. */
 function moteTexture(): THREE.CanvasTexture {
   const tex = makeTexture(16, 16, (ctx, w, h) => {
@@ -67,17 +43,47 @@ function buildWindowShaft(scene: THREE.Scene, position: number[], preset: TimeOf
   const dir = new THREE.Vector3(nx * 1.4, -1.0, nz * 1.4).normalize();
   const hinge = new THREE.Vector3(wx + nx * 0.2, wy + 0.25, wz + nz * 0.2);
 
-  const geo = new THREE.PlaneGeometry(1.7, SHAFT_LEN, 1, 8);
+  // Open square frustum, hinged at the window and widening toward the floor.
+  // Fresnel-faded additive shader → soft silhouette from every viewing angle.
+  const geo = new THREE.CylinderGeometry(0.9, 1.35, SHAFT_LEN, 4, 1, true);
+  geo.rotateY(Math.PI / 4); // flat faces toward the room axes
   geo.translate(0, -SHAFT_LEN / 2, 0); // hinge the top edge at the window
-  const shaft = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({
-    color: preset.windowGlow.color,
-    alphaMap: shaftTexture(),
+  const shaft = new THREE.Mesh(geo, new THREE.ShaderMaterial({
+    uniforms: {
+      uColor: { value: new THREE.Color(preset.windowGlow.color) },
+      uOpacity: { value: 0.6 },
+    },
+    vertexShader: /* glsl */ `
+      varying vec3 vNormalW;
+      varying vec3 vViewW;
+      varying float vAlong;
+      void main() {
+        vAlong = -position.y / ${SHAFT_LEN.toFixed(1)};
+        vec4 wp = modelMatrix * vec4(position, 1.0);
+        vNormalW = normalize(mat3(modelMatrix) * normal);
+        vViewW = cameraPosition - wp.xyz;
+        gl_Position = projectionMatrix * viewMatrix * wp;
+      }
+    `,
+    fragmentShader: /* glsl */ `
+      uniform vec3 uColor;
+      uniform float uOpacity;
+      varying vec3 vNormalW;
+      varying vec3 vViewW;
+      varying float vAlong;
+      void main() {
+        float v = clamp(vAlong, 0.0, 1.0);
+        float ramp = min(1.0, v / 0.06); // soft hinge at the window
+        float along = v < 0.45 ? 0.55 : 0.55 * (1.0 - (v - 0.45) / 0.55);
+        float fresnel = pow(abs(dot(normalize(vNormalW), normalize(vViewW))), 1.5);
+        float a = along * ramp * fresnel * uOpacity;
+        gl_FragColor = vec4(uColor * a, a);
+      }
+    `,
     transparent: true,
-    opacity: 0.6,
     blending: THREE.AdditiveBlending,
     depthWrite: false,
     side: THREE.DoubleSide,
-    fog: false,
   }));
   shaft.position.copy(hinge);
   shaft.quaternion.setFromUnitVectors(new THREE.Vector3(0, -1, 0), dir);
