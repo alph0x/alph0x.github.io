@@ -791,3 +791,9 @@ CLOSE-READY: yes — every done-signal verified runnable and green; remaining fi
 ### Status
 
 **Initiative closed.** All 26 points 🟢, verified, accepted.
+
+---
+
+## 2026-07-18 — Retro
+
+Retro ran; artifact: `retro.md`. Metrics: see the Metrics table there (mined, not remembered).
