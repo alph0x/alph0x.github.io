@@ -44,6 +44,17 @@ try {
   exitCode = 1;
 }
 
+// docs/plans/ is gitignored local state — nothing under it may be tracked.
+try {
+  const trackedPlans = execSync('git ls-files docs/plans', { encoding: 'utf-8', cwd: process.cwd() }).trim();
+  if (trackedPlans) {
+    log('❌ Tracked files under docs/plans/ (must be local-only):', RED);
+    console.log(trackedPlans);
+    log('→ Fix: git rm --cached <files>', RED);
+    exitCode = 1;
+  }
+} catch { /* not a git repo — already flagged above */ }
+
 // ── 2. Active mission overlap ───────────────────────────────────
 
 heading('ACTIVE MISSIONS');
