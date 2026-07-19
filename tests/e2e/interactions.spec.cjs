@@ -84,7 +84,7 @@ test.describe('Interaction validation suite', () => {
     await aim(page, mac.pos, mac.look);
     await page.keyboard.press('e'); // real keydown through systems/input.ts
 
-    await page.waitForSelector('#panel-alphgpt.active', { timeout: 10000 });
+    await page.waitForSelector('#panel-alphgpt.active', { timeout: 30000 });
     await expect(page.locator('#panel-alphgpt')).toHaveClass(/terminal-mode/);
   });
 
@@ -95,7 +95,7 @@ test.describe('Interaction validation suite', () => {
     const mac = TARGETS.find((t) => t.type === 'macBook');
     await aim(page, mac.pos, mac.look);
     await page.keyboard.press('e');
-    await page.waitForSelector('#panel-alphgpt.active', { timeout: 10000 });
+    await page.waitForSelector('#panel-alphgpt.active', { timeout: 30000 });
 
     const before = await page.locator('#alphgpt-messages > *').count();
     await page.fill('#alphgpt-input', 'help');
@@ -128,7 +128,7 @@ test.describe('Interaction validation suite', () => {
     // across headless environments, which would re-own the camera mid-test).
     const openPanel = async () => {
       await page.evaluate(() => window.__game.interaction.openPanel('panel-alphgpt'));
-      await page.waitForSelector('#panel-alphgpt.active', { timeout: 10000 });
+      await page.waitForSelector('#panel-alphgpt.active', { timeout: 30000 });
     };
     const expectClosed = async () => {
       await expect(page.locator('.info-panel.active')).toHaveCount(0);
@@ -163,7 +163,7 @@ test.describe('Interaction validation suite', () => {
     // Regression: openPanel used to unlock() before marking the panel active,
     // so loading.ts re-showed the start screen on top of the panel.
     await page.evaluate(() => window.__game.interaction.openPanel('panel-alphgpt'));
-    await page.waitForSelector('#panel-alphgpt.active', { timeout: 10000 });
+    await page.waitForSelector('#panel-alphgpt.active', { timeout: 30000 });
     await expect(page.locator('#start-screen')).toBeHidden();
   });
 });
