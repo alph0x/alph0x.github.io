@@ -54,3 +54,6 @@ docs/plans/
 
 # ── Local context files ─────────────────────────
 CONTEXT.md
+
+# Tackle learning-loop profile (local, like docs/plans)
+.tackle/
