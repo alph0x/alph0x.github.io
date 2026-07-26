@@ -14,7 +14,6 @@ const FILES: Record<string, string> = {
   'wood-floor': 'wood_floor_deck',
   plaster: 'plastered_wall',
   fabric: 'fabric_leather_02',
-  metal: 'metal_plate',
 };
 
 export function loadPbrSet(name: keyof typeof FILES, repeatX = 1, repeatY = 1): PbrSet {

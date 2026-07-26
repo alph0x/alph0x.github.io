@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { COLORS } from '../core.js';
-import { texWall, texFloor, texCeiling, texTerminal, texWood } from './textures.js';
+import { texTerminal, texWood } from './textures.js';
 
 interface StdParams {
   color?: THREE.ColorRepresentation;
@@ -42,16 +42,11 @@ export function makeStd({
 }
 
 export const M: Record<string, THREE.Material> = {
-  wall: makeStd({ map: texWall }),
-  floor: makeStd({ map: texFloor }),
-  ceiling: makeStd({ map: texCeiling }),
   terminal: new THREE.MeshBasicMaterial({ map: texTerminal }),
   terminalPink: new THREE.MeshBasicMaterial({ map: texTerminal, color: COLORS.magenta }),
   terminalCyan: new THREE.MeshBasicMaterial({ map: texTerminal, color: COLORS.cyan }),
   terminalGreen: new THREE.MeshBasicMaterial({ map: texTerminal, color: COLORS.green }),
   glowPurple: new THREE.MeshBasicMaterial({ color: COLORS.accent }),
-  glowPink: new THREE.MeshBasicMaterial({ color: COLORS.magenta }),
   glowCyan: new THREE.MeshBasicMaterial({ color: COLORS.cyan }),
-  glowGreen: new THREE.MeshBasicMaterial({ color: COLORS.green }),
   wood: makeStd({ map: texWood }),
 };

@@ -142,20 +142,6 @@
     .panel-body .stat-block::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--accent); box-shadow: 0 0 10px var(--accent-glow); }
     .panel-body .stat-num { font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 28px; color: var(--accent); text-shadow: 0 0 10px var(--accent-glow); }
     .panel-body .stat-label { font-family: 'Press Start 2P', monospace; font-size: 8px; color: #57534e; margin-top: 6px; }
-    .panel-body .mission-entry { border-top: 2px solid #1c1917; padding: 24px 0; }
-    .panel-body .mission-role { font-family: 'Orbitron', sans-serif; font-weight: 800; font-size: 18px; text-transform: uppercase; color: #e7e5e4; margin-bottom: 4px; }
-    .panel-body .mission-corp { font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 14px; text-transform: uppercase; color: #ec4899; margin-bottom: 10px; text-shadow: 0 0 10px rgba(236,72,153,0.3); }
-    .panel-body .mission-desc { color: #e7e5e4; font-size: 13px; line-height: 1.7; max-width: 600px; }
-    .panel-body .mission-desc li { list-style: none; padding-left: 16px; position: relative; margin-bottom: 4px; }
-    .panel-body .mission-desc li::before { content: '>'; position: absolute; left: 0; color: #ec4899; font-family: 'Press Start 2P'; font-size: 8px; }
-    .panel-body .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
-    .panel-body .tag { font-family: 'Press Start 2P', monospace; font-size: 7px; letter-spacing: 0.06em; text-transform: uppercase; padding: 5px 10px; border: 2px solid transparent; }
-    .tag-cyber-fill { background: #f59e0b; color: #0c0a09; border-color: #f59e0b; }
-    .tag-pink-fill { background: #ec4899; color: #e7e5e4; border-color: #ec4899; }
-    .tag-cyan-fill { background: #06b6d4; color: #0c0a09; border-color: #06b6d4; }
-    .tag-orange-fill { background: #f97316; color: #0c0a09; border-color: #f97316; }
-    .tag-green-fill { background: #10b981; color: #0c0a09; border-color: #10b981; }
-    .tag-dim-out { border-color: #44403c; color: #78716c; background: transparent; }
     .panel-body .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; }
     @media (max-width: 768px) { .panel-body .two-col { grid-template-columns: 1fr; } .panel-body .stat-row { grid-template-columns: 1fr; } }
     .panel-body .info-block { padding: 18px 20px; background: #111114; border: 2px solid #1c1917; }
@@ -165,24 +151,8 @@
     .panel-body .info-key { font-family: 'Press Start 2P', monospace; font-size: 7px; color: #57534e; text-transform: uppercase; }
     .panel-body .info-val { color: #e7e5e4; text-align: right; }
 
-    /* ── MOBILE RESUME (static fallback) ─────────────── */
-    #mobile-resume { display: none; }
     @media (max-width: 768px) and (orientation: portrait), (hover: none) and (pointer: coarse) and (orientation: portrait) {
       #game-container, #loading, #start-screen, #hud, #crosshair, #prompt, .info-panel, #legend { display: none !important; }
-      #mobile-resume { display: block !important; background: #0c0a09; color: #e7e5e4; font-family: 'Share Tech Mono', monospace; padding: 20px; }
-      #mobile-resume .m-header { text-align: center; margin-bottom: 30px; }
-      #mobile-resume .m-header h1 { font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 2.2rem; text-transform: uppercase; line-height: 0.9; text-shadow: 2px 2px 0 #ec4899; }
-      #mobile-resume .m-header h1 span { color: #f59e0b; }
-      #mobile-resume .m-avatar { width: 120px; height: 120px; object-fit: cover; border: 2px solid #ec4899; margin: 0 auto 16px; display: block; filter: grayscale(0.3) contrast(1.1); }
-      #mobile-resume .m-section { margin-bottom: 28px; }
-      #mobile-resume .m-label { font-family: 'Press Start 2P', monospace; font-size: 8px; color: #57534e; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 8px; border-bottom: 1px solid #1c1917; padding-bottom: 4px; }
-      #mobile-resume .m-title { font-family: 'Orbitron', sans-serif; font-weight: 800; font-size: 1.1rem; text-transform: uppercase; color: #f59e0b; margin-bottom: 2px; }
-      #mobile-resume .m-corp { font-family: 'Orbitron', sans-serif; font-size: 0.85rem; color: #ec4899; text-transform: uppercase; margin-bottom: 6px; }
-      #mobile-resume .m-text { font-size: 13px; line-height: 1.7; color: #e7e5e4; }
-      #mobile-resume .m-skills { display: flex; flex-wrap: wrap; gap: 4px; }
-      #mobile-resume .m-skill { font-family: 'Press Start 2P', monospace; font-size: 7px; text-transform: uppercase; padding: 5px 8px; background: #111114; border: 1px solid #292524; color: #f59e0b; }
-      #mobile-resume .m-contact a { display: block; color: #f59e0b; text-decoration: none; margin-bottom: 6px; font-size: 13px; }
-      #mobile-resume .m-footer { text-align: center; font-size: 11px; color: #57534e; margin-top: 30px; padding-top: 20px; border-top: 1px solid #1c1917; }
     }
 
     /* ── ALPHGPT CHAT ────────────────────────────────── */
