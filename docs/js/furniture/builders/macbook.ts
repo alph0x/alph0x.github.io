@@ -2,7 +2,8 @@ import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { register } from '../registry.js';
-import { makeStd, texMetal, texPlastic, texScreenGlow } from '../../assets/index.js';
+import { makeScreenGlow } from '../glow.js';
+import { makeStd, texMetal, texPlastic } from '../../assets/index.js';
 import { rootGroup } from '../../primitives.js';
 import type { FurnitureConfig } from '../../seed.js';
 
@@ -34,8 +35,7 @@ function buildMacBook(cfg: FurnitureConfig): { mesh: THREE.Group; type: string; 
   const dark = makeStd({ map: texPlastic, color: 0x1a1a1e });
   const keyMat = makeStd({ color: 0x141418 });
   const trackpadMat = makeStd({ map: texMetal, color: 0xd2d4da });
-  const screenGlow = new THREE.MeshBasicMaterial({ map: texScreenGlow });
-  screenGlow.color.multiplyScalar(4); // crosses the 0.85 bloom threshold
+  const screenGlow = makeScreenGlow();
 
   const w = 0.36;
   const d = 0.25;

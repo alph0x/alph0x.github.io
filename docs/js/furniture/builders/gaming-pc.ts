@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { COLORS } from '../../core.js';
 import { register } from '../registry.js';
+import { makePcLedGlow } from '../glow.js';
 import { M, makeStd, texMetal, texPlastic, texScreenGlow } from '../../assets/index.js';
 import { makeBox, makeCylinder, makeLight, makePlane, makeRoundedBox, rootGroup } from '../../primitives.js';
 import type { FurnitureConfig } from '../../seed.js';
@@ -32,13 +33,11 @@ function buildGamingPC(cfg: FurnitureConfig): { mesh: THREE.Group } {
   }
 
   // top and bottom RGB accents
-  const topAccent = makeBox(M.glowPurple.clone(), [0.52, 0.02, 0.01], [0, 0.15, 0.26]);
+  const topAccent = makeBox(makePcLedGlow(M.glowPurple as THREE.MeshBasicMaterial), [0.52, 0.02, 0.01], [0, 0.15, 0.26]);
   topAccent.userData._pcLed = true;
-  (topAccent.material as THREE.MeshBasicMaterial).color.multiplyScalar(2.5);
   g.add(topAccent);
-  const bottomAccent = makeBox(M.glowCyan.clone(), [0.52, 0.02, 0.01], [0, 0.95, 0.26]);
+  const bottomAccent = makeBox(makePcLedGlow(M.glowCyan as THREE.MeshBasicMaterial), [0.52, 0.02, 0.01], [0, 0.95, 0.26]);
   bottomAccent.userData._pcLed = true;
-  (bottomAccent.material as THREE.MeshBasicMaterial).color.multiplyScalar(2.5);
   g.add(bottomAccent);
 
   // front vents

@@ -1,7 +1,8 @@
 import * as THREE from 'three';
 import { COLORS } from '../../core.js';
 import { register } from '../registry.js';
-import { makeStd, texMetal, texPlastic, texScreenGlow } from '../../assets/index.js';
+import { makeScreenGlow } from '../glow.js';
+import { makeStd, texMetal, texPlastic } from '../../assets/index.js';
 import { makeBox, makeLight, makePlane, makeRoundedBox, rootGroup } from '../../primitives.js';
 import type { FurnitureConfig } from '../../seed.js';
 
@@ -10,8 +11,7 @@ function buildMonitor(cfg: FurnitureConfig): { mesh: THREE.Group } {
 
   const frameMat = makeStd({ map: texPlastic, color: 0x1c1c1f, roughness: 0.5, metalness: 0.2 });
   const standMat = makeStd({ map: texMetal, color: 0x151519, roughness: 0.4, metalness: 0.6 });
-  const screenMat = new THREE.MeshBasicMaterial({ map: texScreenGlow });
-  screenMat.color.multiplyScalar(4); // crosses the 0.85 bloom threshold
+  const screenMat = makeScreenGlow();
   const glowMat = makeStd({ color: COLORS.ancientAmber, emissive: COLORS.ancientAmber, emissiveIntensity: 1.4 });
 
   // thin rounded panel
