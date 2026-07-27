@@ -17,7 +17,8 @@ function buildCeilingLamp(cfg: FurnitureConfig): { mesh: THREE.Group; label: str
 
   const rodMat = makeStd({ map: texMetal, color: 0x2a2a30, roughness: 0.4, metalness: 0.6 });
   const shadeMat = makeStd({ map: texMetal, color: 0x25252b, roughness: 0.5, metalness: 0.4 });
-  const bulbMat = makeStd({ color, emissive: color, emissiveIntensity: 1.6, roughness: 0.2 });
+  // Bulb is a §6 warm practical (ancientAmber) regardless of the light's cfg.color hue.
+  const bulbMat = makeStd({ color: COLORS.ancientAmber, emissive: COLORS.ancientAmber, emissiveIntensity: 1.6, roughness: 0.2 });
 
   // cord / metal rod from ceiling
   g.add(makeCylinder(rodMat, [0.015, 0.015, rodH], [0, rodH / 2, 0], 12));

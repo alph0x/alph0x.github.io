@@ -1,7 +1,8 @@
 import * as THREE from 'three';
 import { COLORS } from '../../core.js';
 import { register } from '../registry.js';
-import { makeStd, texMetal, texPlastic, texScreenGlow } from '../../assets/index.js';
+import { makeScreenGlow } from '../glow.js';
+import { makeStd, texMetal, texPlastic } from '../../assets/index.js';
 import { makeBox, makeCylinder, makeLight, makePlane, makeRoundedBox, rootGroup } from '../../primitives.js';
 import type { FurnitureConfig } from '../../seed.js';
 
@@ -19,9 +20,8 @@ function buildTV(cfg: FurnitureConfig): { mesh: THREE.Group; type: string; panel
   // inner bezel
   g.add(makeBox(bezelMat, [w - 0.04, h - 0.04, 0.005], [0, 0, d / 2 + 0.003]));
 
-  // Deterministic screen glow — pushed past the 0.85 bloom threshold
-  const screenMat = new THREE.MeshBasicMaterial({ map: texScreenGlow });
-  screenMat.color.multiplyScalar(4);
+  // Deterministic screen glow — pushed past the 1.45 bloom threshold
+  const screenMat = makeScreenGlow();
   g.add(makePlane(screenMat, [w - 0.05, h - 0.05], [0, 0, d / 2 + 0.006]));
 
   // Metal stand (also supports furniture placement)

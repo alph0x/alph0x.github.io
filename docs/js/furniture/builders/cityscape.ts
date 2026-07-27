@@ -1,5 +1,7 @@
 import * as THREE from 'three';
+import { COLORS } from '../../core.js';
 import { makeBox } from '../../primitives.js';
+import { tagEmissiveBase } from '../glow.js';
 import { registerParallaxTarget } from '../../systems/animation/parallax.js';
 
 /**
@@ -14,11 +16,12 @@ function makeSeededRng(seed = 0) {
   };
 }
 
+// Dusk skyline (contract §6): warm amber-family bodies/signs, teal kept sparse.
 const CAREER_LANDMARKS = [
-  { name: 'GeoPagos', role: 'fintech', color: 0x10b981, accent: 0x06b6d4, shape: 'glass' as const },
+  { name: 'GeoPagos', role: 'fintech', color: 0xd97706, accent: COLORS.sheikahTeal, shape: 'glass' as const },
   { name: 'Rappi', role: 'delivery', color: 0xf97316, accent: 0xfacc15, shape: 'hub' as const },
-  { name: 'ALPH0X', role: 'personal', color: 0x8b5cf6, accent: 0xe879f9, shape: 'creative' as const },
-  { name: 'FullStack', role: 'skills', color: 0x0ea5e9, accent: 0x22d3ee, shape: 'spire' as const },
+  { name: 'ALPH0X', role: 'personal', color: 0x9a3412, accent: COLORS.ancientAmber, shape: 'creative' as const },
+  { name: 'FullStack', role: 'skills', color: COLORS.duskAmber, accent: COLORS.paperWhite, shape: 'spire' as const },
   { name: 'Leadership', role: 'mentor', color: 0xf59e0b, accent: 0xfcd34d, shape: 'twin' as const },
 ];
 
@@ -36,7 +39,7 @@ function buildLayer(
 }
 
 
-function neonMat(color: number) {
+function signMat(color: number) {
   return new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide });
 }
 
@@ -67,18 +70,20 @@ export function buildCityscape(cfg: { position: number[]; seed?: number }): THRE
       for (let f = 0; f < floors; f++) {
         for (let w = 0; w < winsPerFloor; w++) {
           if (rng() > 0.55) continue;
-          const winColor = rng() > 0.7 ? 0xfef3c7 : 0x334155;
+          // Warm dusk lit windows, sparse teal accents, dark slate unlit (one draw, seed-stable).
+          const wr = rng();
+          const winColor = wr > 0.7 ? 0xfef3c7 : wr > 0.62 ? COLORS.sheikahTeal : 0x334155;
           const wx = bx - bw / 2 + 0.2 + (w * (bw - 0.4)) / Math.max(1, winsPerFloor - 1);
           const wy = (f * 2) - 3 + 0.8;
           const wmesh = makeBox(new THREE.MeshBasicMaterial({ color: winColor }), [0.18, 0.25, 0.05], [wx, wy, bz + bd / 2 + 0.03]);
-          wmesh.userData._emissiveBase = (wmesh.material as THREE.MeshBasicMaterial).color.getHex();
+          tagEmissiveBase(wmesh);
           group.add(wmesh);
         }
       }
     }
   });
 
-  // Midground: career-themed buildings with neon sign planes
+  // Midground: career-themed buildings with lit sign planes
   const midground = buildLayer(rng, 0.03, (group) => {
     for (let i = 0; i < CAREER_LANDMARKS.length; i++) {
       const landmark = CAREER_LANDMARKS[i];
@@ -105,11 +110,11 @@ export function buildCityscape(cfg: { position: number[]; seed?: number }): THRE
       const bldg = makeBox(new THREE.MeshBasicMaterial({ color: landmark.color }), [bw, bh, bd], [bx, bh / 2 - 2, bz]);
       group.add(bldg);
 
-      // Neon sign representing company/role
+      // Lit sign representing company/role
       const signW = bw * 0.8;
       const signH = bh * 0.25;
-      const sign = makeBox(neonMat(landmark.accent), [signW, signH, 0.06], [bx, bh / 2 - 1, bz + bd / 2 + 0.05]);
-      sign.userData._emissiveBase = (sign.material as THREE.MeshBasicMaterial).color.getHex();
+      const sign = makeBox(signMat(landmark.accent), [signW, signH, 0.06], [bx, bh / 2 - 1, bz + bd / 2 + 0.05]);
+      tagEmissiveBase(sign);
       group.add(sign);
 
       // Small accent strips
@@ -118,7 +123,7 @@ export function buildCityscape(cfg: { position: number[]; seed?: number }): THRE
         const sy = bh - 2 - s * 1.8;
         if (sy < 0) break;
         const strip = makeBox(new THREE.MeshBasicMaterial({ color: landmark.accent }), [bw + 0.06, 0.12, bd + 0.06], [bx, sy - 2, bz]);
-        strip.userData._emissiveBase = (strip.material as THREE.MeshBasicMaterial).color.getHex();
+        tagEmissiveBase(strip);
         group.add(strip);
       }
     }
@@ -131,15 +136,15 @@ export function buildCityscape(cfg: { position: number[]; seed?: number }): THRE
       const fy = 2 + rng() * 7;
       const fz = -8 - rng() * 25;
       const isDrone = rng() > 0.5;
-      const bodyColor = isDrone ? 0xec4899 : 0x06b6d4;
-      const lightColor = isDrone ? 0xf472b6 : 0x67e8f9;
+      const bodyColor = isDrone ? 0x9a3412 : 0xd97706;
+      const lightColor = isDrone ? COLORS.ancientAmber : 0xfef3c7;
 
       const body = makeBox(new THREE.MeshBasicMaterial({ color: bodyColor }), [isDrone ? 0.25 : 0.5, isDrone ? 0.12 : 0.12, isDrone ? 0.25 : 0.2], [fx, fy, fz]);
       group.add(body);
 
       const light = makeBox(new THREE.MeshBasicMaterial({ color: lightColor }), [0.1, 0.04, 0.04], [fx, fy - (isDrone ? 0.08 : 0.06), fz + (isDrone ? 0.14 : 0.11)]);
       group.add(light);
-      light.userData._emissiveBase = (light.material as THREE.MeshBasicMaterial).color.getHex();
+      tagEmissiveBase(light);
     }
   });
 
