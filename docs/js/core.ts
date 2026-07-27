@@ -48,10 +48,23 @@ export const CFG = Object.freeze({
 });
 
 export const COLORS = Object.freeze({
-  accent: 0x7c3aed,
-  cyan: 0x06b6d4,
-  magenta: 0xec4899,
-  green: 0x10b981,
+  // ── P-01 palette (docs/art-direction/palette.md) — base surfaces ──
+  paperWhite: 0xf4ecd8,
+  plasterCream: 0xe6dbc2,
+  woodHoney: 0xb98a52,
+  fabricSage: 0x8ba888,
+  metalSoft: 0x98a2a6,
+  shadowLavender: 0x7c7fa0,
+  // ── light ──
+  sunlightWarm: 0xffd9a0,
+  skyFillBlue: 0x9fc8e0,
+  duskAmber: 0xf5a54a,
+  nightIndigo: 0x333f63,
+  fogHaze: 0xcfe4da,
+  // ── Sheikah-tech accents (the ONLY emissive hues, contract §6) ──
+  sheikahTeal: 0x3ec8ae,
+  ancientAmber: 0xff9e44,
+  // ── legacy neutrals kept per P-04 briefing (superseded-token removal is a later sweep) ──
   orange: 0xf59e0b,
   warm: 0xf5f5f4,
   dim: 0x57534e,

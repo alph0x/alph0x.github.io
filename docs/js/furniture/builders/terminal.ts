@@ -20,7 +20,7 @@ function buildTerminal(cfg: FurnitureConfig): { mesh: THREE.Group; type: string;
   // Stand
   group.add(makeBox(frameMat, [0.06, 0.12, 0.04], [0, -(h / 2 + 0.07), -0.02]));
   group.add(makeBox(frameMat, [0.2, 0.01, 0.1], [0, -(h / 2 + 0.13), -0.02]));
-  const lightColor = colorKey === 'yellow' ? COLORS.accent : colorKey === 'pink' ? COLORS.magenta : colorKey === 'cyan' ? COLORS.cyan : COLORS.green;
+  const lightColor = colorKey === 'yellow' ? COLORS.ancientAmber : colorKey === 'pink' ? COLORS.ancientAmber : colorKey === 'cyan' ? COLORS.sheikahTeal : COLORS.sheikahTeal;
   group.add(makeLight(lightColor, 0.6, 3, [0, 0, 0.15]));
   return { mesh: group, type: 'terminal', panelId: cfg.panelId, label: 'TERMINAL', room: 'APT' };
 }

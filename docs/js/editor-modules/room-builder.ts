@@ -26,7 +26,7 @@ export class RoomBuilder {
   private readonly _config: RoomBuilderConfig;
   private _wallMeshes: WallEntry[] = [];
   private _gridHelper: THREE.GridHelper | null = null;
-  private _wallMaterial: THREE.MeshStandardMaterial | undefined;
+  private _wallMaterial: THREE.MeshToonMaterial | undefined;
 
   constructor(roomGroup: THREE.Group, scene: THREE.Scene, config: RoomBuilderConfig) {
     this._roomGroup = roomGroup;
@@ -73,7 +73,7 @@ export class RoomBuilder {
     }
   }
 
-  get wallMaterial(): THREE.MeshStandardMaterial | null {
+  get wallMaterial(): THREE.MeshToonMaterial | null {
     return this._wallMaterial ?? null;
   }
 

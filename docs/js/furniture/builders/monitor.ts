@@ -12,7 +12,7 @@ function buildMonitor(cfg: FurnitureConfig): { mesh: THREE.Group } {
   const standMat = makeStd({ map: texMetal, color: 0x151519, roughness: 0.4, metalness: 0.6 });
   const screenMat = new THREE.MeshBasicMaterial({ map: texScreenGlow });
   screenMat.color.multiplyScalar(4); // crosses the 0.85 bloom threshold
-  const glowMat = makeStd({ color: COLORS.accent, emissive: COLORS.accent, emissiveIntensity: 1.4 });
+  const glowMat = makeStd({ color: COLORS.ancientAmber, emissive: COLORS.ancientAmber, emissiveIntensity: 1.4 });
 
   // thin rounded panel
   g.add(makeRoundedBox(frameMat, [1.2, 0.7, 0.04], [0, 0, 0], 0.015, 2));
@@ -33,7 +33,7 @@ function buildMonitor(cfg: FurnitureConfig): { mesh: THREE.Group } {
   g.add(makeRoundedBox(standMat, [0.4, 0.02, 0.25], [0, -0.65, -0.05], 0.01, 2));
 
   // glow
-  g.add(makeLight(COLORS.accent, 1.2, 6, [0, 0, 0.3]));
+  g.add(makeLight(COLORS.ancientAmber, 1.2, 6, [0, 0, 0.3]));
   return { mesh: g };
 }
 register('monitor', buildMonitor);

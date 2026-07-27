@@ -10,7 +10,7 @@ function buildHeadset(cfg: FurnitureConfig): { mesh: THREE.Group } {
 
   const bandMat = makeStd({ color: 0x1c1c1f });
   const padMat = makeStd({ color: 0x2a2a2e });
-  const accentMat = new THREE.MeshBasicMaterial({ color: COLORS.accent });
+  const accentMat = new THREE.MeshBasicMaterial({ color: COLORS.ancientAmber });
   g.add(makeBox(bandMat, [0.18, 0.04, 0.14], [0, 0.08, 0]));
   g.add(makeBox(padMat, [0.04, 0.08, 0.08], [-0.1, 0.04, 0]));
   g.add(makeBox(padMat, [0.04, 0.08, 0.08], [0.1, 0.04, 0]));

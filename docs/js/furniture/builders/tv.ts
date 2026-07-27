@@ -29,7 +29,7 @@ function buildTV(cfg: FurnitureConfig): { mesh: THREE.Group; type: string; panel
   g.add(makeRoundedBox(standMat, [0.45, 0.02, 0.25], [0, -0.58, -0.05], 0.01, 2));
 
   // Subtle wall-wash glow behind the panel
-  g.add(makeLight(COLORS.accent, 0.8, 4, [0, 0, 0.25]));
+  g.add(makeLight(COLORS.ancientAmber, 0.8, 4, [0, 0, 0.25]));
 
   return { mesh: g, type: 'terminal', panelId: cfg.panelId, label: 'TV', room: 'APT' };
 }

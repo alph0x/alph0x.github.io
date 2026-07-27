@@ -25,7 +25,7 @@ function buildGamingPC(cfg: FurnitureConfig): { mesh: THREE.Group } {
 
   // vertical RGB strip behind glass
   for (let i = 0; i < 5; i++) {
-    const ledColor = i % 2 === 0 ? COLORS.accent : COLORS.cyan;
+    const ledColor = i % 2 === 0 ? COLORS.ancientAmber : COLORS.sheikahTeal;
     const ledMesh = makeBox(new THREE.MeshBasicMaterial({ color: new THREE.Color(ledColor).multiplyScalar(2.5) }), [0.01, 0.12, 0.35], [0.3, 0.2 + i * 0.18, 0]);
     ledMesh.userData._pcLed = true;
     g.add(ledMesh);
@@ -52,7 +52,7 @@ function buildGamingPC(cfg: FurnitureConfig): { mesh: THREE.Group } {
 
   // GPU / motherboard cards visible through glass
   g.add(makeBox(metalMat, [0.35, 0.02, 0.08], [0, 0.5, 0.1]));
-  g.add(makeBox(makeStd({ map: texScreenGlow, color: COLORS.accent, emissive: COLORS.accent, emissiveIntensity: 1.6 }), [0.25, 0.06, 0.02], [0, 0.55, 0.12]));
+  g.add(makeBox(makeStd({ map: texScreenGlow, color: COLORS.ancientAmber, emissive: COLORS.ancientAmber, emissiveIntensity: 1.6 }), [0.25, 0.06, 0.02], [0, 0.55, 0.12]));
 
   // feet
   for (const lx of [-0.2, 0.2]) {
@@ -62,7 +62,7 @@ function buildGamingPC(cfg: FurnitureConfig): { mesh: THREE.Group } {
   }
 
   // internal glow light
-  const pcLight = makeLight(COLORS.accent, 0.8, 4, [0.3, 0.5, 0]);
+  const pcLight = makeLight(COLORS.ancientAmber, 0.8, 4, [0.3, 0.5, 0]);
   pcLight.userData._pcLight = true;
   pcLight.userData.baseIntensity = 0.8;
   g.add(pcLight);

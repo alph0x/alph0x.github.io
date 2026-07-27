@@ -10,7 +10,7 @@ import { makeBox } from '../../primitives.js';
 import type { FurnitureConfig } from '../../seed.js';
 
 function buildPoster(cfg: FurnitureConfig): { mesh: THREE.Mesh } {
-  const color = cfg.color ?? COLORS.accent;
+  const color = cfg.color ?? COLORS.ancientAmber;
   const text = cfg.text || 'POSTER';
 
   // deterministic canvas texture — only rect fills and text, no gradients or arcs
