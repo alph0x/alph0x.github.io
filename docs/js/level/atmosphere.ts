@@ -5,7 +5,7 @@
  */
 
 import * as THREE from 'three';
-import { ROOM_LAYOUT } from '../core.js';
+import { COLORS, ROOM_LAYOUT } from '../core.js';
 import { makeTexture, rng } from '../assets/textures.js';
 import { getInteriorOffset } from '../furniture/builders/wall-offset.js';
 import { registerDust } from '../systems/animation/dust.js';
@@ -128,10 +128,13 @@ function buildWindowShaft(scene: THREE.Scene, position: number[], preset: TimeOf
   scene.add(dust);
 }
 
+// P-01 fog bases per preset (lighting-moods.md) — replaces the old flat dark base.
+const FOG_BASE = { morning: COLORS.fogHaze, afternoon: 0xe8cfae, night: COLORS.nightIndigo };
+
 export function setupAtmosphere(scene: THREE.Scene, preset: TimeOfDayPreset): void {
   // Fog tinted toward the dusk fill; near plane beyond the room diagonal so the
   // interior stays clear and the haze reads through the window over the city.
-  const fogColor = new THREE.Color(0x1a1a2e).lerp(new THREE.Color(preset.fill.color), 0.45);
+  const fogColor = new THREE.Color(FOG_BASE[preset.name]).lerp(new THREE.Color(preset.fill.color), 0.45);
   scene.fog = new THREE.Fog(fogColor, 7, 42);
 
   for (const f of ROOM_LAYOUT.furniture || []) {

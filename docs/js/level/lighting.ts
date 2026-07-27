@@ -30,32 +30,36 @@ export interface TimeOfDayPreset {
 const PRESETS: Record<TimeOfDayName, TimeOfDayPreset> = {
   morning: {
     name: 'morning',
-    key: { color: 0xffd6a0, intensity: 20 },
-    fill: { color: 0x7fa0d0, intensity: 1.2 },
-    accent: 1.4,
-    windowGlow: { color: 0xffaa77, intensity: 2.8, spotIntensity: 1.2 },
-    cityEmissiveMultiplier: 0.8,
-    pcLedMultiplier: 1.0,
+    key: { color: COLORS.sunlightWarm, intensity: 6.0 },
+    fill: { color: COLORS.skyFillBlue, intensity: 1.5 },
+    accent: 0.8,
+    windowGlow: { color: 0xffe8c0, intensity: 4.0, spotIntensity: 1.6 },
+    cityEmissiveMultiplier: 0.4,
+    pcLedMultiplier: 0.6,
   },
   afternoon: {
     name: 'afternoon',
-    key: { color: 0xffc890, intensity: 24 },
-    fill: { color: 0x8aa8d8, intensity: 1.8 },
-    accent: 1.6,
-    windowGlow: { color: 0x6688aa, intensity: 6.0, spotIntensity: 2.5 },
+    key: { color: 0xffc27a, intensity: 6.0 },
+    fill: { color: 0xb0a8c8, intensity: 1.2 },
+    accent: 1.2,
+    windowGlow: { color: COLORS.duskAmber, intensity: 6.0, spotIntensity: 2.5 },
     cityEmissiveMultiplier: 1.0,
     pcLedMultiplier: 1.0,
   },
   night: {
     name: 'night',
-    key: { color: 0xffa860, intensity: 18 },
-    fill: { color: 0x405d94, intensity: 0.55 },
+    key: { color: 0xffb36b, intensity: 2.5 },
+    fill: { color: 0x3a4a72, intensity: 0.55 },
     accent: 1.6,
-    windowGlow: { color: 0x4466cc, intensity: 8.0, spotIntensity: 3.0 },
-    cityEmissiveMultiplier: 1.5,
-    pcLedMultiplier: 1.2,
+    windowGlow: { color: 0x4460a8, intensity: 5.0, spotIntensity: 2.5 },
+    cityEmissiveMultiplier: 1.4,
+    pcLedMultiplier: 1.3,
   },
 };
+
+// Per-preset sky for scene.background (P-01 lighting-moods.md; interface is
+// frozen, so the sky value lives here instead of on the preset).
+const SKY_BACKGROUND = { morning: 0xa8d4e0, afternoon: 0xe0b184, night: 0x232c48 };
 
 declare global {
   interface Window {
@@ -102,6 +106,9 @@ function isSpotLight(o: THREE.Object3D): o is THREE.SpotLight {
 }
 
 export function applyTimeOfDay(scene: THREE.Object3D, preset: TimeOfDayPreset): void {
+  if ((scene as THREE.Scene).isScene) {
+    (scene as THREE.Scene).background = new THREE.Color(SKY_BACKGROUND[preset.name]);
+  }
   scene.traverse((obj) => {
     if (isMesh(obj)) {
       const mat = obj.material as THREE.Material;
@@ -163,12 +170,12 @@ export function setupLighting(scene: THREE.Scene, options?: { now?: Date }): Tim
   scene.add(new THREE.AmbientLight(0x8899bb, 0.32));
 
   // RGB accents — small, shadowless local glow.
-  const deskGlow = new THREE.PointLight(COLORS.cyan, preset.accent, 3.5, 1.8);
+  const deskGlow = new THREE.PointLight(COLORS.sheikahTeal, preset.accent, 3.5, 1.8);
   deskGlow.position.set(1.4, 1.2, -0.9);
   scene.add(deskGlow);
 
   // Kept off the wall: hugging it produced a source-less hotspot orb.
-  const cornerGlow = new THREE.PointLight(COLORS.magenta, preset.accent * 0.45, 4, 1.8);
+  const cornerGlow = new THREE.PointLight(COLORS.ancientAmber, preset.accent * 0.45, 4, 1.8);
   cornerGlow.position.set(-1.6, 1.5, 0.6);
   scene.add(cornerGlow);
 
