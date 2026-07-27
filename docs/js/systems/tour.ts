@@ -23,7 +23,7 @@ const TOUR_STOPS: TourStop[] = [
   { name: 'desk', position: new THREE.Vector3(0.7, 1.4, -0.4), target: new THREE.Vector3(1.2, 0.8, -1.15), panelId: 'panel-profile' },
   { name: 'macbook', position: new THREE.Vector3(1.2, 1.35, -0.7), target: new THREE.Vector3(1.6, 0.9, -1.2), panelId: 'panel-alphgpt' },
   { name: 'window', position: new THREE.Vector3(0, 1.45, -0.9), target: new THREE.Vector3(0, 1.5, -10), panelId: null },
-  { name: 'pet', position: new THREE.Vector3(-0.4, 1.25, -0.2), target: new THREE.Vector3(-0.85, 0.9, -0.85), panelId: null },
+  { name: 'pet', position: new THREE.Vector3(0.5, 1.25, 0.35), target: new THREE.Vector3(1.45, 0.4, 1.15), panelId: null },
 ];
 
 export class TourSystem {

@@ -140,7 +140,10 @@ export async function buildLevel(scene: THREE.Scene, worldState: WorldState): Pr
   const noCollisionTypes = new Set(['rug', 'ceilingLamp', 'door', 'window']);
   for (const f of ROOM_LAYOUT.furniture || []) {
     const entry = (FurnitureRegistry).get(f.type);
-    if (!entry) continue;
+    if (!entry) {
+      console.warn('[seed] unknown furniture id, skipping:', f.type);
+      continue;
+    }
 
     const result: BuilderResult = entry.builder(f);
 

@@ -7,14 +7,14 @@ import { register } from '../registry.js';
 import { COLORS } from '../../core.js';
 import { makeStd, texMetal } from '../../assets/index.js';
 import { makeSphere, makeLight } from '../../primitives.js';
-import type { FurnitureConfig } from '../../seed.js';
 
-function buildFairyLights(cfg: FurnitureConfig): { mesh: THREE.Group } {
+function buildFairyLights(): { mesh: THREE.Group } {
   const group = new THREE.Group();
-  const [x, y, z] = cfg.position;
+  // Build around local origin — consumers (buildLevel / editor) position the group.
+  // (Previously baked cfg.position into vertices AND the group got translated → double-apply.)
   const count = 10;
-  const startX = x - 0.8;
-  const endX = x + 0.82;
+  const startX = -0.8;
+  const endX = 0.82;
 
   // deterministic organic sag via sine harmonics
   const points: THREE.Vector3[] = [];
@@ -22,8 +22,8 @@ function buildFairyLights(cfg: FurnitureConfig): { mesh: THREE.Group } {
     const t = i / 16;
     const px = startX + (endX - startX) * t;
     const sag = 0.14 * Math.sin(Math.PI * t) + 0.04 * Math.sin(Math.PI * 2 * t);
-    const pz = z + 0.05 + 0.03 * Math.sin(Math.PI * 3 * t);
-    points.push(new THREE.Vector3(px, y - sag, pz));
+    const pz = 0.05 + 0.03 * Math.sin(Math.PI * 3 * t);
+    points.push(new THREE.Vector3(px, -sag, pz));
   }
   const curve = new THREE.CatmullRomCurve3(points);
 
@@ -33,7 +33,7 @@ function buildFairyLights(cfg: FurnitureConfig): { mesh: THREE.Group } {
 
   const bulbMat = makeStd({
     color: COLORS.warm,
-    emissive: COLORS.orange,
+    emissive: COLORS.ancientAmber,
     emissiveIntensity: 1.8,
     roughness: 0.2,
   });
