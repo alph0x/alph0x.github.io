@@ -1,0 +1,55 @@
+/* Design tokens — ghibli-restyle (design-contract.md §7, owned by P-03).
+   Palette values: docs/art-direction/palette.md (P-01, human-approved).
+   Type/spacing/radius/elevation: docs/art-direction/type-spacing.md.
+   Consumers use var(--*); never invent values (contract §1). */
+:root {
+  /* Palette — base surfaces */
+  --paperWhite: #f4ecd8;
+  --plasterCream: #e6dbc2;
+  --woodHoney: #b98a52;
+  --fabricSage: #8ba888;
+  --metalSoft: #98a2a6;
+  --shadowLavender: #7c7fa0;
+
+  /* Palette — light */
+  --sunlightWarm: #ffd9a0;
+  --skyFillBlue: #9fc8e0;
+  --duskAmber: #f5a54a;
+  --nightIndigo: #333f63;
+  --fogHaze: #cfe4da;
+
+  /* Palette — Sheikah-tech accents (the ONLY emissive hues, contract §6) */
+  --sheikahTeal: #3ec8ae;
+  --ancientAmber: #ff9e44;
+
+  /* Type voices */
+  --font-ui: ui-rounded, "SF Pro Rounded", "Segoe UI", system-ui, sans-serif;
+  --font-tech: ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* Type scale (1.25 minor-third on 16px base) */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.5rem;
+  --text-2xl: 2rem;
+
+  /* Spacing scale (4px grid) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  /* Radius (soft rounded paper) */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+
+  /* Elevation (nightIndigo-tinted, never black-on-light) */
+  --shadow-panel: 0 2px 12px rgb(51 63 99 / 0.18);
+  --shadow-pop: 0 8px 32px rgb(51 63 99 / 0.28);
+}

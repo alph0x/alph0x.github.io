@@ -1,0 +1,151 @@
+/* Info panels, portrait lockout, AlphGPT chat, terminal mode, legend —
+   extracted as-is from the index.html inline <style> block (P-03). */
+
+/* ── INFO PANELS (Terminal overlay) ──────────────── */
+.info-panel {
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.9);
+  z-index: 3000; width: 90%; max-width: 900px; max-height: 85vh; overflow-y: auto;
+  background: rgba(12,10,9,0.97); border: 2px solid #292524;
+  box-shadow: 0 0 40px rgba(0,0,0,0.9), inset 0 0 60px rgba(0,0,0,0.5);
+  padding: 40px; opacity: 0; pointer-events: none; transition: all 0.3s;
+}
+.info-panel.active { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
+.info-panel::-webkit-scrollbar { width: 4px; }
+.info-panel::-webkit-scrollbar-thumb { background: #f59e0b; }
+
+.panel-header {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 32px;
+  padding-bottom: 16px; border-bottom: 2px solid #1c1917;
+}
+.panel-header .panel-icon {
+  width: 40px; height: 40px; border: 2px solid var(--accent); display: flex;
+  align-items: center; justify-content: center; font-size: 18px;
+  color: var(--accent); text-shadow: 0 0 10px var(--accent-glow);
+}
+.panel-header h2 {
+  font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 28px;
+  text-transform: uppercase; color: #e7e5e4; letter-spacing: 0.04em;
+}
+.panel-close {
+  margin-left: auto; font-family: 'Press Start 2P', monospace; font-size: 10px;
+  color: #ec4899; background: none; border: 2px solid #ec4899; padding: 8px 16px;
+  cursor: pointer; transition: all 0.2s; text-transform: uppercase;
+}
+.panel-close:hover { background: #ec4899; color: #e7e5e4; }
+
+.panel-body { font-family: 'Share Tech Mono', monospace; font-size: 14px; line-height: 1.8; color: #e7e5e4; }
+.panel-body .section-label {
+  font-family: 'Press Start 2P', monospace; font-size: 9px; color: #57534e;
+  letter-spacing: 0.12em; text-transform: uppercase; margin: 24px 0 12px;
+  display: flex; align-items: center; gap: 10px;
+}
+.panel-body .section-label::after { content: ''; flex: 1; height: 1px; background: #1c1917; }
+.panel-body .bio-text { max-width: 700px; }
+.panel-body .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+.panel-body .stat-block { background: #111114; border: 2px solid #1c1917; padding: 16px; position: relative; }
+.panel-body .stat-block::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--accent); box-shadow: 0 0 10px var(--accent-glow); }
+.panel-body .stat-num { font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 28px; color: var(--accent); text-shadow: 0 0 10px var(--accent-glow); }
+.panel-body .stat-label { font-family: 'Press Start 2P', monospace; font-size: 8px; color: #57534e; margin-top: 6px; }
+.panel-body .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; }
+@media (max-width: 768px) { .panel-body .two-col { grid-template-columns: 1fr; } .panel-body .stat-row { grid-template-columns: 1fr; } }
+.panel-body .info-block { padding: 18px 20px; background: #111114; border: 2px solid #1c1917; }
+.panel-body .info-title { font-family: 'Orbitron', sans-serif; font-weight: 800; font-size: 12px; text-transform: uppercase; color: #f59e0b; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #1c1917; text-shadow: 0 0 10px rgba(245,158,11,0.3); }
+.panel-body .info-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #1c1917; font-size: 12px; }
+.panel-body .info-row:last-child { border-bottom: none; }
+.panel-body .info-key { font-family: 'Press Start 2P', monospace; font-size: 7px; color: #57534e; text-transform: uppercase; }
+.panel-body .info-val { color: #e7e5e4; text-align: right; }
+
+@media (max-width: 768px) and (orientation: portrait), (hover: none) and (pointer: coarse) and (orientation: portrait) {
+  #game-container, #loading, #start-screen, #hud, #crosshair, #prompt, .info-panel, #legend { display: none !important; }
+}
+
+/* ── ALPHGPT CHAT ────────────────────────────────── */
+.chat-container { display: flex; flex-direction: column; height: 55vh; max-height: 460px; }
+.chat-messages { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 4px; }
+.chat-msg { padding: 10px 12px; max-width: 88%; font-size: 13px; line-height: 1.6; white-space: pre-wrap; }
+.chat-msg-bot { background: #111114; border-left: 3px solid #10b981; color: #e7e5e4; align-self: flex-start; }
+.chat-msg-user { background: #1c1917; border-right: 3px solid #f59e0b; color: #e7e5e4; align-self: flex-end; text-align: right; }
+.chat-msg-meta { font-family: 'Press Start 2P', monospace; font-size: 7px; color: #57534e; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.08em; }
+.chat-input-row { display: flex; gap: 8px; padding-top: 10px; border-top: 2px solid #1c1917; }
+.chat-input { flex: 1; background: #111114; border: 1px solid #292524; color: #e7e5e4; padding: 10px 12px; font-family: 'Share Tech Mono', monospace; font-size: 13px; outline: none; }
+.chat-input:focus { border-color: #f59e0b; }
+.chat-send { background: #f59e0b; color: #0c0a09; border: none; padding: 10px 16px; font-family: 'Press Start 2P', monospace; font-size: 9px; cursor: pointer; text-transform: uppercase; }
+.chat-send:hover { background: #fbbf24; }
+.chat-typing { display: flex; gap: 4px; padding: 8px 12px; }
+.chat-typing-dot { width: 6px; height: 6px; background: #10b981; border-radius: 50%; animation: chatBounce 1s infinite; }
+.chat-typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.chat-typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes chatBounce { 0%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-4px); } }
+
+/* ── TERMINAL MODE ───────────────────────────────── */
+#panel-alphgpt.terminal-mode {
+  background: rgba(0, 10, 2, 0.98);
+  border-color: #10b981;
+  box-shadow: 0 0 40px rgba(16,185,129,0.25), inset 0 0 80px rgba(16,185,129,0.05);
+}
+#panel-alphgpt.terminal-mode .panel-header { border-bottom-color: #064e3b; }
+#panel-alphgpt.terminal-mode .panel-header h2 {
+  font-family: 'Share Tech Mono', monospace; color: #10b981;
+  text-shadow: 0 0 12px rgba(16,185,129,0.4);
+}
+#panel-alphgpt.terminal-mode .panel-icon { border-color: #10b981; color: #10b981; }
+#panel-alphgpt.terminal-mode .section-label { color: #059669; }
+#panel-alphgpt.terminal-mode .chat-container {
+  height: 58vh; max-height: 520px; background: rgba(0,0,0,0.35);
+  border: 1px solid #064e3b; padding: 12px;
+}
+#panel-alphgpt.terminal-mode .chat-messages {
+  font-family: 'Share Tech Mono', monospace; font-size: 13px; line-height: 1.6; color: #4ade80;
+}
+#panel-alphgpt.terminal-mode .chat-msg { background: transparent; border: none; padding: 4px 0; max-width: 100%; }
+#panel-alphgpt.terminal-mode .chat-msg-bot { color: #22d3ee; }
+#panel-alphgpt.terminal-mode .chat-msg-user { color: #4ade80; align-self: flex-start; text-align: left; }
+#panel-alphgpt.terminal-mode .chat-msg-meta { color: #059669; font-family: 'Share Tech Mono', monospace; font-size: 8px; }
+#panel-alphgpt.terminal-mode .chat-input-row { border-top-color: #064e3b; align-items: center; }
+#panel-alphgpt.terminal-mode .chat-input-row::before {
+  content: '>'; color: #10b981; margin-right: 8px;
+  font-family: 'Share Tech Mono', monospace; font-size: 13px;
+}
+#panel-alphgpt.terminal-mode .chat-input {
+  background: transparent; border: none; color: #4ade80;
+  font-family: 'Share Tech Mono', monospace; caret-color: #10b981;
+  text-shadow: 0 0 6px rgba(16,185,129,0.4);
+}
+#panel-alphgpt.terminal-mode .chat-input::placeholder { color: #065f46; }
+#panel-alphgpt.terminal-mode .chat-send {
+  background: #064e3b; color: #10b981; border: 1px solid #10b981;
+}
+#panel-alphgpt.terminal-mode .chat-send:hover { background: #10b981; color: #000; }
+
+/* ── LEGEND OVERLAY ──────────────────────────────── */
+.legend-overlay {
+  position: fixed; top: 50%; left: 50%;
+  transform: translate(-50%, -50%) scale(0.95);
+  z-index: 3500; width: 90%; max-width: 420px;
+  background: rgba(12,10,9,0.97); border: 2px solid #292524;
+  box-shadow: 0 0 40px rgba(0,0,0,0.9), inset 0 0 60px rgba(0,0,0,0.5);
+  padding: 24px; opacity: 0; pointer-events: none; transition: all 0.3s;
+  font-family: 'Share Tech Mono', monospace; color: #e7e5e4;
+}
+.legend-overlay.active { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
+.legend-overlay .legend-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid #1c1917;
+}
+.legend-overlay h2 {
+  font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 18px;
+  text-transform: uppercase; letter-spacing: 0.04em; color: #f59e0b;
+}
+.legend-overlay .legend-close {
+  font-family: 'Press Start 2P', monospace; font-size: 8px;
+  color: #ec4899; background: none; border: 2px solid #ec4899;
+  padding: 6px 12px; cursor: pointer; text-transform: uppercase;
+}
+.legend-overlay .legend-close:hover { background: #ec4899; color: #e7e5e4; }
+.legend-overlay .legend-grid { display: grid; gap: 10px; }
+.legend-overlay .legend-row { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.legend-overlay .legend-row span { color: #a8a29e; }
+.legend-overlay kbd {
+  background: #292524; border-radius: 3px; padding: 2px 6px;
+  font-family: monospace; font-size: 12px; color: #e7e5e4;
+}
