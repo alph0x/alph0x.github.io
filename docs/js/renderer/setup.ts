@@ -24,7 +24,10 @@ export function createWebGLRenderer(): THREE.WebGLRenderer {
   renderer.setPixelRatio(dpr);
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  // D-17: Neutral tone mapping — ACES at 1.25 washed out the toon palette,
+  // and ACES at lower exposure only darkened it; Neutral keeps warm
+  // saturation without an exposure retune (P-07, design-contract §5).
+  renderer.toneMapping = THREE.NeutralToneMapping;
   renderer.toneMappingExposure = 1.25;
   document.body.appendChild(renderer.domElement);
   return renderer;
