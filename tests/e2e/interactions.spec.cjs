@@ -48,14 +48,6 @@ test.describe('Interaction validation suite', () => {
   // Panels and the start screen are display:none on mobile portrait (index.html).
   test.skip(({ isMobile }) => !!isMobile, 'info panels are desktop-only');
 
-  test.beforeEach(async ({ page }) => {
-    // Force the production path: webdriver=true would skip GLB model loading,
-    // and the GLB macBook nests meshes deeper than the procedural fallback.
-    await page.addInitScript(() => {
-      Object.defineProperty(navigator, 'webdriver', { get: () => false });
-    });
-  });
-
   test('prompt shows [E] name for every interactable', async ({ page }) => {
     test.setTimeout(90000);
     await boot(page);

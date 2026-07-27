@@ -19,10 +19,6 @@ describe('asset size budgets', () => {
     expect(dirSizeMB(path.join(ASSETS_ROOT, 'env'))).toBeLessThanOrEqual(4);
   });
 
-  it('texture sets stay within 8 MB total', () => {
-    expect(dirSizeMB(path.join(ASSETS_ROOT, 'tex'))).toBeLessThanOrEqual(8);
-  });
-
   it('every vendored asset is precached by the service worker', () => {
     const sw = fs.readFileSync(path.resolve(import.meta.dirname, '../docs/public/sw.js'), 'utf-8');
     const files = [];

@@ -10,7 +10,7 @@ function buildGamingPC(cfg: FurnitureConfig): { mesh: THREE.Group } {
 
   const caseMat = makeStd({ map: texPlastic, color: 0x1c1c1f, roughness: 0.4, metalness: 0.3 });
   const metalMat = makeStd({ map: texMetal, color: 0x2a2a30, roughness: 0.4, metalness: 0.6 });
-  const glassMat = new THREE.MeshStandardMaterial({ color: 0x111114, transparent: true, opacity: 0.35, flatShading: true, roughness: 0.2, metalness: 0.1 });
+  const glassMat = new THREE.MeshStandardMaterial({ color: 0x111114, transparent: true, opacity: 0.35, roughness: 0.2, metalness: 0.1 });
   const ventMat = makeStd({ map: texPlastic, color: 0x0a0a0c, roughness: 0.9 });
 
   // rounded tower case

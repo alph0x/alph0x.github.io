@@ -13,18 +13,7 @@ const SHELL_ASSETS = [
   '/icons/icon-192.png',
   '/icons/icon-512.png',
   '/icons/apple-touch-icon.png',
-  '/assets/models/macbook.glb',
   '/assets/env/dusk_1k.hdr',
-  '/assets/models/ATTRIBUTION.md',
-  '/assets/tex/fabric/fabric_leather_02_diff_1k.jpg',
-  '/assets/tex/fabric/fabric_leather_02_nor_gl_1k.jpg',
-  '/assets/tex/fabric/fabric_leather_02_rough_1k.jpg',
-  '/assets/tex/plaster/plastered_wall_diff_1k.jpg',
-  '/assets/tex/plaster/plastered_wall_nor_gl_1k.jpg',
-  '/assets/tex/plaster/plastered_wall_rough_1k.jpg',
-  '/assets/tex/wood-floor/wood_floor_deck_diff_1k.jpg',
-  '/assets/tex/wood-floor/wood_floor_deck_nor_gl_1k.jpg',
-  '/assets/tex/wood-floor/wood_floor_deck_rough_1k.jpg',
 ];
 
 self.addEventListener('install', (event) => {

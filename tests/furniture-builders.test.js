@@ -216,52 +216,54 @@ describe('buildMiniSchnauzer', () => {
     expect(result.mesh).toBeInstanceOf(THREE.Group);
   });
 
+  it('exposes exactly the 5 named pet animation anchors (pet-renderer contract)', () => {
+    const result = builder({ position: [0, 0, 0], rotation: 0 });
+    for (const name of ['body', 'head', 'tail', 'earL', 'earR']) {
+      expect(result.mesh.getObjectByName(name), `anchor ${name}`).toBeDefined();
+    }
+  });
+
   it('has head as a Group containing facial features', () => {
     const result = builder({ position: [0, 0, 0], rotation: 0 });
     const head = result.mesh.getObjectByName('head');
     expect(head).toBeInstanceOf(THREE.Group);
-    expect(head.children.length).toBeGreaterThanOrEqual(9); // cranium + 8 facial features
+    // P-15 hero rebuild: static same-material features merge (draw-call budget)
+    // — cranium + merged furnishings + nose + merged eyes + 2 anchored ears.
+    expect(head.children.length).toBeGreaterThanOrEqual(5);
   });
 
   it('facial features are children of head group', () => {
     const result = builder({ position: [0, 0, 0], rotation: 0 });
     const head = result.mesh.getObjectByName('head');
-    const muzzle = result.mesh.getObjectByName('muzzle');
-    const beard = result.mesh.getObjectByName('beard');
+    const furnishings = result.mesh.getObjectByName('furnishings');
     const nose = result.mesh.getObjectByName('nose');
-    const eyeL = result.mesh.getObjectByName('eyeL');
-    const eyeR = result.mesh.getObjectByName('eyeR');
+    const eyes = result.mesh.getObjectByName('eyes');
     const earL = result.mesh.getObjectByName('earL');
     const earR = result.mesh.getObjectByName('earR');
-    const eyebrowL = result.mesh.getObjectByName('eyebrowL');
-    const eyebrowR = result.mesh.getObjectByName('eyebrowR');
 
-    expect(muzzle.parent).toBe(head);
-    expect(beard.parent).toBe(head);
+    expect(furnishings.parent).toBe(head);
     expect(nose.parent).toBe(head);
-    expect(eyeL.parent).toBe(head);
-    expect(eyeR.parent).toBe(head);
+    expect(eyes.parent).toBe(head);
     expect(earL.parent).toBe(head);
     expect(earR.parent).toBe(head);
-    expect(eyebrowL.parent).toBe(head);
-    expect(eyebrowR.parent).toBe(head);
   });
 
   it('rotating head rotates facial features in world space', () => {
     const result = builder({ position: [0, 0, 0], rotation: 0 });
     const head = result.mesh.getObjectByName('head');
-    const muzzle = result.mesh.getObjectByName('muzzle');
+    // nose sits off the head origin, so head rotation must move it in world.
+    const nose = result.mesh.getObjectByName('nose');
 
     result.mesh.updateMatrixWorld(true);
 
     const before = new THREE.Vector3();
-    muzzle.getWorldPosition(before);
+    nose.getWorldPosition(before);
 
     head.rotation.y = Math.PI / 4;
     result.mesh.updateMatrixWorld(true);
 
     const after = new THREE.Vector3();
-    muzzle.getWorldPosition(after);
+    nose.getWorldPosition(after);
 
     expect(after.x).not.toBeCloseTo(before.x, 3);
     expect(after.z).not.toBeCloseTo(before.z, 3);

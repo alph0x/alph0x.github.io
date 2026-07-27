@@ -33,10 +33,9 @@ export function makeStd({
   transparent,
   opacity,
   side,
+  flatShading,
   normalMap,
 }: StdParams): THREE.MeshToonMaterial {
-  // ponytail: roughness/metalness/roughnessMap stay accepted via StdParams but
-  // are not forwarded — toon has no PBR response; no caller changes needed.
   // ponytail: roughness/metalness/roughnessMap stay accepted via StdParams but
   // are not forwarded — toon has no PBR response; no caller changes needed.
   const params: THREE.MeshToonMaterialParameters = { emissive, emissiveIntensity, gradientMap };
@@ -47,10 +46,12 @@ export function makeStd({
   if (side !== undefined) params.side = side;
   if (normalMap) params.normalMap = normalMap;
   const mat = new THREE.MeshToonMaterial(params);
+  // D-15: flatShading defaults OFF (smooth normals — the Ghibli/BOTW look).
   // three r185 dropped flatShading from MeshToonMaterial's declared params, but
   // WebGLPrograms still honors material.flatShading === true for any material
-  // type — keep the low-poly facet look (contract §3).
-  return Object.assign(mat, { flatShading: true });
+  // type — deliberate per-item opt-in only (contract §3 as superseded).
+  if (flatShading) Object.assign(mat, { flatShading: true });
+  return mat;
 }
 
 export const M: Record<string, THREE.Material> = {

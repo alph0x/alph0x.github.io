@@ -4,11 +4,29 @@
  */
 
 import * as THREE from 'three';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { mergeGeometries, mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js';
 import { register } from '../registry.js';
 import { makeStd, texMetal, texWood } from '../../assets/index.js';
-import { makeRoundedBox, makeBox, makeCylinder, rootGroup } from '../../primitives.js';
+import { rootGroup } from '../../primitives.js';
 import { getInteriorOffset } from './wall-offset.js';
 import type { FurnitureConfig } from '../../seed.js';
+
+// Deduped rounded box (RoundedBoxGeometry is non-indexed — mergeVertices
+// re-indexes it, keeping vertex counts near old indexed builds).
+const rb = (w: number, h: number, d: number, r: number, seg = 3): THREE.BufferGeometry =>
+  mergeVertices(new RoundedBoxGeometry(w, h, d, seg, r));
+
+/** Normalize indexing, merge, re-index (P-15 pattern — no new abstractions). */
+const merge = (geos: THREE.BufferGeometry[]): THREE.BufferGeometry =>
+  mergeVertices(mergeGeometries(geos.map((p) => (p.index ? p.toNonIndexed() : p))));
+
+function part(geo: THREE.BufferGeometry, mat: THREE.Material, x: number, y: number, z: number): THREE.Mesh {
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.position.set(x, y, z);
+  mesh.castShadow = mesh.receiveShadow = true;
+  return mesh;
+}
 
 function buildDoor(cfg: FurnitureConfig): { mesh: THREE.Group; label: string } {
   const [x, y, z] = cfg.position;
@@ -25,28 +43,28 @@ function buildDoor(cfg: FurnitureConfig): { mesh: THREE.Group; label: string } {
   const doorH = 2.15;
   const frameD = 0.12;
 
-  // outer frame with real depth
-  door.add(makeRoundedBox(frameMat, [doorW + 0.12, 0.12, frameD], [0, doorH + 0.06, 0], 0.02, 2));
-  door.add(makeRoundedBox(frameMat, [0.12, doorH, frameD], [-doorW / 2 - 0.06, doorH / 2, 0], 0.02, 2));
-  door.add(makeRoundedBox(frameMat, [0.12, doorH, frameD], [doorW / 2 + 0.06, doorH / 2, 0], 0.02, 2));
+  // Outer frame with real depth (merged static)
+  door.add(new THREE.Mesh(merge([
+    rb(doorW + 0.12, 0.12, frameD, 0.02).translate(0, doorH + 0.06, 0),
+    rb(0.12, doorH, frameD, 0.02).translate(-doorW / 2 - 0.06, doorH / 2, 0),
+    rb(0.12, doorH, frameD, 0.02).translate(doorW / 2 + 0.06, doorH / 2, 0),
+  ]), frameMat));
 
-  // main panel
-  door.add(makeRoundedBox(panelMat, [doorW, doorH, 0.06], [0, doorH / 2, 0], 0.03, 2));
+  // Main panel
+  door.add(part(rb(doorW, doorH, 0.06, 0.03), panelMat, 0, doorH / 2, 0));
 
-  // subtle raised-panel border inset
+  // Subtle raised-panel border inset
   const insetW = doorW - 0.22;
   const insetH = doorH - 0.22;
-  door.add(makeRoundedBox(insetMat, [insetW, insetH, 0.04], [0, doorH / 2, 0.02], 0.02, 2));
-  door.add(makeRoundedBox(panelMat, [insetW - 0.08, insetH - 0.08, 0.045], [0, doorH / 2, 0.025], 0.015, 2));
+  door.add(part(rb(insetW, insetH, 0.04, 0.02, 2), insetMat, 0, doorH / 2, 0.02));
+  door.add(part(rb(insetW - 0.08, insetH - 0.08, 0.045, 0.015, 2), panelMat, 0, doorH / 2, 0.025));
 
-  // metal handle lever + backplate
-  door.add(makeRoundedBox(metalMat, [0.08, 0.04, 0.015], [0.38, doorH / 2 + 0.05, 0.04], 0.005, 2));
-  door.add(makeBox(metalMat, [0.04, 0.02, 0.08], [0.42, doorH / 2 + 0.06, 0.06]));
-
-  // hinges on the frame side
-  for (const hy of [0.3, 1.1, 1.9]) {
-    door.add(makeCylinder(metalMat, [0.025, 0.025, 0.05], [-doorW / 2 - 0.06, hy, -0.03], 8));
-  }
+  // Metal: handle lever + backplate + hinges (merged static)
+  door.add(new THREE.Mesh(merge([
+    rb(0.08, 0.04, 0.015, 0.005, 2).translate(0.38, doorH / 2 + 0.05, 0.04),
+    new THREE.BoxGeometry(0.04, 0.02, 0.08).translate(0.42, doorH / 2 + 0.06, 0.06),
+    ...[0.3, 1.1, 1.9].map((hy) => new THREE.CylinderGeometry(0.025, 0.025, 0.05, 12).translate(-doorW / 2 - 0.06, hy, -0.03)),
+  ]), metalMat));
 
   const off = getInteriorOffset(x, z, 0.15);
   door.position.set(off.x, 0, off.z);
