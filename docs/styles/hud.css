@@ -1,26 +1,28 @@
 /* In-game HUD chrome (HUD bar, interact prompt, touch controls) —
-   extracted as-is from the index.html inline <style> block (P-03). */
+   extracted as-is from the index.html inline <style> block (P-03).
+   P-09: colors onto var(--*) tokens; .hud-pink re-hued magenta →
+   ancientAmber, touch/interact green → sheikahTeal (palette.md dispositions). */
 
 /* ── HUD ─────────────────────────────────────────── */
 #hud {
   position: fixed; bottom: 0; left: 0; right: 0; z-index: 150;
-  height: 72px; background: rgba(12,10,9,0.92); border-top: 2px solid #292524;
+  height: 72px; background: color-mix(in srgb, var(--nightIndigo) 40%, black); border-top: 2px solid color-mix(in srgb, var(--nightIndigo) 65%, black);
   display: flex; align-items: center; padding: 0 20px; gap: 20px;
   font-family: 'Press Start 2P', monospace; font-size: 10px;
   pointer-events: none;
 }
 .hud-block { display: flex; flex-direction: column; gap: 4px; min-width: 80px; }
-.hud-label { color: #57534e; font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; }
+.hud-label { color: var(--shadowLavender); font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; }
 .hud-value { font-size: 14px; letter-spacing: 0.04em; }
-.hud-pink { color: #ec4899; text-shadow: 0 0 8px rgba(236,72,153,0.5); }
+.hud-pink { color: var(--ancientAmber); text-shadow: 0 0 8px color-mix(in srgb, var(--ancientAmber) 50%, transparent); }
 
 /* ── PROMPT ──────────────────────────────────────── */
 #prompt {
   position: fixed; top: 62%; left: 50%; transform: translate(-50%, -50%);
-  z-index: 200; pointer-events: none; color: #f59e0b;
+  z-index: 200; pointer-events: none; color: var(--ancientAmber);
   font-family: 'Press Start 2P', monospace; font-size: 10px;
-  text-shadow: 0 0 12px rgba(245,158,11,0.6); opacity: 0; transition: opacity 0.2s;
-  background: rgba(0,0,0,0.6); padding: 8px 16px; border: 1px solid #f59e0b;
+  text-shadow: 0 0 12px color-mix(in srgb, var(--ancientAmber) 60%, transparent); opacity: 0; transition: opacity 0.2s;
+  background: rgba(0,0,0,0.6); padding: 8px 16px; border: 1px solid var(--ancientAmber);
 }
 #prompt.active { opacity: 1; }
 
@@ -51,12 +53,12 @@
     width: 44px;
     height: 44px;
     border-radius: 50%;
-    background: rgba(245,158,11,0.45);
-    border: 2px solid #f59e0b;
+    background: color-mix(in srgb, var(--ancientAmber) 45%, transparent);
+    border: 2px solid var(--ancientAmber);
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    box-shadow: 0 0 14px rgba(245,158,11,0.25);
+    box-shadow: 0 0 14px color-mix(in srgb, var(--ancientAmber) 25%, transparent);
   }
   #touch-interact {
     position: absolute;
@@ -65,22 +67,22 @@
     width: 60px;
     height: 60px;
     border-radius: 50%;
-    background: rgba(16,185,129,0.12);
-    border: 2px solid #10b981;
-    color: #10b981;
+    background: color-mix(in srgb, var(--sheikahTeal) 12%, transparent);
+    border: 2px solid var(--sheikahTeal);
+    color: var(--sheikahTeal);
     display: flex;
     align-items: center;
     justify-content: center;
     font-family: 'Press Start 2P', monospace;
     font-size: 12px;
     pointer-events: auto;
-    box-shadow: 0 0 12px rgba(16,185,129,0.15);
+    box-shadow: 0 0 12px color-mix(in srgb, var(--sheikahTeal) 15%, transparent);
     user-select: none;
     -webkit-user-select: none;
     transition: background 0.1s, transform 0.1s;
   }
   #touch-interact.active {
-    background: rgba(16,185,129,0.4);
+    background: color-mix(in srgb, var(--sheikahTeal) 40%, transparent);
     transform: scale(0.95);
   }
   #touch-hint {
