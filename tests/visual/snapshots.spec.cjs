@@ -31,7 +31,8 @@ test.describe('visual snapshots', () => {
   test('editor.html matches baseline', async ({ page }) => {
     await page.goto('/editor.html');
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(500);
+    await page.waitForFunction(() => Boolean(window.__editorSnapshotReady), { timeout: 10000 });
+    await page.waitForTimeout(200);
     await expect(page).toHaveScreenshot('editor.png');
   });
 

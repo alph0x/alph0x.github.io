@@ -116,11 +116,14 @@ export class EditorApp {
   uiManager!: EditorUIManager;
   decorGroup!: THREE.Group;
   guideGroup!: THREE.Group;
+  private readonly _snapshotMode: boolean;
+  private _snapshotFrameCount = 0;
 
   constructor(config: EditorAppConfig) {
     this.config = config;
     this.state = new EditorState();
     this._boundAnimate = this._animate.bind(this);
+    this._snapshotMode = Boolean(window.__snapshotMode);
   }
 
   init(): void {
@@ -150,7 +153,7 @@ export class EditorApp {
   // ── Setup stages ──────────────────────────────────────────────
 
   private _setupRenderer(container: HTMLElement): void {
-    this.renderer = new THREE.WebGLRenderer({ antialias: true });
+    this.renderer = new THREE.WebGLRenderer({ antialias: !this._snapshotMode });
     // ponytail: ensure container has size before setting renderer size
     const w = container.clientWidth || container.offsetWidth || 800;
     const h = container.clientHeight || container.offsetHeight || 600;
@@ -456,6 +459,13 @@ export class EditorApp {
   private _boundAnimate: () => void;
 
   private _animate(): void {
+    // In snapshot mode, render a few frames to settle the initial view, then
+    // freeze and signal the visual test so the screenshot is deterministic.
+    if (this._snapshotMode && this._snapshotFrameCount >= 5) {
+      window.__editorSnapshotReady = true;
+      return;
+    }
+
     requestAnimationFrame(this._boundAnimate);
     this.cameraSystem.controls?.update();
     if (this.state.viewMode === '3d') {
@@ -463,5 +473,6 @@ export class EditorApp {
     }
     this.renderer.render(this.scene, this.cameraSystem.camera as THREE.Camera);
     this.previewManager.tick();
+    this._snapshotFrameCount++;
   }
 }

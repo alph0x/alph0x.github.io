@@ -43,5 +43,7 @@ declare global {
     __scene: THREE.Scene;
     __cameraSystem: EditorCameraSystem;
     __camera: THREE.Camera;
+    __snapshotMode?: boolean;
+    __editorSnapshotReady?: boolean;
   }
 }
