@@ -8,7 +8,6 @@
  */
 
 import * as THREE from 'three';
-import { COLORS } from '../core.js';
 
 import type { TimeOfDayName } from '../core.js';
 export type { TimeOfDayName };
@@ -30,36 +29,32 @@ export interface TimeOfDayPreset {
 const PRESETS: Record<TimeOfDayName, TimeOfDayPreset> = {
   morning: {
     name: 'morning',
-    key: { color: COLORS.sunlightWarm, intensity: 6.0 },
-    fill: { color: COLORS.skyFillBlue, intensity: 1.5 },
-    accent: 0.8,
-    windowGlow: { color: 0xffe8c0, intensity: 4.0, spotIntensity: 1.6 },
-    cityEmissiveMultiplier: 0.4,
-    pcLedMultiplier: 0.6,
+    key: { color: 0xffe2b8, intensity: 14 },
+    fill: { color: 0xfff0d0, intensity: 2.4 },
+    accent: 0.9,
+    windowGlow: { color: 0xffe9c2, intensity: 0.7, spotIntensity: 2.0 },
+    cityEmissiveMultiplier: 0.9,
+    pcLedMultiplier: 1.0,
   },
   afternoon: {
     name: 'afternoon',
-    key: { color: 0xffc27a, intensity: 6.0 },
-    fill: { color: 0xb0a8c8, intensity: 1.2 },
-    accent: 1.2,
-    windowGlow: { color: COLORS.duskAmber, intensity: 6.0, spotIntensity: 2.5 },
+    key: { color: 0xffd9a0, intensity: 12 },
+    fill: { color: 0xffcf8e, intensity: 3.0 },
+    accent: 0.9,
+    windowGlow: { color: 0xffd29a, intensity: 0.9, spotIntensity: 2.6 },
     cityEmissiveMultiplier: 1.0,
     pcLedMultiplier: 1.0,
   },
   night: {
     name: 'night',
-    key: { color: 0xffb36b, intensity: 2.5 },
-    fill: { color: 0x3a4a72, intensity: 0.55 },
-    accent: 1.6,
-    windowGlow: { color: 0x4460a8, intensity: 5.0, spotIntensity: 2.5 },
-    cityEmissiveMultiplier: 1.4,
-    pcLedMultiplier: 1.3,
+    key: { color: 0xffc98a, intensity: 22 },
+    fill: { color: 0x7d8fb0, intensity: 0.6 },
+    accent: 1.1,
+    windowGlow: { color: 0x93aed6, intensity: 0.55, spotIntensity: 1.4 },
+    cityEmissiveMultiplier: 0.7,
+    pcLedMultiplier: 1.0,
   },
 };
-
-// Per-preset sky for scene.background (P-01 lighting-moods.md; interface is
-// frozen, so the sky value lives here instead of on the preset).
-const SKY_BACKGROUND = { morning: 0xa8d4e0, afternoon: 0xe0b184, night: 0x232c48 };
 
 declare global {
   interface Window {
@@ -106,9 +101,6 @@ function isSpotLight(o: THREE.Object3D): o is THREE.SpotLight {
 }
 
 export function applyTimeOfDay(scene: THREE.Object3D, preset: TimeOfDayPreset): void {
-  if ((scene as THREE.Scene).isScene) {
-    (scene as THREE.Scene).background = new THREE.Color(SKY_BACKGROUND[preset.name]);
-  }
   scene.traverse((obj) => {
     if (isMesh(obj)) {
       const mat = obj.material as THREE.Material;
@@ -116,7 +108,6 @@ export function applyTimeOfDay(scene: THREE.Object3D, preset: TimeOfDayPreset): 
       if (obj.userData._windowGlow && 'emissive' in mat && 'emissiveIntensity' in mat) {
         const std = mat as THREE.MeshStandardMaterial;
         std.emissive.setHex(preset.windowGlow.color);
-        std.color.setHex(preset.windowGlow.color);
         std.emissiveIntensity = preset.windowGlow.intensity;
       }
 
@@ -159,23 +150,22 @@ export function setupLighting(scene: THREE.Scene, options?: { now?: Date }): Tim
   key.shadow.bias = -0.001;
   scene.add(key, key.target);
 
-  // Cool dusk fill from the window direction (shadowless; the window spot
+  // Sunlight streaming from the window direction (shadowless; the window spot
   // adds the local shaft and is caster #2).
   const fill = new THREE.DirectionalLight(preset.fill.color, preset.fill.intensity);
   fill.position.set(0, 1.8, -4);
   scene.add(fill, fill.target);
 
-  // Lift unlit surfaces (door wall, ceiling) off pitch-black without
-  // flattening the preset mood.
-  scene.add(new THREE.AmbientLight(0x8899bb, 0.32));
+  // Lift unlit surfaces (door wall, ceiling) with warm bounced light.
+  scene.add(new THREE.AmbientLight(0xffeed6, preset.name === 'night' ? 0.18 : 0.5));
 
-  // RGB accents — small, shadowless local glow.
-  const deskGlow = new THREE.PointLight(COLORS.sheikahTeal, preset.accent, 3.5, 1.8);
+  // Warm practical accents — small, shadowless local glow.
+  const deskGlow = new THREE.PointLight(0xffc98a, preset.accent, 3.5, 1.8);
   deskGlow.position.set(1.4, 1.2, -0.9);
   scene.add(deskGlow);
 
   // Kept off the wall: hugging it produced a source-less hotspot orb.
-  const cornerGlow = new THREE.PointLight(COLORS.ancientAmber, preset.accent * 0.45, 4, 1.8);
+  const cornerGlow = new THREE.PointLight(0xffd9a8, preset.accent * 0.5, 4, 1.8);
   cornerGlow.position.set(-1.6, 1.5, 0.6);
   scene.add(cornerGlow);
 

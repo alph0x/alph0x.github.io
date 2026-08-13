@@ -1,8 +1,6 @@
 import * as THREE from 'three';
-import { COLORS } from '../../core.js';
-import { makeBox } from '../../primitives.js';
-import { tagEmissiveBase } from '../glow.js';
 import { registerParallaxTarget } from '../../systems/animation/parallax.js';
+import { registerCloud } from '../../systems/animation/clouds.js';
 
 /**
  * Deterministic seeded PRNG.
@@ -16,13 +14,13 @@ function makeSeededRng(seed = 0) {
   };
 }
 
-// Dusk skyline (contract §6): warm amber-family bodies/signs, teal kept sparse.
-const CAREER_LANDMARKS = [
-  { name: 'GeoPagos', role: 'fintech', color: 0xd97706, accent: COLORS.sheikahTeal, shape: 'glass' as const },
-  { name: 'Rappi', role: 'delivery', color: 0xf97316, accent: 0xfacc15, shape: 'hub' as const },
-  { name: 'ALPH0X', role: 'personal', color: 0x9a3412, accent: COLORS.ancientAmber, shape: 'creative' as const },
-  { name: 'FullStack', role: 'skills', color: COLORS.duskAmber, accent: COLORS.paperWhite, shape: 'spire' as const },
-  { name: 'Leadership', role: 'mentor', color: 0xf59e0b, accent: 0xfcd34d, shape: 'twin' as const },
+// Career milestones, reimagined as cottages scattered across the hills.
+const CAREER_COTTAGES = [
+  { name: 'GeoPagos', wall: 0xf5ead2, roof: 0xc96f4a },
+  { name: 'Rappi', wall: 0xf3e6c8, roof: 0xb85c40 },
+  { name: 'ALPH0X', wall: 0xf7eeda, roof: 0xd77a61 },
+  { name: 'FullStack', wall: 0xefe4cc, roof: 0xa85238 },
+  { name: 'Leadership', wall: 0xf5ead2, roof: 0xc96f4a },
 ];
 
 function buildLayer(
@@ -38,9 +36,132 @@ function buildLayer(
   return layer;
 }
 
+// Landscape materials ignore the room's fog: distances here are tens of
+// meters, so scene fog would wash every hill into a milky silhouette.
+function basic(color: number, fog = false): THREE.MeshBasicMaterial {
+  return new THREE.MeshBasicMaterial({ color, fog });
+}
 
-function signMat(color: number) {
-  return new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide });
+/** Soft radial sprite used for the sun glow. */
+function sunTexture(): THREE.CanvasTexture {
+  const c = document.createElement('canvas');
+  c.width = 64;
+  c.height = 64;
+  const ctx = c.getContext('2d');
+  if (ctx) {
+    for (let y = 0; y < 64; y++) {
+      for (let x = 0; x < 64; x++) {
+        const d = Math.hypot(x - 31.5, y - 31.5) / 32;
+        const a = Math.max(0, 1 - d);
+        ctx.fillStyle = `rgba(255,236,190,${(a * a * 0.9).toFixed(3)})`;
+        ctx.fillRect(x, y, 1, 1);
+      }
+    }
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.name = 'sun-glow';
+  return tex;
+}
+
+/** Warm gradient sky: golden horizon rising into a soft blue zenith. */
+function buildSky(): THREE.Mesh {
+  const geo = new THREE.PlaneGeometry(240, 110);
+  const mat = new THREE.ShaderMaterial({
+    uniforms: {
+      uHorizon: { value: new THREE.Color(0xffe4b8) },
+      uMid: { value: new THREE.Color(0xbfe0e8) },
+      uZenith: { value: new THREE.Color(0x6fb4dc) },
+    },
+    vertexShader: /* glsl */ `
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: /* glsl */ `
+      uniform vec3 uHorizon;
+      uniform vec3 uMid;
+      uniform vec3 uZenith;
+      varying vec2 vUv;
+      void main() {
+        float t = clamp(vUv.y, 0.0, 1.0);
+        vec3 col = t < 0.42
+          ? mix(uHorizon, uMid, smoothstep(0.0, 0.42, t))
+          : mix(uMid, uZenith, smoothstep(0.42, 1.0, t));
+        gl_FragColor = vec4(col, 1.0);
+      }
+    `,
+    fog: false,
+    depthWrite: false,
+  });
+  const sky = new THREE.Mesh(geo, mat);
+  sky.position.set(0, 26, -58);
+  sky.renderOrder = -10;
+  return sky;
+}
+
+function buildCloud(rng: () => number, x: number, y: number, z: number, scale: number): THREE.Group {
+  const cloud = new THREE.Group();
+  const puffs = 3 + Math.floor(rng() * 3);
+  for (let i = 0; i < puffs; i++) {
+    const r = (0.9 + rng() * 1.1) * scale;
+    const puff = new THREE.Mesh(new THREE.SphereGeometry(r, 10, 8), basic(0xfffbef));
+    puff.position.set((i - puffs / 2) * r * 1.15 + (rng() - 0.5) * 0.5, (rng() - 0.5) * 0.4 * scale, (rng() - 0.5) * 0.6);
+    puff.scale.y = 0.62;
+    cloud.add(puff);
+  }
+  cloud.position.set(x, y, z);
+  cloud.userData._driftSpeed = 0.08 + rng() * 0.12;
+  registerCloud(cloud);
+  return cloud;
+}
+
+function buildHill(x: number, z: number, w: number, h: number, color: number): THREE.Mesh {
+  const hill = new THREE.Mesh(new THREE.SphereGeometry(1, 24, 16), basic(color));
+  hill.scale.set(w, h, w * 0.5);
+  hill.position.set(x, -2.2, z);
+  return hill;
+}
+
+function buildTree(rng: () => number, x: number, y: number, z: number, s: number): THREE.Group {
+  const tree = new THREE.Group();
+  const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.06 * s, 0.09 * s, 0.7 * s, 5), basic(0x6b5138));
+  trunk.position.y = 0.35 * s;
+  tree.add(trunk);
+  const blobs = 2 + Math.floor(rng() * 2);
+  for (let i = 0; i < blobs; i++) {
+    const r = (0.5 + rng() * 0.35) * s;
+    const leaf = new THREE.Mesh(new THREE.SphereGeometry(r, 8, 6), basic(i === 0 ? 0x4e7a52 : 0x5d8a58));
+    leaf.position.set((rng() - 0.5) * 0.5 * s, (0.8 + i * 0.45) * s, (rng() - 0.5) * 0.3 * s);
+    tree.add(leaf);
+  }
+  tree.position.set(x, y, z);
+  return tree;
+}
+
+function buildCottage(wall: number, roof: number): THREE.Group {
+  const g = new THREE.Group();
+  const body = new THREE.Mesh(new THREE.BoxGeometry(1.6, 1.1, 1.3), basic(wall));
+  body.position.y = 0.55;
+  g.add(body);
+  // Four-sided pyramid roof, Ghibli terracotta.
+  const roofMesh = new THREE.Mesh(new THREE.ConeGeometry(1.35, 0.85, 4), basic(roof));
+  roofMesh.rotation.y = Math.PI / 4;
+  roofMesh.position.y = 1.1 + 0.42;
+  g.add(roofMesh);
+  // Chimney with a warm lit window below it.
+  const chimney = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.5, 0.22), basic(0x8a8071));
+  chimney.position.set(0.45, 1.55, 0.2);
+  g.add(chimney);
+  const win = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.32, 0.04), basic(0xffd9a0));
+  win.position.set(-0.3, 0.55, 0.67);
+  win.userData._emissiveBase = 0xffd9a0;
+  g.add(win);
+  const win2 = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.32, 0.04), basic(0xfff2d0));
+  win2.position.set(0.38, 0.55, 0.67);
+  g.add(win2);
+  return g;
 }
 
 export function buildCityscape(cfg: { position: number[]; seed?: number }): THREE.Group {
@@ -53,98 +174,63 @@ export function buildCityscape(cfg: { position: number[]; seed?: number }): THRE
   cityGroup.userData._parallaxFactor = 0;
   registerParallaxTarget(cityGroup);
 
-  // Background: tall thin towers with subtle emissive windows
+  cityGroup.add(buildSky());
+
+  // Sun — warm disc with a soft halo, high over the hills.
+  const sun = new THREE.Mesh(new THREE.CircleGeometry(2.2, 24), basic(0xfff3cf, false));
+  sun.position.set(-14, 24, -57);
+  const halo = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: sunTexture(), transparent: true, depthWrite: false, fog: false,
+  }));
+  halo.scale.setScalar(16);
+  halo.position.copy(sun.position);
+  cityGroup.add(sun, halo);
+
+  // Background: hazy distant ridges + slow clouds.
   const background = buildLayer(rng, 0.015, (group) => {
-    for (let i = 0; i < 14; i++) {
-      const bw = 0.8 + rng() * 1.4;
-      const bh = 14 + rng() * 22;
-      const bd = 0.8 + rng() * 1.4;
-      const bx = (rng() - 0.5) * 55;
-      const bz = -8 - rng() * 30;
-      const hue = 0x1a1a1e + Math.floor(rng() * 8) * 0x020203;
-      const tower = makeBox(new THREE.MeshBasicMaterial({ color: hue }), [bw, bh, bd], [bx, bh / 2 - 3, bz]);
-      group.add(tower);
-
-      const floors = Math.floor(bh / 2);
-      const winsPerFloor = Math.max(1, Math.floor(bw / 0.5));
-      for (let f = 0; f < floors; f++) {
-        for (let w = 0; w < winsPerFloor; w++) {
-          if (rng() > 0.55) continue;
-          // Warm dusk lit windows, sparse teal accents, dark slate unlit (one draw, seed-stable).
-          const wr = rng();
-          const winColor = wr > 0.7 ? 0xfef3c7 : wr > 0.62 ? COLORS.sheikahTeal : 0x334155;
-          const wx = bx - bw / 2 + 0.2 + (w * (bw - 0.4)) / Math.max(1, winsPerFloor - 1);
-          const wy = (f * 2) - 3 + 0.8;
-          const wmesh = makeBox(new THREE.MeshBasicMaterial({ color: winColor }), [0.18, 0.25, 0.05], [wx, wy, bz + bd / 2 + 0.03]);
-          tagEmissiveBase(wmesh);
-          group.add(wmesh);
-        }
-      }
+    group.add(buildHill(-22, -40, 34, 7.5, 0xa9c6bc));
+    group.add(buildHill(14, -43, 40, 9, 0x9fbfc4));
+    group.add(buildHill(38, -38, 26, 6, 0xa9c6bc));
+    for (let i = 0; i < 4; i++) {
+      group.add(buildCloud(rng, (rng() - 0.5) * 70, 12 + rng() * 10, -34 - rng() * 14, 1.4 + rng() * 1.2));
     }
   });
 
-  // Midground: career-themed buildings with lit sign planes
+  // Midground: green rolling hills with career cottages and tree clusters.
   const midground = buildLayer(rng, 0.03, (group) => {
-    for (let i = 0; i < CAREER_LANDMARKS.length; i++) {
-      const landmark = CAREER_LANDMARKS[i];
-      const bx = -20 + i * 10 + (rng() - 0.5) * 2;
-      const bz = -12 - rng() * 10;
-      let bw = 2.5;
-      let bh = 7 + rng() * 6;
-      let bd = 2.5;
+    group.add(buildHill(-16, -26, 26, 6.5, 0x7fb08a));
+    group.add(buildHill(12, -24, 30, 7, 0x86b48e));
+    group.add(buildHill(34, -22, 20, 5.5, 0x7fb08a));
 
-      if (landmark.shape === 'glass') {
-        bw = 3; bd = 3; bh += 2;
-      } else if (landmark.shape === 'hub') {
-        bw = 4; bd = 3; bh -= 1;
-      } else if (landmark.shape === 'creative') {
-        bw = 2; bd = 2; bh += 4;
-      } else if (landmark.shape === 'spire') {
-        bw = 1.6; bd = 1.6; bh += 6;
-      } else if (landmark.shape === 'twin') {
-        bw = 1.8; bd = 1.8; bh -= 1;
-        const twin = makeBox(new THREE.MeshBasicMaterial({ color: landmark.color }), [bw, bh, bd], [bx + 1.2, bh / 2 - 2, bz]);
-        group.add(twin);
-      }
+    for (let i = 0; i < CAREER_COTTAGES.length; i++) {
+      const c = CAREER_COTTAGES[i];
+      const cottage = buildCottage(c.wall, c.roof);
+      const bx = -20 + i * 10 + (rng() - 0.5) * 3;
+      cottage.position.set(bx, 1.4 + rng() * 1.2, -21 - rng() * 4);
+      cottage.rotation.y = (rng() - 0.5) * 0.6;
+      cottage.scale.setScalar(0.9 + rng() * 0.4);
+      group.add(cottage);
 
-      const bldg = makeBox(new THREE.MeshBasicMaterial({ color: landmark.color }), [bw, bh, bd], [bx, bh / 2 - 2, bz]);
-      group.add(bldg);
-
-      // Lit sign representing company/role
-      const signW = bw * 0.8;
-      const signH = bh * 0.25;
-      const sign = makeBox(signMat(landmark.accent), [signW, signH, 0.06], [bx, bh / 2 - 1, bz + bd / 2 + 0.05]);
-      tagEmissiveBase(sign);
-      group.add(sign);
-
-      // Small accent strips
-      const stripCount = landmark.shape === 'hub' ? 3 : 2;
-      for (let s = 0; s < stripCount; s++) {
-        const sy = bh - 2 - s * 1.8;
-        if (sy < 0) break;
-        const strip = makeBox(new THREE.MeshBasicMaterial({ color: landmark.accent }), [bw + 0.06, 0.12, bd + 0.06], [bx, sy - 2, bz]);
-        tagEmissiveBase(strip);
-        group.add(strip);
+      const trees = 2 + Math.floor(rng() * 3);
+      for (let t = 0; t < trees; t++) {
+        group.add(buildTree(rng, bx + (rng() - 0.5) * 6, 0.9 + rng(), -20 - rng() * 5, 0.9 + rng() * 0.7));
       }
     }
   });
 
-  // Foreground: flying drones/cars with emissive lights
+  // Foreground: the nearest meadow ridge + faster, lower clouds.
   const foreground = buildLayer(rng, 0.08, (group) => {
-    for (let i = 0; i < 8; i++) {
-      const fx = (rng() - 0.5) * 50;
-      const fy = 2 + rng() * 7;
-      const fz = -8 - rng() * 25;
-      const isDrone = rng() > 0.5;
-      const bodyColor = isDrone ? 0x9a3412 : 0xd97706;
-      const lightColor = isDrone ? COLORS.ancientAmber : 0xfef3c7;
-
-      const body = makeBox(new THREE.MeshBasicMaterial({ color: bodyColor }), [isDrone ? 0.25 : 0.5, isDrone ? 0.12 : 0.12, isDrone ? 0.25 : 0.2], [fx, fy, fz]);
-      group.add(body);
-
-      const light = makeBox(new THREE.MeshBasicMaterial({ color: lightColor }), [0.1, 0.04, 0.04], [fx, fy - (isDrone ? 0.08 : 0.06), fz + (isDrone ? 0.14 : 0.11)]);
-      group.add(light);
-      tagEmissiveBase(light);
+    group.add(buildHill(-8, -13, 24, 4.5, 0x5d9a6e));
+    group.add(buildHill(18, -12, 20, 4, 0x559264));
+    for (let i = 0; i < 3; i++) {
+      group.add(buildCloud(rng, (rng() - 0.5) * 50, 6 + rng() * 6, -10 - rng() * 8, 0.9 + rng() * 0.8));
+    }
+    // low drifters crossing the window sight-line (local y ≈ window band)
+    for (let i = 0; i < 2; i++) {
+      group.add(buildCloud(rng, (rng() - 0.5) * 36, 3.4 + rng() * 1.8, -12 - rng() * 6, 0.55 + rng() * 0.4));
+    }
+    for (let i = 0; i < 6; i++) {
+      group.add(buildTree(rng, (rng() - 0.5) * 40, 1.1 + rng() * 0.8, -11 - rng() * 4, 1.1 + rng() * 0.8));
     }
   });
 

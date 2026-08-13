@@ -8,9 +8,9 @@ import type { FurnitureConfig } from '../../seed.js';
 function buildHeadset(cfg: FurnitureConfig): { mesh: THREE.Group } {
   const g = rootGroup(cfg);
 
-  const bandMat = makeStd({ color: 0x1c1c1f });
-  const padMat = makeStd({ color: 0x2a2a2e });
-  const accentMat = new THREE.MeshBasicMaterial({ color: COLORS.ancientAmber });
+  const bandMat = makeStd({ color: 0x4a443c });
+  const padMat = makeStd({ color: 0x5a5248 });
+  const accentMat = new THREE.MeshBasicMaterial({ color: COLORS.accent });
   g.add(makeBox(bandMat, [0.18, 0.04, 0.14], [0, 0.08, 0]));
   g.add(makeBox(padMat, [0.04, 0.08, 0.08], [-0.1, 0.04, 0]));
   g.add(makeBox(padMat, [0.04, 0.08, 0.08], [0.1, 0.04, 0]));

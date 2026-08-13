@@ -132,7 +132,7 @@ describe('serializeLayout', () => {
     };
     const seed = serializeLayout(layout);
     const parsed = JSON.parse(atob(seed));
-    expect(parsed.mat).toEqual({ floor: '#1c1917', wall: '#44403c', ceiling: '#1c1917' });
+    expect(parsed.mat).toEqual({ floor: '#e2c19a', wall: '#f7eeda', ceiling: '#faf4e8' });
   });
 });
 

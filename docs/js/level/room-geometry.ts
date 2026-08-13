@@ -31,7 +31,7 @@ export interface BuildWallsOptions {
   outline: [number, number][];
   wallH: number;
   wallT: number;
-  material: THREE.Material;
+  material: THREE.MeshStandardMaterial;
   trimMaterial?: THREE.Material;
   openings?: WallOpening[];
   /** If provided, pushes collision boxes for stubs below this height. */

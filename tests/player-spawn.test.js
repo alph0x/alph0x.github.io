@@ -11,7 +11,7 @@ import { checkCollision } from '../docs/js/core.js';
 describe('playerSpawn validity', () => {
   it('is inside the room outline', () => {
     // Room outline: [-2.25, -1.75] -> [2.25, 1.75]
-    const [x, z] = [-0.4, 0.55];
+    const [x, z] = [0.5, 0.5];
     expect(x).toBeGreaterThan(-2.25);
     expect(x).toBeLessThan(2.25);
     expect(z).toBeGreaterThan(-1.75);
@@ -28,7 +28,7 @@ describe('playerSpawn validity', () => {
     const scene = new THREE.Scene();
     buildLevel(scene, worldState);
 
-    const [x, z] = [-0.4, 0.55];
+    const [x, z] = [0.5, 0.5];
     const playerRadius = 0.35;
     expect(checkCollision(x, z, worldState.room.walls, playerRadius)).toBe(false);
   });

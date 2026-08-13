@@ -48,35 +48,22 @@ export const CFG = Object.freeze({
 });
 
 export const COLORS = Object.freeze({
-  // ── P-01 palette (docs/art-direction/palette.md) — base surfaces ──
-  paperWhite: 0xf4ecd8,
-  plasterCream: 0xe6dbc2,
-  woodHoney: 0xb98a52,
-  fabricSage: 0x8ba888,
-  metalSoft: 0x98a2a6,
-  shadowLavender: 0x7c7fa0,
-  // ── light ──
-  sunlightWarm: 0xffd9a0,
-  skyFillBlue: 0x9fc8e0,
-  duskAmber: 0xf5a54a,
-  nightIndigo: 0x333f63,
-  fogHaze: 0xcfe4da,
-  // ── Sheikah-tech accents (the ONLY emissive hues, contract §6) ──
-  sheikahTeal: 0x3ec8ae,
-  ancientAmber: 0xff9e44,
-  // ── legacy neutrals kept per P-04 briefing (superseded-token removal is a later sweep) ──
-  orange: 0xf59e0b,
-  warm: 0xf5f5f4,
-  dim: 0x57534e,
-  void: 0x0c0a09,
-  panel: 0x1c1917,
-  metal: 0x44403c,
-  bone: 0xe7e5e4,
+  accent: 0xe76f51,
+  cyan: 0x6fa8a0,
+  magenta: 0xd77a61,
+  green: 0x6a994e,
+  orange: 0xe9c46a,
+  warm: 0xfdf6e3,
+  dim: 0x8a8071,
+  void: 0x2e2a23,
+  panel: 0x40392e,
+  metal: 0x8d8272,
+  bone: 0xf3ead8,
 });
 
 // ── Default Seed (hardcoded layout) ─────────────────────────────
 
-export const DEFAULT_SEED = 'eyJ2IjoyLCJvdXRsaW5lIjpbWy0yLjI1LC0xLjc1XSxbMi4yNSwtMS43NV0sWzIuMjUsMS43NV0sWy0yLjI1LDEuNzVdXSwiZiI6W3sidCI6ImJlZCIsInAiOlstMS4xLDAsLTAuOV0sInIiOjYuMjgzfSx7InQiOiJuaWdodHN0YW5kIiwicCI6Wy0xLjg5LDAsMC4xXSwiciI6MS41NzF9LHsidCI6ImRlc2siLCJwIjpbMS4yLDAsLTEuMTVdLCJyIjo2LjI4NH0seyJ0IjoibWFjQm9vayIsInAiOlsxLjYsMC44MiwtMS4yXSwiciI6NS43Nn0seyJ0IjoiZGVza0NoYWlyIiwicCI6WzEuNiwwLC0wLjQ1XSwiciI6My4xNDJ9LHsidCI6Im11ZyIsInAiOlswLjc1LDAuODUsLTEuM119LHsidCI6ImJvb2tTdGFjayIsInAiOlstMS45NywwLjYxLDAuMThdLCJyIjowLjN9LHsidCI6ImJvb2tzaGVsZiIsInAiOlsyLDAsMC4xNV0sInIiOjQuNzEyfSx7InQiOiJydWciLCJwIjpbMC4zLDAuMDEsMC43NV19LHsidCI6Im1pbmlTY2huYXV6ZXIiLCJwIjpbMS40NSwwLDEuMTVdLCJyIjoyLjd9LHsidCI6InBsYW50IiwicCI6Wy0xLjk1LDAsMC42XX0seyJ0IjoiZmxvb3JMYW1wIiwicCI6Wy0xLjg1LDAsMS4zXX0seyJ0IjoiZmFpcnlMaWdodHMiLCJwIjpbMCwyLjM1LC0xLjU4XSwibmMiOjF9LHsidCI6ImNlaWxpbmdMYW1wIiwicCI6WzAsMi43LDBdLCJjb2wiOjE2MTE5Mjg0LCJpIjoyLCJkc3QiOjh9LHsidCI6IndpbmRvdyIsInAiOlswLDEuNSwtMS44NV19LHsidCI6ImRvb3IiLCJwIjpbMCwwLDEuOV19XSwicHMiOlstMC40LDAuNTVdLCJscyI6WzEuNDUsMS4xNV0sIm1hdCI6eyJmbG9vciI6IiNmNGVjZDgiLCJ3YWxsIjoiI2U2ZGJjMiIsImNlaWxpbmciOiIjZjRlY2Q4In0sImRlYyI6W119';
+export const DEFAULT_SEED = 'eyJ2IjoyLCJvdXRsaW5lIjpbWy0yLjI1LC0xLjc1XSxbMi4yNSwtMS43NV0sWzIuMjUsMS43NV0sWy0yLjI1LDEuNzVdXSwiZiI6W3sidCI6ImJlZCIsInAiOlstMS4yNSwwLC0xLjA1XSwiciI6MH0seyJ0IjoibmlnaHRzdGFuZCIsInAiOlstMS45NSwwLDAuMDhdLCJyIjoxLjU3MX0seyJ0IjoicnVnIiwicCI6WzAuMTUsMC4wMSwtMC4yXSwiciI6MH0seyJ0IjoibWluaVNjaG5hdXplciIsInAiOlstMS4wNSwwLjY1NSwtMS4wNV0sInIiOjEuNTcxfSx7InQiOiJkZXNrIiwicCI6WzAuOTIsMCwtMS4zNV0sInIiOjB9LHsidCI6Im1hY0Jvb2siLCJwIjpbMC43OCwwLjgzLC0xLjMyXSwiciI6MC4xMn0seyJ0IjoiZGVza0NoYWlyIiwicCI6WzAuNzcsMCwtMC42Ml0sInIiOjMuMTl9LHsidCI6Im11ZyIsInAiOlsxLjMsMC44NTUsLTEuNDJdLCJyIjowfSx7InQiOiJib29rU3RhY2siLCJwIjpbMS41LDAuODMsLTEuNDVdLCJyIjowLjUsImN0IjozfSx7InQiOiJib29rc2hlbGYiLCJwIjpbMi4wOCwwLC0wLjU1XSwiciI6LTEuNTcxfSx7InQiOiJwbGFudCIsInAiOlsyLjAsMCwwLjM1XSwiciI6MH0seyJ0IjoiZmxvb3JMYW1wIiwicCI6Wy0xLjk1LDAsMS40XSwiciI6MH0seyJ0IjoicG9zdGVyIiwicCI6Wy0yLjIsMS41NSwtMS4wXSwiciI6MS41NzEsImNvbCI6MTUxNjczMTMsInRleHQiOiJCVUVOT1NcbkFJUkVTIn0seyJ0IjoiZmFpcnlMaWdodHMiLCJwIjpbMCwyLjUsLTEuNjhdfSx7InQiOiJzaG9lcyIsInAiOlswLjU1LDAsMS41XSwiciI6MC4zfSx7InQiOiJjZWlsaW5nTGFtcCIsInAiOlswLDIuNywwXSwiY29sIjoxNjExOTI4NCwiaSI6MiwiZHN0Ijo4fSx7InQiOiJ3aW5kb3ciLCJwIjpbMCwxLjUsLTEuODVdfSx7InQiOiJkb29yIiwicCI6WzAsMCwxLjldfV0sInBzIjpbMC41LDAuNV0sImxzIjpbLTEuMDUsLTEuMDVdLCJtYXQiOnsiZmxvb3IiOiIjZTJjMTlhIiwid2FsbCI6IiNmN2VlZGEiLCJjZWlsaW5nIjoiI2ZhZjRlOCJ9LCJkZWMiOltdfQ==';
 
 export const ROOM_LAYOUT = { ...deserializeSeed(DEFAULT_SEED) };
 

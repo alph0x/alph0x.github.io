@@ -4,7 +4,6 @@
  */
 
 import * as THREE from 'three';
-import { COLORS } from '../core.js';
 
 interface SetupResult {
   floorPlane: THREE.Mesh;
@@ -53,11 +52,10 @@ export class EditorSceneSetup {
   }
 
   private _addLights(): void {
-    // Neutral daylight for toon surfaces (contract §8): warm key + cool dim
-    // fill leave headroom under 1.0 so the 3-step ramp's mid-tones don't clip.
-    // No environment map here, so the cool ambient carries interior legibility.
-    this._scene.add(new THREE.AmbientLight(COLORS.skyFillBlue, 0.45));
-    const dir = new THREE.DirectionalLight(COLORS.sunlightWarm, 0.9);
+    // Brighter than the in-game mood lighting on purpose: the editor has no
+    // environment map, so the ambient/fill must carry interior legibility.
+    this._scene.add(new THREE.AmbientLight(0xffffff, 1.5));
+    const dir = new THREE.DirectionalLight(0xffffff, 1.2);
     dir.position.set(5, 10, 5);
     this._scene.add(dir);
   }

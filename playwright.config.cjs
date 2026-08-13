@@ -27,8 +27,7 @@ module.exports = defineConfig({
   webServer: {
     command: 'npx vite docs --port 8765',
     url: 'http://localhost:8765',
-    // Always reuse: fresh CI still starts its own server when the port is free.
-    reuseExistingServer: true,
+    reuseExistingServer: !process.env.CI,
     timeout: 120000,
   },
 });

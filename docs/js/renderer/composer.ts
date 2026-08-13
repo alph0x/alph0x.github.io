@@ -21,14 +21,13 @@ export function isLowEndDevice(): boolean {
   );
 }
 
-// Final grade: warm Ghibli grade — soft warm highlight lift, gentle
-// saturation, reduced vignette + lighter film grain, in display space.
+// Final grade: warm paper split-tone + soft vignette + film grain, in display space.
 const GradeShader = {
   uniforms: {
     tDiffuse: { value: null as THREE.Texture | null },
     time: { value: 0 },
-    vignetteStrength: { value: 0.22 },
-    grainStrength: { value: typeof window !== 'undefined' && (window as unknown as { __snapshotMode?: boolean }).__snapshotMode ? 0 : 0.018 },
+    vignetteStrength: { value: 0.26 },
+    grainStrength: { value: typeof window !== 'undefined' && (window as unknown as { __snapshotMode?: boolean }).__snapshotMode ? 0 : 0.035 },
   },
   vertexShader: /* glsl */ `
     varying vec2 vUv;
@@ -52,14 +51,10 @@ const GradeShader = {
       vec4 color = texture2D(tDiffuse, vUv);
       float lum = dot(color.rgb, vec3(0.299, 0.587, 0.114));
 
-      // Warm Ghibli grade: soft warm lift on high luminance only —
-      // shadows stay neutral (no split-tone).
-      float hi = smoothstep(0.55, 0.95, lum);
-      color.rgb += vec3(0.045, 0.026, 0.006) * hi;
-
-      // gentle saturation boost
-      float lum2 = dot(color.rgb, vec3(0.299, 0.587, 0.114));
-      color.rgb = mix(vec3(lum2), color.rgb, 1.08);
+      // warm paper grade: sage-cream shadows / golden highlights
+      vec3 shadowTint = vec3(0.97, 1.01, 0.97);
+      vec3 highlightTint = vec3(1.05, 1.0, 0.92);
+      color.rgb *= mix(shadowTint, highlightTint, smoothstep(0.12, 0.72, lum));
 
       // vignette
       float d = distance(vUv, vec2(0.5));
@@ -83,12 +78,10 @@ export function buildComposer(
 
   composer.addPass(new RenderPass(scene, camera));
 
-  // Threshold-driven bloom; emissive materials will feed it. Threshold 1.45
-  // re-derived against toon-surface luminance (P-07): worst-case lit
-  // non-emissive ceiling measured 1.26 linear HDR (morning floor hotspot;
-  // afternoon 0.96, night 0.80) → ~15% headroom; true emissives sit above
-  // (lamp 1.46, window glow 2–3.3, screens up to 4).
-  const bloom = new UnrealBloomPass(new THREE.Vector2(size.x, size.y), 0.35, 0.3, 1.45);
+  // Threshold-driven bloom; emissive materials will feed it. Threshold sits
+  // above lit-diffuse luminance so bright white surfaces (bed, pet coat) don't
+  // bloom into glowing blobs — only true emissives (lamps, LEDs, window) do.
+  const bloom = new UnrealBloomPass(new THREE.Vector2(size.x, size.y), 0.35, 0.3, 1.4);
   composer.addPass(bloom);
 
   const ssao = new SSAOPass(scene, camera, size.x, size.y);

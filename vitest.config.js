@@ -3,7 +3,7 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   test: {
     environment: 'happy-dom',
-    include: ['tests/**/*.test.{js,ts}'],
+    include: ['tests/**/*.test.js'],
     exclude: ['tests/e2e/**', 'tests/visual/**', 'node_modules/**'],
     setupFiles: ['tests/setup-canvas-mock.js'],
     coverage: {

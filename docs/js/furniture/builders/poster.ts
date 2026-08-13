@@ -10,7 +10,7 @@ import { makeBox } from '../../primitives.js';
 import type { FurnitureConfig } from '../../seed.js';
 
 function buildPoster(cfg: FurnitureConfig): { mesh: THREE.Mesh } {
-  const color = cfg.color ?? COLORS.ancientAmber;
+  const color = cfg.color ?? COLORS.accent;
   const text = cfg.text || 'POSTER';
 
   // deterministic canvas texture — only rect fills and text, no gradients or arcs
@@ -19,18 +19,19 @@ function buildPoster(cfg: FurnitureConfig): { mesh: THREE.Mesh } {
   c.height = 90;
   const ctx = c.getContext('2d')!;
   const hex = '#' + color.toString(16).padStart(6, '0');
-  ctx.fillStyle = '#111114';
+  // warm paper print, not a neon club flyer
+  ctx.fillStyle = '#f5f0e1';
   ctx.fillRect(0, 0, 64, 90);
   ctx.fillStyle = hex;
-  ctx.fillRect(4, 4, 56, 10);
-  ctx.fillRect(4, 76, 56, 10);
+  ctx.fillRect(6, 6, 52, 8);
+  ctx.fillRect(6, 76, 52, 8);
   ctx.strokeStyle = hex;
-  ctx.lineWidth = 2;
-  ctx.strokeRect(2, 2, 60, 86);
-  ctx.fillStyle = hex;
-  ctx.font = 'bold 10px monospace';
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(3, 3, 58, 84);
+  ctx.fillStyle = '#264653';
+  ctx.font = 'bold 11px Georgia, serif';
   ctx.textAlign = 'center';
-  text.split('\n').forEach((line, i) => ctx.fillText(line, 32, 28 + i * 14));
+  text.split('\n').forEach((line, i) => ctx.fillText(line, 32, 30 + i * 15));
 
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;

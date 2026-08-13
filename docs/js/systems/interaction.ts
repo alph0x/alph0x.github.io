@@ -35,8 +35,6 @@ export class InteractionSystem {
     duration: number;
     panelId: string;
   } | null = null;
-  private readonly _terminalTargetPos = new THREE.Vector3(1.2, 1.35, -0.7);
-  private readonly _terminalTargetLookAt = new THREE.Vector3(1.6, 0.9, -1.2);
 
   // Cached DOM refs — resolved lazily, never re-queried per frame.
   private _promptEl: HTMLElement | null = null;
@@ -45,6 +43,7 @@ export class InteractionSystem {
 
   // Cached interactable mesh list — rebuilt only when the source array changes.
   private _meshCache: THREE.Object3D[] = [];
+  private _actionable: ThreeInteractable[] = [];
   private _meshCacheSrc: ThreeInteractable[] | null = null;
   private _meshCacheLen = -1;
 
@@ -89,12 +88,20 @@ export class InteractionSystem {
     return el;
   }
 
-  private _interactableMeshes(interactables: ThreeInteractable[]): THREE.Object3D[] {
+  // Only furniture that actually does something (has a panel) may raycast —
+  // the rest never shows the "[E]" prompt nor swallows the E key.
+  private _actionableInteractables(interactables: ThreeInteractable[]): ThreeInteractable[] {
     if (this._meshCacheSrc !== interactables || this._meshCacheLen !== interactables.length) {
-      this._meshCache = interactables.map((i) => i.mesh);
+      this._actionable = interactables.filter((i) => !!i.panelId);
+      this._meshCache = this._actionable.map((i) => i.mesh);
       this._meshCacheSrc = interactables;
       this._meshCacheLen = interactables.length;
     }
+    return this._actionable;
+  }
+
+  private _interactableMeshes(interactables: ThreeInteractable[]): THREE.Object3D[] {
+    this._actionableInteractables(interactables);
     return this._meshCache;
   }
 
@@ -113,13 +120,13 @@ export class InteractionSystem {
     const { ui, room } = this.worldState;
     if (ui.isPanelOpen || this._terminalZoom?.active) return;
     this.raycaster.setFromCamera(_center, this.camera);
-    const interactables = room.interactables as ThreeInteractable[];
+    const interactables = this._actionableInteractables(room.interactables as ThreeInteractable[]);
     const hits = this.raycaster.intersectObjects(this._interactableMeshes(interactables), true);
     if (hits.length > 0 && hits[0].distance < 5) {
       const obj = this._findInteractable(interactables, hits[0].object);
       if (!obj) return;
       if (obj.panelId === 'panel-alphgpt') {
-        this._startTerminalZoom(obj.panelId);
+        this._startTerminalZoom(obj.panelId, obj.mesh);
       } else if (obj.panelId) {
         this.openPanel(obj.panelId);
       }
@@ -139,21 +146,39 @@ export class InteractionSystem {
     if (crosshair) crosshair.style.display = 'none';
   }
 
-  private _startTerminalZoom(panelId: string): void {
+  // Lean in to the actual laptop: eyes stop just in front of the screen,
+  // gaze resting on the display center — as if sitting down to use it.
+  private _computeTerminalView(mesh: THREE.Object3D): { pos: THREE.Vector3; look: THREE.Vector3 } {
+    const box = new THREE.Box3().setFromObject(mesh);
+    const center = box.getCenter(new THREE.Vector3());
+    const fwd = new THREE.Vector3(Math.sin(mesh.rotation.y), 0, Math.cos(mesh.rotation.y));
+    const look = center.clone().addScaledVector(fwd, -0.05); // lid sits at the back
+    look.y = box.min.y + (box.max.y - box.min.y) * 0.7; // screen center, not keyboard
+    const pos = look.clone().addScaledVector(fwd, 0.38);
+    pos.y = look.y + 0.06;
+    return { pos, look };
+  }
+
+  private _startTerminalZoom(panelId: string, mesh: THREE.Object3D): void {
     if (this._terminalZoom?.active) return;
     this._terminalOriginalPos = this.camera.position.clone();
     this._terminalOriginalQuat = this.camera.quaternion.clone();
 
-    const dummy = new THREE.Object3D();
-    dummy.position.copy(this._terminalTargetPos);
-    dummy.lookAt(this._terminalTargetLookAt);
+    const { pos, look } = this._computeTerminalView(mesh);
+    // Cameras look down -Z, so Object3D.lookAt (which faces +Z) would leave
+    // the view rotated 180° — aim with the same YXZ convention as the FPS
+    // controls instead.
+    const dir = look.clone().sub(pos);
+    const yaw = Math.atan2(-dir.x, -dir.z);
+    const pitch = Math.atan2(dir.y, Math.hypot(dir.x, dir.z));
+    const toQuat = new THREE.Quaternion().setFromEuler(new THREE.Euler(pitch, yaw, 0, 'YXZ'));
 
     this._terminalZoom = {
       active: true,
       fromPos: this.camera.position.clone(),
-      toPos: this._terminalTargetPos.clone(),
+      toPos: pos,
       fromQuat: this.camera.quaternion.clone(),
-      toQuat: dummy.quaternion.clone(),
+      toQuat,
       startTime: performance.now(),
       duration: 800,
       panelId,
@@ -235,7 +260,7 @@ export class InteractionSystem {
     this._promptRaycastAccum = 0;
 
     this.raycaster.setFromCamera(_center, this.camera);
-    const interactables = room.interactables as ThreeInteractable[];
+    const interactables = this._actionableInteractables(room.interactables as ThreeInteractable[]);
     const hits = this.raycaster.intersectObjects(this._interactableMeshes(interactables), true);
 
     if (hits.length > 0 && hits[0].distance < 5) {

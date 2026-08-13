@@ -12,7 +12,7 @@ function buildTerminal(cfg: FurnitureConfig): { mesh: THREE.Group; type: string;
   // Desktop monitor proportions (~27")
   const w = 0.65, h = 0.42, d = 0.04;
   group.add(makeBox(screenMat, [w, h, d], [0, 0, 0]));
-  const frameMat = new THREE.MeshBasicMaterial({ color: 0x1a1a1e });
+  const frameMat = new THREE.MeshBasicMaterial({ color: 0x40392e });
   group.add(makeBox(frameMat, [w + 0.02, 0.015, d + 0.01], [0, h / 2 + 0.008, 0]));
   group.add(makeBox(frameMat, [w + 0.02, 0.015, d + 0.01], [0, -(h / 2 + 0.008), 0]));
   group.add(makeBox(frameMat, [0.015, h + 0.02, d + 0.01], [-(w / 2 + 0.008), 0, 0]));
@@ -20,8 +20,7 @@ function buildTerminal(cfg: FurnitureConfig): { mesh: THREE.Group; type: string;
   // Stand
   group.add(makeBox(frameMat, [0.06, 0.12, 0.04], [0, -(h / 2 + 0.07), -0.02]));
   group.add(makeBox(frameMat, [0.2, 0.01, 0.1], [0, -(h / 2 + 0.13), -0.02]));
-  // Accent light: deliberate §6 pair — warm-key terminals amber, cool-key teal.
-  const lightColor = (colorKey === 'yellow' || colorKey === 'pink') ? COLORS.ancientAmber : COLORS.sheikahTeal;
+  const lightColor = colorKey === 'yellow' ? COLORS.accent : colorKey === 'pink' ? COLORS.magenta : colorKey === 'cyan' ? COLORS.cyan : COLORS.green;
   group.add(makeLight(lightColor, 0.6, 3, [0, 0, 0.15]));
   return { mesh: group, type: 'terminal', panelId: cfg.panelId, label: 'TERMINAL', room: 'APT' };
 }

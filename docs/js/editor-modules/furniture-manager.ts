@@ -61,10 +61,7 @@ export class FurnitureManager {
   placeConfig(cfg: FurnitureConfig, skipSelect = false, skipUndo = false, forcedId: number | null = null): void {
     const entry = FurnitureRegistry.get(cfg.type);
     const builder = entry?.builder;
-    if (!builder) {
-      console.warn('[seed] unknown furniture id, skipping:', cfg.type);
-      return;
-    }
+    if (!builder) return;
 
     const result = builder(cfg);
     const mesh = extractMeshFromResult(result);

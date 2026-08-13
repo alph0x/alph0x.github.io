@@ -78,7 +78,7 @@ describe('EditorState', () => {
     const payload = s.toSeedPayload();
     expect(payload.outline).toEqual(s.outline);
     expect(payload.placed).toHaveLength(1);
-    expect(payload.mat).toEqual({ floor: '#1c1917', wall: '#44403c', ceiling: '#1c1917' });
+    expect(payload.mat).toEqual({ floor: '#e2c19a', wall: '#f7eeda', ceiling: '#faf4e8' });
   });
 
   it('loads from seed layout', () => {

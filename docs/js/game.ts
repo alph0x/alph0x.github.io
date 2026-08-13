@@ -10,7 +10,6 @@ import { InteractionSystem } from './systems/interaction.js';
 import { AnimationSystem } from './systems/animation/index.js';
 import { LoadingSystem } from './systems/loading.js';
 import { AudioSystem } from './systems/audio.js';
-import { TourSystem } from './systems/tour.js';
 import { ScreenReflections } from './systems/screen-reflections.js';
 import { buildComposer, isLowEndDevice, type GradedComposer } from './renderer/composer.js';
 import { AlphGPTContextProvider } from './systems/alphgpt-context.js';
@@ -44,7 +43,6 @@ export class Game {
   animation: AnimationSystem;
   loading: LoadingSystem;
   audio: AudioSystem;
-  tour: TourSystem;
   reflections: ScreenReflections;
   composer: GradedComposer | null;
   prevTime: number;
@@ -72,7 +70,6 @@ export class Game {
     this.animation = new AnimationSystem({ scene, worldState, camera });
     this.loading = new LoadingSystem({ controls });
     this.audio = new AudioSystem();
-    this.tour = new TourSystem(camera, worldState, controls, this.interaction);
     this.reflections = new ScreenReflections(scene, renderer);
     this.alphgptContext = new AlphGPTContextProvider(worldState);
     this.composer = isLowEndDevice() ? null : buildComposer(renderer, scene, camera);
@@ -98,11 +95,6 @@ export class Game {
         this.closePanels();
       });
 
-      const tourBtn = document.getElementById('tour-btn');
-      const tourSkip = document.getElementById('tour-skip');
-      if (tourBtn) tourBtn.addEventListener('click', () => this.startTour());
-      if (tourSkip) tourSkip.addEventListener('click', () => this.stopTour());
-
       this.reflections.init();
     });
     this.input.bind();
@@ -126,7 +118,7 @@ export class Game {
     const delta = (time - this.prevTime) / 1000;
     this.prevTime = time;
 
-    const canMove = !this.tour.active && (this.controls.isLocked || (this.touchControls?.isActive ?? false));
+    const canMove = this.controls.isLocked || (this.touchControls?.isActive ?? false);
     if (canMove) {
       this._updateMovement(delta);
     }
@@ -135,12 +127,8 @@ export class Game {
 
     this.animation.update(delta, time);
     this.audio.update(delta);
-    if (this.tour.active) {
-      this.tour.update(delta);
-    } else {
-      this.interaction.updatePrompt(delta);
-    }
-    this.alphgptContext.update(delta, this.tour.active);
+    this.interaction.updatePrompt(delta);
+    this.alphgptContext.update(delta);
     this.reflections.update();
     if (this.composer) {
       this.composer.gradePass.uniforms.time.value = time / 1000;
@@ -164,13 +152,5 @@ export class Game {
 
   closePanels() {
     this.interaction.closePanels();
-  }
-
-  startTour() {
-    this.tour.start();
-  }
-
-  stopTour() {
-    return this.tour.stop();
   }
 }

@@ -11,7 +11,6 @@ interface GameLike {
   controls: ControlsLike;
   interact(): void;
   closePanels(): void;
-  stopTour?(): boolean;
 }
 
 export class InputSystem {
@@ -82,8 +81,6 @@ export class InputSystem {
         case 'Escape':
           if (isLegendOpen()) {
             this._closeLegend();
-          } else if (this.game.stopTour && this.game.stopTour()) {
-            // handled active tour
           } else {
             this.game.closePanels();
           }

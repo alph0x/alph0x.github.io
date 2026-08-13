@@ -1,11 +1,10 @@
 import * as THREE from 'three';
 import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
-import { CFG, COLORS } from '../core.js';
+import { CFG } from '../core.js';
 
 export function createSceneAndCamera(): { scene: THREE.Scene; camera: THREE.PerspectiveCamera } {
   const scene = new THREE.Scene();
-  // Palette base until applyTimeOfDay sets the per-preset sky.
-  scene.background = new THREE.Color(COLORS.fogHaze);
+  scene.background = new THREE.Color(0xa8d0e4);
   // Fog is owned by the level atmosphere (tinted per time-of-day preset).
 
   const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
@@ -19,15 +18,12 @@ export function createWebGLRenderer(): THREE.WebGLRenderer {
   const isMobile = window.matchMedia('(max-width: 768px)').matches || ('ontouchstart' in window && navigator.maxTouchPoints > 0);
   const dpr = isMobile ? Math.min(window.devicePixelRatio, 2) : Math.min(window.devicePixelRatio, 2);
   const renderer = new THREE.WebGLRenderer({ antialias: !isMobile, powerPreference: isMobile ? 'low-power' : 'high-performance' });
-  renderer.setClearColor(COLORS.fogHaze);
+  renderer.setClearColor(0xa8d0e4);
   renderer.setSize(window.innerWidth, window.innerHeight, false);
   renderer.setPixelRatio(dpr);
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap;
-  // D-17: Neutral tone mapping — ACES at 1.25 washed out the toon palette,
-  // and ACES at lower exposure only darkened it; Neutral keeps warm
-  // saturation without an exposure retune (P-07, design-contract §5).
-  renderer.toneMapping = THREE.NeutralToneMapping;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.25;
   document.body.appendChild(renderer.domElement);
   return renderer;

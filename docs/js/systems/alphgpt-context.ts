@@ -19,7 +19,7 @@ export class AlphGPTContextProvider {
 
   constructor(private worldState: WorldState) {}
 
-  update(delta: number, tourActive: boolean): void {
+  update(delta: number): void {
     this.accum += delta;
     if (this.accum < 1) return;
     this.accum = 0;
@@ -46,7 +46,6 @@ export class AlphGPTContextProvider {
       furnitureNames: this.furnitureNames,
       luluNearby,
       isMoving,
-      tourActive,
     };
   }
 }

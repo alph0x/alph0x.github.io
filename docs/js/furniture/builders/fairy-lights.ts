@@ -6,12 +6,12 @@ import * as THREE from 'three';
 import { register } from '../registry.js';
 import { COLORS } from '../../core.js';
 import { makeStd, texMetal } from '../../assets/index.js';
-import { makeSphere, makeLight } from '../../primitives.js';
+import { makeSphere, makeLight, rootGroup } from '../../primitives.js';
+import type { FurnitureConfig } from '../../seed.js';
 
-function buildFairyLights(): { mesh: THREE.Group } {
-  const group = new THREE.Group();
-  // Build around local origin — consumers (buildLevel / editor) position the group.
-  // (Previously baked cfg.position into vertices AND the group got translated → double-apply.)
+function buildFairyLights(cfg: FurnitureConfig): { mesh: THREE.Group } {
+  // Build around the origin — the placement layer applies cfg.position itself.
+  const group = rootGroup(cfg);
   const count = 10;
   const startX = -0.8;
   const endX = 0.82;
@@ -27,13 +27,13 @@ function buildFairyLights(): { mesh: THREE.Group } {
   }
   const curve = new THREE.CatmullRomCurve3(points);
 
-  const wireMat = makeStd({ map: texMetal, color: 0x1a1a1e, roughness: 0.6, metalness: 0.3 });
+  const wireMat = makeStd({ map: texMetal, color: 0x5a5248, roughness: 0.6, metalness: 0.3 });
   const wireGeo = new THREE.TubeGeometry(curve, 24, 0.004, 6, false);
   group.add(new THREE.Mesh(wireGeo, wireMat));
 
   const bulbMat = makeStd({
     color: COLORS.warm,
-    emissive: COLORS.ancientAmber,
+    emissive: COLORS.orange,
     emissiveIntensity: 1.8,
     roughness: 0.2,
   });

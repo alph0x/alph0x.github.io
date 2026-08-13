@@ -28,7 +28,7 @@ describe('E2E: editor seed → game level', () => {
     const zs = ROOM_LAYOUT.outline.map((v) => v[1]);
     expect(Math.max(...xs) - Math.min(...xs)).toBeCloseTo(4.5);
     expect(Math.max(...zs) - Math.min(...zs)).toBeCloseTo(3.5);
-    expect(ROOM_LAYOUT.playerSpawn).toEqual([-0.4, 0.55]);
+    expect(ROOM_LAYOUT.playerSpawn).toEqual([0.5, 0.5]);
     const types = ROOM_LAYOUT.furniture.map((f) => f.type);
     for (const t of ['bed', 'desk', 'macBook', 'miniSchnauzer', 'ceilingLamp', 'window', 'door']) {
       expect(types).toContain(t);

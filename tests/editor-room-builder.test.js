@@ -77,7 +77,7 @@ describe('RoomBuilder', () => {
     ];
     expect(builder.wallMaterial).toBeNull();
     builder.rebuild(outline, { floor: '#1c1917', wall: '#44403c', ceiling: '#1c1917' });
-    expect(builder.wallMaterial).toBeInstanceOf(THREE.MeshToonMaterial);
+    expect(builder.wallMaterial).toBeInstanceOf(THREE.MeshStandardMaterial);
   });
 
   it('updateCulling hides two closest walls in 3d mode', () => {

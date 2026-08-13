@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { CFG, COLORS } from '../../core.js';
 import { register } from '../registry.js';
 import { makeStd, texMetal } from '../../assets/index.js';
@@ -15,20 +14,16 @@ function buildCeilingLamp(cfg: FurnitureConfig): { mesh: THREE.Group; label: str
   const distance = cfg.distance || 16;
   const rodH = CFG.wallH - y;
 
-  const rodMat = makeStd({ map: texMetal, color: 0x2a2a30, roughness: 0.4, metalness: 0.6 });
-  const shadeMat = makeStd({ map: texMetal, color: 0x25252b, roughness: 0.5, metalness: 0.4 });
-  // Bulb is a §6 warm practical (ancientAmber) regardless of the light's cfg.color hue.
-  const bulbMat = makeStd({ color: COLORS.ancientAmber, emissive: COLORS.ancientAmber, emissiveIntensity: 1.6, roughness: 0.2 });
+  const rodMat = makeStd({ map: texMetal, color: 0x6b5f52, roughness: 0.4, metalness: 0.6 });
+  const shadeMat = makeStd({ map: texMetal, color: 0x7a6f60, roughness: 0.5, metalness: 0.4 });
+  const bulbMat = makeStd({ color, emissive: color, emissiveIntensity: 1.6, roughness: 0.2 });
 
   // cord / metal rod from ceiling
   g.add(makeCylinder(rodMat, [0.015, 0.015, rodH], [0, rodH / 2, 0], 12));
 
-  // ceiling cup + socket ring (merged static)
-  const cupRing = mergeGeometries([
-    new THREE.CylinderGeometry(0.035, 0.035, 0.04, 16).translate(0, -0.02, 0),
-    new THREE.CylinderGeometry(0.04, 0.04, 0.02, 16).translate(0, -0.05, 0),
-  ]);
-  g.add(new THREE.Mesh(cupRing, shadeMat));
+  // small ceiling cup and socket ring
+  g.add(makeCylinder(shadeMat, [0.035, 0.035, 0.04], [0, -0.02, 0], 12));
+  g.add(makeCylinder(shadeMat, [0.04, 0.04, 0.02], [0, -0.05, 0], 12));
 
   // truncated-cone shade with solid thickness
   g.add(makeCylinder(shadeMat, [0.12, 0.30, 0.22], [0, -0.20, 0], 24));

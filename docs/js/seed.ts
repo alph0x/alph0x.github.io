@@ -58,7 +58,7 @@ export interface SeedV2 {
   dec: unknown[];
 }
 
-export const DEFAULT_MAT = Object.freeze({ floor: '#1c1917', wall: '#44403c', ceiling: '#1c1917' });
+export const DEFAULT_MAT = Object.freeze({ floor: '#e2c19a', wall: '#f7eeda', ceiling: '#faf4e8' });
 export const DEFAULT_WALL_T = 0.2;
 export const DEFAULT_LULU_SPAWN = Object.freeze([0.3, 0.7] as const);
 
@@ -184,7 +184,7 @@ export function deserializeSeed(seedStr: string | object): SeedData {
   const hasCeiling = furniture.some((f) => f.type === 'ceilingLamp');
   if (!hasCeiling) {
     furniture.push({ type: 'ceilingLamp', position: [0, 2.7, 0], color: 0xf5f5f4, intensity: 2.0, distance: 8 });
-    furniture.push({ type: 'ceilingLamp', position: [1.3, 2.7, -0.7], color: 0xbfdbfe, intensity: 1.2, distance: 6 });
+    furniture.push({ type: 'ceilingLamp', position: [1.3, 2.7, -0.7], color: 0xffe3b3, intensity: 1.2, distance: 6 });
   }
 
   for (const d of (s.dec || []) as { t: string; p: number[]; r?: number; text?: string; color?: number }[]) {

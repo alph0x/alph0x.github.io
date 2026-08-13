@@ -24,9 +24,9 @@ describe('Editor seed load integration', () => {
     expect(errorDisplay.textContent).toBe('');
 
     // Color inputs should reflect seed materials
-    expect(document.getElementById('colorFloor').value).toBe('#f4ecd8');
-    expect(document.getElementById('colorWall').value).toBe('#e6dbc2');
-    expect(document.getElementById('colorCeiling').value).toBe('#f4ecd8');
+    expect(document.getElementById('colorFloor').value).toBe('#e2c19a');
+    expect(document.getElementById('colorWall').value).toBe('#f7eeda');
+    expect(document.getElementById('colorCeiling').value).toBe('#faf4e8');
 
     // Placed list should show items, not "None"
     const placedList = document.getElementById('placedList');
