@@ -7,15 +7,11 @@ const { test, expect } = require('@playwright/test');
 
 // Camera poses that put each interactable first on the center ray.
 // Free camera pre-ENTER (the game loop doesn't own it yet).
+// Only furniture with a panel is actionable: interaction.ts filters raycasts
+// to `!!panelId`, so unmapped items (bed, desk, …) never show a prompt.
+// macBook look updated for the Ghibli room layout (seed in core.ts).
 const TARGETS = [
-  { type: 'macBook', label: 'MACBOOK', pos: [1.5, 1.5, -0.55], look: [1.6, 1.0, -1.3] },
-  { type: 'bed', label: 'Bed', pos: [-0.1, 1.4, 0.2], look: [-1.8, 0.45, -1.1] },
-  { type: 'nightstand', label: 'Nightstand', pos: [-1.0, 1.3, 0.6], look: [-1.9, 0.5, 0.1] },
-  { type: 'desk', label: 'Desk', pos: [0.9, 1.5, -0.2], look: [1.3, 0.7, -1.15] },
-  { type: 'miniSchnauzer', label: 'Lulú', pos: [-0.1, 1.35, -0.85], look: [-0.85, 1.0, -0.85] },
-  { type: 'ceilingLamp', label: 'Ceiling Lamp', pos: [0, 1.1, 0.9], look: [0, 2.7, 0] },
-  { type: 'window', label: 'Window', pos: [0, 1.5, -0.4], look: [0, 1.5, -1.85] },
-  { type: 'door', label: 'Door', pos: [0, 1.4, 0.3], look: [0, 1.0, 1.75] },
+  { type: 'macBook', label: 'MACBOOK', pos: [1.5, 1.5, -0.55], look: [0.773, 0.931, -1.387] },
 ];
 
 async function boot(page) {
@@ -56,7 +52,7 @@ test.describe('Interaction validation suite', () => {
     });
   });
 
-  test('prompt shows [E] name for every interactable', async ({ page }) => {
+  test('prompt shows [E] name for every actionable interactable', async ({ page }) => {
     test.setTimeout(90000);
     await boot(page);
 
@@ -106,13 +102,14 @@ test.describe('Interaction validation suite', () => {
     ).toBeGreaterThan(before);
   });
 
-  test('unmapped furniture shows a prompt but E opens no panel', async ({ page }) => {
+  test('E on unmapped furniture opens no panel', async ({ page }) => {
     test.setTimeout(60000);
     await boot(page);
 
-    const bed = TARGETS.find((t) => t.type === 'bed');
-    await aim(page, bed.pos, bed.look);
-    expect(await promptText(page)).toBe('[E] Bed');
+    // Bed has no panel → not actionable → no prompt and E is a no-op.
+    // Aim straight at its box center from the room centre.
+    await aim(page, [-0.1, 1.4, 0.2], [-1.255, 0.6, -1.04]);
+    expect(await promptText(page)).toBeNull();
 
     await page.keyboard.press('e');
     await page.waitForTimeout(1200); // longer than the terminal zoom
