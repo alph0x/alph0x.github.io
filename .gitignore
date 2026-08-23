@@ -57,3 +57,6 @@ CONTEXT.md
 
 # Tackle learning-loop profile (local, like docs/plans)
 .tackle/
+
+# graft's local graph cache — regenerable, not committed (run `graft build`).
+/graft/
