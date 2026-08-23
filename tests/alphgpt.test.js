@@ -111,6 +111,60 @@ describe('askAlphGPT', () => {
   });
 });
 
+describe('natural-language robustness (P-01)', () => {
+  it('routes what do you do to experience', () => {
+    expect(askAlphGPT('what do you do?').intent).toBe('experience');
+  });
+
+  it('routes get in touch to contact', () => {
+    expect(askAlphGPT('how do I get in touch?').intent).toBe('contact');
+  });
+
+  it('routes hiring to contact', () => {
+    expect(askAlphGPT('are you hiring?').intent).toBe('contact');
+  });
+
+  it('routes github to contact', () => {
+    expect(askAlphGPT('do you have a github?').intent).toBe('contact');
+  });
+
+  it('routes hire alfredo to contact over who', () => {
+    expect(askAlphGPT('i want to hire alfredo').intent).toBe('contact');
+  });
+
+  it('routes como te llamas to who in Spanish', () => {
+    const r = askAlphGPT('como te llamas?');
+    expect(r.intent).toBe('who');
+    expect(r.text).toMatch(/Soy AlphGPT|asistente/);
+  });
+
+  it('routes que sabes hacer to help', () => {
+    expect(askAlphGPT('que sabes hacer?').intent).toBe('help');
+  });
+
+  it('routes en que trabajas to experience', () => {
+    expect(askAlphGPT('en que trabajas?').intent).toBe('experience');
+  });
+
+  it('routes estas disponible to contact', () => {
+    expect(askAlphGPT('estas disponible para trabajar?').intent).toBe('contact');
+  });
+
+  it('routes hablas español to language', () => {
+    const r = askAlphGPT('hablas español?');
+    expect(r.intent).toBe('language');
+    expect(r.text).toMatch(/español|Hablo/i);
+  });
+
+  it('routes eres un robot to who', () => {
+    expect(askAlphGPT('eres un robot?').intent).toBe('who');
+  });
+
+  it('does not misroute what is interesting to room', () => {
+    expect(askAlphGPT('what is interesting?').intent).not.toBe('room');
+  });
+});
+
 describe('terminal mode', () => {
   beforeEach(() => {
     exitTerminalMode();

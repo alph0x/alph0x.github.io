@@ -36,7 +36,7 @@ const KNOWLEDGE_BASE: Record<string, IntentEntry> = {
     },
   },
   who: {
-    keywords: ['who', 'about', 'name', 'alfredo', 'alph0x', 'quien', 'sobre', 'nombre', 'acerca'],
+    keywords: ['who', 'about', 'name', 'alfredo', 'alph0x', 'quien', 'sobre', 'nombre', 'acerca', 'background', 'llama', 'llamas', 'llamar', 'cuentame', 'cuenta', 'robot', 'edad', 'age'],
     responses: {
       en: [
         "I'm AlphGPT — Alfredo Pérez's virtual assistant. Alfredo is a Computer Engineer with 12+ years building iOS products, from fintech startups to Latin America's largest delivery platforms. He's currently iOS Lead & Software Architect at GeoPagos, expanding into React Native for cross-platform payment systems. He believes in clean architecture, clear contracts, and zero tolerance for tech debt.",
@@ -47,7 +47,7 @@ const KNOWLEDGE_BASE: Record<string, IntentEntry> = {
     },
   },
   skills: {
-    keywords: ['skills', 'tech', 'stack', 'technologies', 'languages', 'swift', 'react native', 'ios', 'framework', 'habilidades', 'tecnologias', 'lenguajes', 'tecnologia'],
+    keywords: ['skills', 'tech', 'stack', 'technologies', 'languages', 'swift', 'react native', 'ios', 'framework', 'habilidades', 'tecnologias', 'lenguajes', 'tecnologia', 'coding', 'programming', 'developer', 'code', 'codigo', 'programar'],
     responses: {
       en: [
         "Alfredo's core stack:\n\n• React Native — Expert (cross-platform payment systems)\n• Swift / iOS — Expert (12+ years)\n• SwiftUI — Advanced\n• Objective-C — Advanced\n• Clean Architecture, MVVM, VIPER — Expert\n• Redux, Combine — Advanced\n• REST APIs, GraphQL — Expert\n• Payments / Fintech — Advanced\n• CI/CD (GitHub Actions, Bitrise, Fastlane) — Advanced\n• TDD / BDD — Advanced\n• Vapor (Swift backend) — Mid",
@@ -58,7 +58,7 @@ const KNOWLEDGE_BASE: Record<string, IntentEntry> = {
     },
   },
   experience: {
-    keywords: ['experience', 'work', 'job', 'career', 'geo', 'company', 'employ', 'experiencia', 'trabajo', 'carrera', 'empresa', 'empleo', 'trayectoria'],
+    keywords: ['experience', 'work', 'job', 'career', 'geo', 'company', 'employ', 'experiencia', 'trabajo', 'carrera', 'empresa', 'empleo', 'trayectoria', 'do', 'does', 'doing', 'hace', 'haces', 'hacer', 'geopagos'],
     responses: {
       en: [
         "Alfredo's current role:\n\n▸ Multiplatform Mobile Software Engineer at GeoPagos (Sep 2023 — Present)\n  Building the React Native engine behind GeoPagos' cross-platform acquiring and POS payment products.\n\nPreviously he worked across multiple iOS teams in fintech and delivery, shipping code that processes millions of transactions.",
@@ -80,7 +80,7 @@ const KNOWLEDGE_BASE: Record<string, IntentEntry> = {
     },
   },
   contact: {
-    keywords: ['contact', 'email', 'reach', 'hire', 'phone', 'linkedin', 'message', 'contacto', 'correo', 'contratar', 'telefono', 'mensaje', 'mail'],
+    keywords: ['contact', 'email', 'reach', 'hire', 'phone', 'linkedin', 'message', 'contacto', 'correo', 'contratar', 'telefono', 'mensaje', 'mail', 'touch', 'get in touch', 'hiring', 'github', 'available', 'disponible'],
     responses: {
       en: [
         "You can reach Alfredo at:\n\n📧 alfredop88@me.com\n📱 +54 9 11 2348 7209\n📍 Buenos Aires, Argentina\n💼 Work mode: Remote · Full-time\n\nHe's currently open to senior engineering and architecture roles.",
@@ -131,13 +131,24 @@ const KNOWLEDGE_BASE: Record<string, IntentEntry> = {
     },
   },
   help: {
-    keywords: ['help', 'what can', 'topics', 'question', 'ask', 'ayuda', 'temas', 'preguntar', 'opciones'],
+    keywords: ['help', 'what can', 'topics', 'question', 'ask', 'ayuda', 'temas', 'preguntar', 'opciones', 'sabes', 'saber', 'puedes', 'hacer', 'haces'],
     responses: {
       en: [
-        "Here are some things you can ask me:\n\n• who are you / tell me about Alfredo\n• skills / tech stack\n• experience / work history\n• projects / portfolio\n• contact / email / hire\n• location / where is he\n• education / degree\n• lulu / dog\n• time / what time is it\n• room / what is in this room\n• joke / funny",
+        "Here are some things you can ask me:\n\n• who are you / tell me about Alfredo\n• skills / tech stack\n• experience / work history\n• projects / portfolio\n• contact / email / hire\n• location / where is he\n• education / degree\n• lulu / dog\n• time / what time is it\n• room / what is in this room\n• joke / funny\n• ask naturally: 'what do you do?', 'hablas español?', 'i want to hire him'",
       ],
       es: [
-        "Estas son algunas cosas que puedes preguntarme:\n\n• quién eres / cuéntame de Alfredo\n• habilidades / stack técnico\n• experiencia / trayectoria\n• proyectos / portafolio\n• contacto / correo / contratar\n• ubicación / dónde vive\n• educación / título\n• lulú / perro\n• hora / qué hora es\n• cuarto / qué hay aquí\n• chiste / algo gracioso",
+        "Estas son algunas cosas que puedes preguntarme:\n\n• quién eres / cuéntame de Alfredo\n• habilidades / stack técnico\n• experiencia / trayectoria\n• proyectos / portafolio\n• contacto / correo / contratar\n• ubicación / dónde vive\n• educación / título\n• lulú / perro\n• hora / qué hora es\n• cuarto / qué hay aquí\n• chiste / algo gracioso\n• pregunta natural: '¿qué sabes hacer?', 'do you speak spanish?', 'estas disponible para trabajar?'",
+      ],
+    },
+  },
+  language: {
+    keywords: ['hablas', 'habla', 'hablar', 'espanol', 'spanish', 'speak', 'idioma'],
+    responses: {
+      en: [
+        "Yes! I speak English and Spanish. Ask me anything about Alfredo — skills, experience, projects, or how to reach him.",
+      ],
+      es: [
+        "¡Sí! Hablo español e inglés. Pregúntame lo que quieras sobre Alfredo: habilidades, experiencia, proyectos o cómo contactarlo.",
       ],
     },
   },
@@ -157,14 +168,14 @@ const KNOWLEDGE_BASE: Record<string, IntentEntry> = {
 
 const FALLBACK_RESPONSES: Record<Lang, string[]> = {
   en: [
-    "I'm not sure I understood that. Try asking about Alfredo's skills, experience, projects, or how to contact him.",
-    "Hmm, my neural nets are still training on that topic. Ask me about his tech stack, work history, or say 'help' for options.",
-    "That's beyond my current dataset. I know a lot about Alfredo's engineering career though — want to hear about it?",
+    "I didn't quite catch that. Try asking: 'What are his skills?', 'How is his experience?', or 'How can I contact him?'.",
+    "Not sure I got that. You can ask me naturally, like 'what do you do?', 'tell me about his experience', or 'do you have a github?'.",
+    "Hmm, that's outside my training. I know a lot about Alfredo though — try 'what's his tech stack?', 'where is he based?', or 'hablas español?'.",
   ],
   es: [
-    "No estoy seguro de haber entendido. Prueba preguntando por las habilidades, experiencia o proyectos de Alfredo, o cómo contactarlo.",
-    "Mmm, mis redes neuronales todavía están entrenando con ese tema. Pregúntame por su stack, su trayectoria, o escribe 'ayuda' para ver opciones.",
-    "Eso está fuera de mi dataset actual. Pero sé mucho sobre la carrera de Alfredo: ¿quieres escucharla?",
+    "No entendí bien. Prueba preguntar: '¿qué habilidades tiene?', '¿cuál es su experiencia?' o '¿cómo lo contacto?'.",
+    "No estoy seguro de haber entendido. Puedes preguntarme natural, por ejemplo '¿qué sabes hacer?', '¿en qué trabajas?' o '¿hablas español?'.",
+    "Mmm, eso está fuera de mi entrenamiento. Sé mucho de Alfredo — prueba '¿qué tecnologías usa?', '¿dónde vive?' o 'do you have a github?'.",
   ],
 };
 
@@ -177,15 +188,51 @@ const ES_WORDS = new Set([
   'trabajo', 'experiencia', 'habilidades', 'contacto', 'correo', 'perro', 'perra', 'mascota',
   'cuarto', 'habitacion', 'chiste', 'ayuda', 'hora', 'donde', 'vive', 'hablas', 'espanol',
   'cuentame', 'dime', 'puedes', 'quiero', 'saber', 'tiene', 'tiene', 'es', 'su', 'sus',
+  'te', 'tu', 'tus', 'un', 'una', 'unos', 'unas', 'y', 'o', 'pero', 'no', 'si',
+  'ya', 'esto', 'eso', 'algo', 'nada', 'tambien', 'tienes', 'eres', 'estas', 'sabes', 'haces',
+  'hace', 'hacer', 'llama', 'llamas', 'soy', 'cuanto', 'tengo', 'estoy', 'puedo', 'favor',
+  'disponible',
 ]);
+
+/**
+ * Light inflection stemmer. Only words of length >= 5 are touched so short
+ * tokens (`yo`, `hi`, `is`, `que`, `es`) never shrink and keep their coverage.
+ * Applied to query tokens AND precomputed over keywords/word sets at load time,
+ * so both sides always use identical normalization.
+ */
+function stem(word: string): string {
+  if (word.length < 5) return word;
+  return word
+    .replace(/ando$|iendo$/, '')
+    .replace(/ing$/, '')
+    .replace(/(me|te|se|le|nos)$/, '')
+    .replace(/(ar|er|ir)$/, '')
+    .replace(/(es|as|os|is)$/, '')
+    .replace(/[aeo]$/, '')
+    .replace(/s$/, '');
+}
+
+const ES_STEMS = new Set([...ES_WORDS].map(stem));
+const KEYWORD_STEMS: Record<string, string[]> = Object.fromEntries(
+  Object.entries(KNOWLEDGE_BASE).map(([intent, entry]) => [
+    intent,
+    entry.keywords.map((kw) => kw.split(/\s+/).map(stem).join(' ')),
+  ])
+);
+const KEYWORD_WEIGHTS: Record<string, number> = {
+  hire: 5, hiring: 5, contratar: 5, disponible: 5, available: 5,
+};
+const KEYWORD_WEIGHT_STEMS: Record<string, number> = Object.fromEntries(
+  Object.entries(KEYWORD_WEIGHTS).map(([kw, w]) => [kw.split(/\s+/).map(stem).join(' '), w])
+);
 
 export function detectLanguage(userText: string): Lang {
   if (ES_CHARS.test(userText)) return 'es';
   const tokens = tokenize(userText);
   let esHits = 0;
-  for (const t of tokens) if (ES_WORDS.has(t)) esHits++;
-  // Require a clear majority of signal so short mixed messages stay English.
-  return esHits >= 2 || (esHits >= 1 && tokens.length <= 3 && esHits / tokens.length >= 0.34) ? 'es' : 'en';
+  for (const t of tokens) if (ES_STEMS.has(t)) esHits++;
+  // Short messages need a single Spanish signal; longer ones a clear majority.
+  return esHits >= 2 || (esHits >= 1 && tokens.length <= 3) ? 'es' : 'en';
 }
 
 function tokenize(text: string): string[] {
@@ -195,7 +242,8 @@ function tokenize(text: string): string[] {
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9\s]/g, ' ')
     .split(/\s+/)
-    .filter((t) => t.length > 1);
+    .filter((t) => t.length > 1)
+    .map(stem);
 }
 
 const GENERIC_WORDS: Record<string, true> = {
@@ -209,21 +257,33 @@ const GENERIC_WORDS: Record<string, true> = {
   su: true, sus: true, el: true, la: true, de: true, del: true, por: true, para: true,
 };
 
+const GENERIC_STEMS = new Set([...Object.keys(GENERIC_WORDS)].map(stem));
+
 function scoreIntent(tokens: string[], keywords: string[]): { score: number; matches: number } {
-  const text = tokens.join('');
   let score = 0;
   let matches = 0;
   for (const kw of keywords) {
     const kwTokens = kw.split(/\s+/);
     let matched = false;
     if (kwTokens.length > 1) {
-      const kwJoined = kw.replace(/\s+/g, '');
-      if (text.includes(kwJoined) || text.includes(kw)) {
-        score += kwTokens.length * 2;
-        matched = true;
+      // Contiguous token-sequence match — a phrase must span whole tokens,
+      // so 'what is in' never matches "what is interesting" ('in' prefix).
+      for (let i = 0; i + kwTokens.length <= tokens.length; i++) {
+        let ok = true;
+        for (let j = 0; j < kwTokens.length; j++) {
+          if (tokens[i + j] !== kwTokens[j]) {
+            ok = false;
+            break;
+          }
+        }
+        if (ok) {
+          score += kwTokens.length * 2;
+          matched = true;
+          break;
+        }
       }
     } else if (tokens.includes(kw)) {
-      score += GENERIC_WORDS[kw] ? 1 : 3;
+      score += KEYWORD_WEIGHT_STEMS[kw] ?? (GENERIC_STEMS.has(kw) ? 1 : 3);
       matched = true;
     }
     if (matched) matches++;
@@ -258,8 +318,8 @@ export function askAlphGPT(
   let bestScore = 0;
   let bestMatches = 0;
 
-  for (const [intent, data] of Object.entries(KNOWLEDGE_BASE)) {
-    const { score, matches } = scoreIntent(tokens, data.keywords);
+  for (const intent of Object.keys(KNOWLEDGE_BASE)) {
+    const { score, matches } = scoreIntent(tokens, KEYWORD_STEMS[intent]);
     if (score > bestScore || (score === bestScore && matches > bestMatches)) {
       bestScore = score;
       bestMatches = matches;
