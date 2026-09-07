@@ -214,6 +214,16 @@ describe('buildMiniSchnauzer', () => {
   it('returns unified contract with mesh', () => {
     const result = builder({ position: [0, 0, 0], rotation: 0 });
     expect(result.mesh).toBeInstanceOf(THREE.Group);
+    expect(result.label).toBe('Lulú');
+  });
+
+  it('applies furniture placement without changing the pet pivot hierarchy', () => {
+    const result = builder({ position: [1, 0.75, -2], rotation: Math.PI / 3 });
+    expect(result.mesh.position.toArray()).toEqual([1, 0.75, -2]);
+    expect(result.mesh.rotation.y).toBeCloseTo(Math.PI / 3);
+    for (const name of ['body', 'head', 'tail', 'earL', 'earR']) {
+      expect(result.mesh.getObjectByName(name)).toBeInstanceOf(THREE.Group);
+    }
   });
 
   it('has head as a Group containing facial features', () => {

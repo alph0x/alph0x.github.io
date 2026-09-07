@@ -155,6 +155,46 @@ describe('updatePet', () => {
       expect(head.rotation.x).toBeLessThan(-0.3);
       delete window.__TIME_OF_DAY_NOW__;
     });
+
+    it('moves the face through the sleep pivot without moving the front paws', () => {
+      const { pet, camera } = createPetAndCamera({ x: 0, y: 1, z: 10 }, { x: 0, z: 0 }, 0);
+      const head = pet.mesh.getObjectByName('head');
+      const nose = pet.mesh.getObjectByName('nose');
+      const pawL = pet.mesh.getObjectByName('frontPawL');
+      const pawR = pet.mesh.getObjectByName('frontPawR');
+      const legs = ['frontLegL', 'frontLegR', 'legFurnishingL', 'legFurnishingR'].map((name) => pet.mesh.getObjectByName(name));
+      const beforeLegs = legs.map((leg) => leg.getWorldPosition(new THREE.Vector3()));
+      const beforeNose = new THREE.Vector3();
+      const beforePawL = new THREE.Vector3();
+      const beforePawR = new THREE.Vector3();
+      pet.mesh.updateMatrixWorld(true);
+      nose.getWorldPosition(beforeNose);
+      pawL.getWorldPosition(beforePawL);
+      pawR.getWorldPosition(beforePawR);
+
+      window.__TIME_OF_DAY_NOW__ = new Date('2026-06-22T03:00:00');
+      updatePet(0, pet, camera);
+      pet.mesh.updateMatrixWorld(true);
+
+      const afterNose = new THREE.Vector3();
+      const afterPawL = new THREE.Vector3();
+      const afterPawR = new THREE.Vector3();
+      nose.getWorldPosition(afterNose);
+      pawL.getWorldPosition(afterPawL);
+      pawR.getWorldPosition(afterPawR);
+
+      expect(head.rotation.x).toBe(-0.45);
+      expect(head.rotation.y).toBe(0);
+      expect(nose.parent).toBe(head);
+      for (const [index, leg] of legs.entries()) {
+        expect(leg.parent).toBe(pet.mesh);
+        expect(leg.getWorldPosition(new THREE.Vector3()).distanceTo(beforeLegs[index])).toBeLessThan(0.0001);
+      }
+      expect(afterNose.distanceTo(beforeNose)).toBeGreaterThan(0.01);
+      expect(afterPawL.distanceTo(beforePawL)).toBeLessThan(0.0001);
+      expect(afterPawR.distanceTo(beforePawR)).toBeLessThan(0.0001);
+      delete window.__TIME_OF_DAY_NOW__;
+    });
   });
 
   describe('proximity notice', () => {
