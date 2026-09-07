@@ -40,6 +40,9 @@ export class InteractionSystem {
   private _promptEl: HTMLElement | null = null;
   private _crosshairEl: HTMLElement | null = null;
   private _panelEls = new Map<string, HTMLElement | null>();
+  private _activePanel: HTMLElement | null = null;
+  private _panelOpener: HTMLElement | null = null;
+  private _restoreStartScreen = false;
 
   // Cached interactable mesh list — rebuilt only when the source array changes.
   private _meshCache: THREE.Object3D[] = [];
@@ -62,6 +65,7 @@ export class InteractionSystem {
     this.worldState = worldState;
     this.controls = controls;
     this.raycaster = new THREE.Raycaster();
+    document.addEventListener('keydown', (event) => this._handleDialogKeydown(event));
   }
 
   private _prompt(): HTMLElement | null {
@@ -133,17 +137,71 @@ export class InteractionSystem {
     }
   }
 
-  openPanel(id: string): void {
+  private _setPanelVisibility(panel: HTMLElement, isOpen: boolean): void {
+    panel.hidden = !isOpen;
+    panel.setAttribute('aria-hidden', String(!isOpen));
+    panel.classList.toggle('active', isOpen);
+    if (!isOpen) panel.classList.remove('terminal-mode');
+  }
+
+  private _focusableElements(panel: HTMLElement): HTMLElement[] {
+    return Array.from(panel.querySelectorAll<HTMLElement>(
+      'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    ));
+  }
+
+  private _focusPanel(panel: HTMLElement): void {
+    const initialFocus = panel.querySelector<HTMLElement>('.panel-close') ?? this._focusableElements(panel)[0];
+    initialFocus?.focus();
+  }
+
+  private _handleDialogKeydown(event: KeyboardEvent): void {
+    const panel = this._activePanel;
+    if (!this.worldState.ui.isPanelOpen || !panel || panel.hidden) return;
+
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      this.closePanels();
+      return;
+    }
+
+    if (event.key !== 'Tab') return;
+    const focusables = this._focusableElements(panel);
+    if (focusables.length === 0) return;
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    const activeElement = document.activeElement;
+
+    if (event.shiftKey && (activeElement === first || !panel.contains(activeElement))) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
+  openPanel(id: string, opener?: HTMLElement | null): void {
+    const panel = this._panel(id);
+    if (!panel) return;
     const { ui } = this.worldState;
     ui.isPanelOpen = true;
-    document.querySelectorAll('.info-panel').forEach((p) => p.classList.remove('active'));
-    const panel = this._panel(id);
-    if (panel) panel.classList.add('active');
+    document.querySelectorAll<HTMLElement>('.info-panel').forEach((item) => this._setPanelVisibility(item, item === panel));
+    this._activePanel = panel;
+    const active = opener ?? document.activeElement;
+    this._panelOpener = active instanceof HTMLElement ? active : null;
+    const startScreen = document.getElementById('start-screen') as HTMLElement | null;
+    this._restoreStartScreen = !!startScreen && startScreen.style.display !== 'none';
+    if (this._restoreStartScreen) {
+      if (startScreen) startScreen.style.display = 'none';
+    }
     // unlock AFTER the panel is active: loading.ts re-shows the start screen
     // on unlock when no panel is open.
     this.controls.unlock();
     const crosshair = this._crosshair();
     if (crosshair) crosshair.style.display = 'none';
+    this._focusPanel(panel);
   }
 
   // Lean in to the actual laptop: eyes stop just in front of the screen,
@@ -216,10 +274,7 @@ export class InteractionSystem {
   closePanels(): void {
     const { ui } = this.worldState;
     ui.isPanelOpen = false;
-    document.querySelectorAll('.info-panel').forEach((p) => {
-      p.classList.remove('active');
-      p.classList.remove('terminal-mode');
-    });
+    document.querySelectorAll<HTMLElement>('.info-panel').forEach((panel) => this._setPanelVisibility(panel, false));
     const crosshair = this._crosshair();
     if (crosshair) crosshair.style.display = 'block';
 
@@ -239,7 +294,19 @@ export class InteractionSystem {
       exitTerminalMode();
     }
 
-    this.controls.lock();
+    const opener = this._panelOpener;
+    const restoreStartScreen = this._restoreStartScreen;
+    this._activePanel = null;
+    this._panelOpener = null;
+    this._restoreStartScreen = false;
+
+    if (restoreStartScreen) {
+      const startScreen = document.getElementById('start-screen') as HTMLElement | null;
+      if (startScreen) startScreen.style.display = 'flex';
+    } else {
+      this.controls.lock();
+    }
+    if (opener?.isConnected) opener.focus();
   }
 
   updatePrompt(delta?: number): void {

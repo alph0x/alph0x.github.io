@@ -15,6 +15,14 @@ import { applySeedFromUrl } from './seed.js';
 
 import type { ControlsLike } from './core.js';
 
+declare global {
+  interface Window {
+    showImmersiveFallback?: (error: unknown, source?: 'boot' | 'pointer-lock' | 'unknown') => void;
+    clearImmersiveFallback?: () => void;
+    retryImmersiveRoom?: () => void;
+  }
+}
+
 export async function initGame(): Promise<Game> {
   const isMobile = window.matchMedia('(max-width: 768px)').matches || ('ontouchstart' in window && navigator.maxTouchPoints > 0);
 
@@ -59,14 +67,7 @@ export async function initGame(): Promise<Game> {
     window.__camera = camera;
     return game;
   } catch (err) {
-    const loading = document.getElementById('loading');
-    if (loading) loading.style.display = 'none';
-    const errDiv = document.getElementById('error-display');
-    if (errDiv && err instanceof Error) {
-      errDiv.style.display = 'block';
-      errDiv.textContent += 'BOOT ERROR: ' + err.message + '\n' + (err.stack || '') + '\n';
-    }
-    if (err instanceof Error) console.error(err);
+    window.showImmersiveFallback?.(err, 'boot');
     throw err;
   }
 }

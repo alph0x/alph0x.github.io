@@ -61,7 +61,7 @@ export class Game {
     camera.fov = 68;
     camera.updateProjectionMatrix();
     camera.rotation.order = 'YXZ';
-    camera.rotation.set(-0.05, 0.15, 0);
+    camera.rotation.set(-0.10, 0.24, 0);
     this.prevTime = performance.now();
     this._boundAnimate = this.animate.bind(this);
 
@@ -85,6 +85,14 @@ export class Game {
       window.addEventListener('resize', () => this.onResize());
       document.querySelectorAll('.panel-close').forEach((btn) => {
         btn.addEventListener('click', () => this.closePanels());
+      });
+      document.querySelectorAll<HTMLElement>('[data-recruiter-panel]').forEach((trigger) => {
+        trigger.addEventListener('click', (event) => {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          const panelId = trigger.dataset.recruiterPanel;
+          if (panelId) this.interaction.openPanel(panelId, trigger);
+        }, true);
       });
       document.addEventListener('click', (e) => {
         if (!this.worldState.ui.isPanelOpen) return;

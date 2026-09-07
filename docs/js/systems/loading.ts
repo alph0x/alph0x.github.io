@@ -10,6 +10,8 @@ export class LoadingSystem {
   controls: PointerLockLike;
   private _loadInt: number | null = null;
   private _resolved = false;
+  private _recruiterPanel: HTMLElement | null = null;
+  private _recruiterTrigger: HTMLElement | null = null;
 
   constructor({ controls }: { controls: PointerLockLike }) {
     this.controls = controls;
@@ -43,7 +45,11 @@ export class LoadingSystem {
       }
     }, 8000);
 
-    this._bindStartBtn();
+    this._bindStartScreen();
+    window.retryImmersiveRoom = () => this._attemptPointerLock();
+    document.addEventListener('pointerlockerror', () => {
+      window.showImmersiveFallback?.(new Error('Pointer Lock was denied'), 'pointer-lock');
+    });
   }
 
   private _showStart(): void {
@@ -51,17 +57,42 @@ export class LoadingSystem {
     (document.getElementById('start-screen') as HTMLElement).style.display = 'flex';
   }
 
-  private _bindStartBtn(): void {
-    (document.getElementById('start-btn') as HTMLElement).addEventListener('click', () => {
-      (document.getElementById('start-screen') as HTMLElement).style.display = 'none';
-      if (typeof this.controls.lock === 'function') {
-        try {
-          this.controls.lock();
-        } catch {
-          /* lock may throw if not ready */
-        }
-      }
+  private _bindStartScreen(): void {
+    const startScreen = document.getElementById('start-screen') as HTMLElement | null;
+    const startButton = document.getElementById('start-btn') as HTMLElement | null;
+
+    startButton?.addEventListener('click', () => this._attemptPointerLock());
+
+    document.querySelectorAll<HTMLElement>('[data-recruiter-panel]').forEach((trigger) => {
+      trigger.addEventListener('click', () => {
+        const panelId = trigger.dataset.recruiterPanel;
+        const panel = panelId ? document.getElementById(panelId) : null;
+        if (!panel || !startScreen) return;
+
+        document.querySelectorAll('.info-panel').forEach((item) => item.classList.remove('active'));
+        this._recruiterPanel = panel;
+        this._recruiterTrigger = trigger;
+        panel.classList.add('active');
+        startScreen.style.display = 'none';
+        (panel.querySelector('.panel-close') as HTMLElement | null)?.focus();
+      });
     });
+
+    document.querySelectorAll<HTMLElement>('.panel-close').forEach((closeButton) => {
+      closeButton.addEventListener('click', (event) => {
+        if (closeButton.closest('.info-panel') !== this._recruiterPanel) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        this._closeRecruiterPanel();
+      }, true);
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape' || !this._recruiterPanel) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      this._closeRecruiterPanel();
+    }, true);
 
     if (typeof this.controls.addEventListener === 'function') {
       this.controls.addEventListener('unlock', () => {
@@ -71,6 +102,27 @@ export class LoadingSystem {
       this.controls.addEventListener('lock', () => {
         (document.getElementById('start-screen') as HTMLElement).style.display = 'none';
       });
+    }
+  }
+
+  private _closeRecruiterPanel(): void {
+    this._recruiterPanel?.classList.remove('active');
+    this._recruiterPanel?.classList.remove('terminal-mode');
+    this._recruiterPanel = null;
+    (document.getElementById('start-screen') as HTMLElement | null)?.style.setProperty('display', 'flex');
+    this._recruiterTrigger?.focus();
+    this._recruiterTrigger = null;
+  }
+
+  private _attemptPointerLock(): void {
+    const startScreen = document.getElementById('start-screen') as HTMLElement | null;
+    if (startScreen) startScreen.style.display = 'none';
+    window.clearImmersiveFallback?.();
+    if (typeof this.controls.lock !== 'function') return;
+    try {
+      this.controls.lock();
+    } catch (error) {
+      window.showImmersiveFallback?.(error, 'pointer-lock');
     }
   }
 }

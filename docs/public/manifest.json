@@ -1,11 +1,11 @@
 {
-  "name": "Alph0x Portfolio",
-  "short_name": "Alph0x",
-  "description": "3D first-person portfolio — a cozy sunlit room with AlphGPT (EN/ES), editor, and Lulú.",
+  "name": "Alfredo E. Pérez Leal Portfolio",
+  "short_name": "Alfredo Pérez",
+  "description": "Alfredo E. Pérez Leal is an iOS Lead and Software Architect building mobile payment products from Buenos Aires, Argentina.",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#f5f0e1",
-  "theme_color": "#e76f51",
+  "theme_color": "#f5f0e1",
   "orientation": "any",
   "icons": [
     {
