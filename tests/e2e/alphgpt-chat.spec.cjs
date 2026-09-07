@@ -111,10 +111,13 @@ test.describe('AlphGPT NLU UI gate (G-03)', () => {
     await page.evaluate(() => { let call = 0; Math.random = () => call++ === 0 ? 0.99 : 0; });
     // Manual input renders a user bubble; a chip click must render one too,
     // through the same renderer (both go through sendMessage → appendMsg).
-    await send(page, 'hello');
-    await expect(page.locator('#alphgpt-messages .chat-msg-user')).toHaveCount(1);
-    await expect(page.locator('#alphgpt-messages .chat-msg-bot')).toHaveCount(2, { timeout: 10000 });
-    await page.click('#alphgpt-chips .chat-chip[data-prompt="What are his skills?"]');
+    // Dispatch both user actions in one browser task, before either reply timer.
+    await page.evaluate(() => {
+      const input = document.getElementById('alphgpt-input');
+      input.value = 'hello';
+      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      document.querySelector('#alphgpt-chips .chat-chip[data-prompt="What are his skills?"]').click();
+    });
     await expect(page.locator('#alphgpt-messages .chat-msg-user')).toHaveCount(2);
     await expect(page.locator('#alphgpt-messages .chat-msg-bot:not(.chat-typing)')).toHaveCount(3);
     await expect(page.locator('#alphgpt-messages .chat-msg-bot:not(.chat-typing)').nth(1)).toContainText(/AlphGPT|Hello|Hey|Hi/);
