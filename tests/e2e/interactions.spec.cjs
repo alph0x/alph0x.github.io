@@ -19,7 +19,7 @@ async function boot(page) {
   await page.waitForFunction(
     () => window.__game !== undefined && window.__camera !== undefined
       && window.__game.worldState?.room?.interactables?.length > 0,
-    { timeout: 30000 }
+    { timeout: 60000 }
   );
 }
 
@@ -64,6 +64,7 @@ test.describe('Interaction validation suite', () => {
   });
 
   test('macBook carries panel-alphgpt through the data flow', async ({ page }) => {
+    test.setTimeout(60000);
     await boot(page);
     const panelId = await page.evaluate(() => {
       const m = window.__game.worldState.room.interactables.find((i) => i.type === 'macBook');

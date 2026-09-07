@@ -35,14 +35,14 @@ describe('bilingual alphGPT', () => {
     const r2 = askAlphGPT('¿qué opinas del asdfgh?');
     expect(r2.intent).toBeNull();
   });
-  it('detects accent-free Spanish (P-01)', () => {
+  it('detects accent-free Spanish', () => {
     expect(detectLanguage('como te llamas?')).toBe('es');
     expect(detectLanguage('que sabes hacer?')).toBe('es');
     expect(detectLanguage('eres un robot?')).toBe('es');
     expect(detectLanguage('estas disponible para trabajar?')).toBe('es');
     expect(detectLanguage('en que trabajas?')).toBe('es');
   });
-  it('keeps accent-free English English (P-01)', () => {
+  it('keeps accent-free English English', () => {
     expect(detectLanguage('what do you do?')).toBe('en');
     expect(detectLanguage('are you hiring?')).toBe('en');
     expect(detectLanguage('is he a robot')).toBe('en');

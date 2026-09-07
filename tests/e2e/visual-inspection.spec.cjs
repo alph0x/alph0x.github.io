@@ -1,6 +1,7 @@
 const { test, expect } = require('@playwright/test');
 
 require('@playwright/test').test.setTimeout(process.env.CI ? 240000 : 120000);
+const screenshotDir = process.env.VISUAL_OUTPUT_DIR || 'tests/e2e/screenshots';
 
 /**
  * Visual inspection test — positions camera at key viewpoints to capture
@@ -20,6 +21,17 @@ test.describe('Visual Inspection', () => {
     });
 
     await page.goto('/');
+    await page.evaluate(async () => {
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(registrations.map((registration) => registration.unregister()));
+      }
+      if ('caches' in window) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map((key) => caches.delete(key)));
+      }
+    });
+    await page.reload();
 
     // Wait for start screen and click ENTER
     const startBtn = page.locator('#start-btn');
@@ -39,7 +51,27 @@ test.describe('Visual Inspection', () => {
       }, { camPos, targetPos });
       // Wait for the repositioned camera to be rendered (two frames: update + paint)
       await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
-      await page.screenshot({ path: `tests/e2e/screenshots/inspect-${name}.png` });
+      await page.screenshot({ path: `${screenshotDir}/inspect-${name}.png` });
+    };
+
+    const lookAtLulu = async (camOffset, targetOffset, name) => {
+      await page.evaluate(({ camOffset, targetOffset }) => {
+        const scene = window.__scene;
+        const cam = window.__camera;
+        const head = scene.getObjectByName('head');
+        if (!head || !head.parent) throw new Error('Lulú root not found');
+        const lulu = head.parent;
+        lulu.updateWorldMatrix(true, false);
+        const camPosition = cam.position.clone().set(camOffset.x, camOffset.y, camOffset.z);
+        const target = cam.position.clone().set(targetOffset.x, targetOffset.y, targetOffset.z);
+        lulu.localToWorld(camPosition);
+        lulu.localToWorld(target);
+        cam.position.copy(camPosition);
+        cam.lookAt(target);
+        cam.updateProjectionMatrix();
+      }, { camOffset, targetOffset });
+      await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+      await page.screenshot({ path: `${screenshotDir}/inspect-${name}.png` });
     };
 
     // ── View 1: Laptop from front-right (eye level) ──
@@ -63,21 +95,39 @@ test.describe('Visual Inspection', () => {
       'laptop-side-profile'
     );
 
-    // ── View 4: Lulú close-up ──
+    // ── Views 4–7: fixed Lulú review angles ──
+    await lookAtLulu(
+      { x: 0.34, y: 0.34, z: 0.55 },
+      { x: 0, y: 0.14, z: 0.07 },
+      'lulu-front-three-quarter'
+    );
+
+    await lookAtLulu(
+      { x: 0.56, y: 0.27, z: 0.02 },
+      { x: 0, y: 0.12, z: 0 },
+      'lulu-profile'
+    );
+
+    await lookAtLulu(
+      { x: 0.16, y: 0.7, z: 0.12 },
+      { x: 0, y: 0.04, z: 0 },
+      'lulu-top-silhouette'
+    );
+
     await lookAt(
       { x: -0.2, y: 1.4, z: -0.3 },
       { x: -0.7, y: 0.89, z: -0.9 },
-      'lulu-closeup'
+      'lulu-in-room'
     );
 
-    // ── View 5: TV from couch/bed area ──
+    // ── View 8: TV from couch/bed area ──
     await lookAt(
       { x: -0.5, y: 1.3, z: -0.5 },
       { x: 1.35, y: 1.4, z: 1.65 },
       'tv-from-bed'
     );
 
-    // ── View 6: Wide room overview ──
+    // ── View 9: Wide room overview ──
     await lookAt(
       { x: 0, y: 3.5, z: 0 },
       { x: 0, y: 0, z: 0 },

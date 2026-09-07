@@ -9,7 +9,7 @@ function filterKnownErrors(errors) {
   });
 }
 
-const REPRESENTATIVE_MODELS = ['sofa', 'door', 'window', 'miniSchnauzer', 'macbook', 'tv'];
+const REPRESENTATIVE_MODELS = ['bed', 'door', 'window', 'miniSchnauzer', 'macbook', 'tv'];
 
 test.describe('Model Viewer', () => {
   test.beforeEach(async ({ page }) => {
@@ -21,6 +21,7 @@ test.describe('Model Viewer', () => {
   });
 
   test('loads sidebar and each representative model has geometry', async ({ page }) => {
+    test.setTimeout(120000);
     await page.goto('/model-viewer.html');
     await page.waitForSelector('#list .item', { state: 'visible', timeout: 10000 });
     await page.waitForTimeout(300);

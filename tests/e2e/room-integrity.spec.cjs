@@ -4,9 +4,9 @@ require('@playwright/test').test.setTimeout(process.env.CI ? 240000 : 120000);
 
 function filterKnownErrors(errors) {
   return errors.filter((e) => {
-    if (e.includes('Pointer Lock API')) return false;
+    const normalized = e.toLowerCase();
+    if (normalized.includes('pointer lock')) return false;
     if (e.includes('WrongDocumentError')) return false;
-    if (e.includes('pointer lock')) return false;
     return true;
   });
 }

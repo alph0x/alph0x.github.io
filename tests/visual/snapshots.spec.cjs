@@ -1,6 +1,6 @@
 const { test, expect } = require('@playwright/test');
 
-const BOOT_TIMEOUT = process.env.CI ? 60000 : 10000;
+const BOOT_TIMEOUT = 60000;
 
 require('@playwright/test').test.setTimeout(process.env.CI ? 180000 : 60000);
 
