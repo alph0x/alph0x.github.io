@@ -6,7 +6,7 @@ import * as THREE from 'three';
 import { register } from '../registry.js';
 import { COLORS } from '../../core.js';
 import { makeStd, texMetal } from '../../assets/index.js';
-import { makeSphere, makeLight, rootGroup } from '../../primitives.js';
+import { makeCylinder, makeSphere, makeLight, rootGroup } from '../../primitives.js';
 import type { FurnitureConfig } from '../../seed.js';
 
 function buildFairyLights(cfg: FurnitureConfig): { mesh: THREE.Group } {
@@ -28,7 +28,8 @@ function buildFairyLights(cfg: FurnitureConfig): { mesh: THREE.Group } {
   const curve = new THREE.CatmullRomCurve3(points);
 
   const wireMat = makeStd({ map: texMetal, color: 0x5a5248, roughness: 0.6, metalness: 0.3 });
-  const wireGeo = new THREE.TubeGeometry(curve, 24, 0.004, 6, false);
+  wireMat.flatShading = false;
+  const wireGeo = new THREE.TubeGeometry(curve, 48, 0.004, 8, false);
   group.add(new THREE.Mesh(wireGeo, wireMat));
 
   const bulbMat = makeStd({
@@ -38,10 +39,15 @@ function buildFairyLights(cfg: FurnitureConfig): { mesh: THREE.Group } {
     roughness: 0.2,
   });
 
+  bulbMat.flatShading = false;
+
   for (let i = 0; i < count; i++) {
     const t = i / (count - 1);
     const p = curve.getPoint(t);
-    const bulb = makeSphere(bulbMat, [0.018], [p.x, p.y, p.z], 10);
+    const socket = makeCylinder(wireMat, [0.006, 0.01, 0.018], [p.x, p.y + 0.008, p.z], 12);
+    socket.name = `bulb-socket-${i}`;
+    group.add(socket);
+    const bulb = makeSphere(bulbMat, [0.018], [p.x, p.y, p.z], 16);
     group.add(bulb);
     if (i % 3 === 0) {
       group.add(makeLight(COLORS.warm, 0.08, 1.2, [p.x, p.y, p.z]));

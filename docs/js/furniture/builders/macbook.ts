@@ -46,7 +46,9 @@ function buildMacBook(cfg: FurnitureConfig): { mesh: THREE.Group; type: string; 
   // Bezel
   lidGroup.add(makeBox(dark, [w * 0.96, 0.002, d * 0.92], [0, -0.001, d / 2]));
   // Emissive screen plane
-  lidGroup.add(makePlane(screenGlow, [w * 0.9, d * 0.85], [0, -0.002, d / 2]));
+  const screen = makePlane(screenGlow, [w * 0.9, d * 0.85], [0, -0.002, d / 2]);
+  screen.rotation.x = Math.PI / 2;
+  lidGroup.add(screen);
 
   g.add(lidGroup);
 
