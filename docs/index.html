@@ -787,6 +787,7 @@
     const sendBtn = document.getElementById('alphgpt-send');
     const liveEl = document.getElementById('alphgpt-live');
     let lastIntent = null;
+    let nextReplyAt = 0;
 
     function announce(text) {
       if (!liveEl) return;
@@ -849,12 +850,14 @@
       appendMsg(text, true);
       inputEl.value = '';
       showTyping();
+      const now = Date.now();
+      nextReplyAt = Math.max(now + 600 + Math.random() * 400, nextReplyAt + 1);
       setTimeout(() => {
         removeTyping();
         const result = askAlphGPT(text, lastIntent, context);
         appendMsg(result.text, false);
         lastIntent = result.intent;
-      }, 600 + Math.random() * 400);
+      }, nextReplyAt - now);
     }
 
     function handleSend() {

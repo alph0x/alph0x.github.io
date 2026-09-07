@@ -107,6 +107,8 @@ test.describe('AlphGPT NLU UI gate (G-03)', () => {
 
   test('chips and typed input share the same send path', async ({ page }) => {
     await bootChat(page);
+    // Force the first simulated response to be slower than the second.
+    await page.evaluate(() => { let call = 0; Math.random = () => call++ === 0 ? 0.99 : 0; });
     // Manual input renders a user bubble; a chip click must render one too,
     // through the same renderer (both go through sendMessage → appendMsg).
     await send(page, 'hello');
@@ -114,6 +116,8 @@ test.describe('AlphGPT NLU UI gate (G-03)', () => {
     await expect(page.locator('#alphgpt-messages .chat-msg-bot')).toHaveCount(2, { timeout: 10000 });
     await page.click('#alphgpt-chips .chat-chip[data-prompt="What are his skills?"]');
     await expect(page.locator('#alphgpt-messages .chat-msg-user')).toHaveCount(2);
+    await expect(page.locator('#alphgpt-messages .chat-msg-bot:not(.chat-typing)')).toHaveCount(3);
+    await expect(page.locator('#alphgpt-messages .chat-msg-bot:not(.chat-typing)').nth(1)).toContainText(/AlphGPT|Hello|Hey|Hi/);
     await expect
       .poll(() => lastBotText(page), { timeout: 10000 })
       .toMatch(/Alfredo's core stack/);
