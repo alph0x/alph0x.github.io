@@ -27,12 +27,13 @@ function buildWindow(cfg: FurnitureConfig): { mesh: THREE.Group; label: string }
   const glassMat = makeStd({
     color: 0xd8ecf2,
     transparent: true,
-    opacity: 0.12,
-    roughness: 0.08,
+    opacity: 0.025,
+    roughness: 0.55,
     metalness: 0.1,
     side: THREE.DoubleSide,
   });
 
+  glassMat.depthWrite = false;
   const frame = new THREE.Group();
 
   // top + bottom frame
@@ -59,9 +60,10 @@ function buildWindow(cfg: FurnitureConfig): { mesh: THREE.Group; label: string }
     emissive: 0xffd9a0,
     emissiveIntensity: 0.35,
     transparent: true,
-    opacity: 0.1,
+    opacity: 0.015,
     side: THREE.DoubleSide,
   });
+  glowMat.depthWrite = false;
   const glowMesh = makeBox(glowMat, [winW - 0.05, winH - 0.05, 0.005], [0, 0, 0.008]);
   glowMesh.userData._windowGlow = true;
   frame.add(glowMesh);
@@ -81,18 +83,25 @@ function buildWindow(cfg: FurnitureConfig): { mesh: THREE.Group; label: string }
   frame.add(rod);
   frame.add(makeSphere(muntinMat, [0.028], [-(winW / 2 + 0.26), winH / 2 + 0.14, 0.09], 8));
   frame.add(makeSphere(muntinMat, [0.028], [winW / 2 + 0.26, winH / 2 + 0.14, 0.09], 8));
+  curtainMat.flatShading = false;
   for (const side of [-1, 1]) {
-    // three offset slats per side read as gathered folds, not a flat card
-    for (let f = 0; f < 3; f++) {
-      const fold = makeRoundedBox(
-        curtainMat,
-        [0.09, winH + 0.34 - f * 0.03, 0.035],
-        [side * (winW / 2 + 0.1 + f * 0.055), -0.02 + f * 0.015, 0.075 + f * 0.028],
-        0.015, 2
-      );
-      fold.rotation.z = side * (0.02 + f * 0.015);
-      frame.add(fold);
+    // Continuous linen: hanging pleats, a gathered waist and a scalloped hem.
+    const geometry = new THREE.PlaneGeometry(1, 1, 24, 20);
+    const positions = geometry.attributes.position;
+    for (let i = 0; i < positions.count; i++) {
+      const u = positions.getX(i) + 0.5;
+      const v = positions.getY(i) + 0.5;
+      const gather = Math.sin(Math.PI * v) * 0.07;
+      const fold = Math.sin(u * Math.PI * 6);
+      positions.setXYZ(i,
+        side * (winW / 2 + 0.02 + u * (0.28 - gather) + gather),
+        (v - 0.5) * (winH + 0.31) - 0.015 + (1 - v) * fold * 0.015,
+        0.1 + fold * (0.026 + v * 0.012));
     }
+    geometry.computeVertexNormals();
+    const curtain = new THREE.Mesh(geometry, curtainMat);
+    curtain.castShadow = curtain.receiveShadow = true;
+    frame.add(curtain);
   }
 
   // tiny succulent on the sill — the room's second resident

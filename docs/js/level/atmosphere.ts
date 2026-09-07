@@ -51,7 +51,7 @@ function buildWindowShaft(scene: THREE.Scene, position: number[], preset: TimeOf
   const shaft = new THREE.Mesh(geo, new THREE.ShaderMaterial({
     uniforms: {
       uColor: { value: new THREE.Color(preset.windowGlow.color) },
-      uOpacity: { value: 0.6 },
+      uOpacity: { value: 0.08 },
     },
     vertexShader: /* glsl */ `
       varying vec3 vNormalW;
@@ -112,10 +112,10 @@ function buildWindowShaft(scene: THREE.Scene, position: number[], preset: TimeOf
   dustGeo.setAttribute('position', new THREE.BufferAttribute(base.slice(), 3));
   const dust = new THREE.Points(dustGeo, new THREE.PointsMaterial({
     color: preset.windowGlow.color,
-    size: 0.03,
+    size: 0.014,
     map: moteTexture(),
     transparent: true,
-    opacity: 0.7,
+    opacity: 0.18,
     blending: THREE.AdditiveBlending,
     depthWrite: false,
     sizeAttenuation: true,
@@ -131,7 +131,7 @@ function buildWindowShaft(scene: THREE.Scene, position: number[], preset: TimeOf
 export function setupAtmosphere(scene: THREE.Scene, preset: TimeOfDayPreset): void {
   // Warm haze tinted toward the sunlight; near plane beyond the room diagonal so
   // the interior stays clear and the haze softens the hills outside the window.
-  const base = preset.name === 'night' ? 0x3a3f52 : 0xf2ddba;
+  const base = preset.name === 'night' ? 0x3a3f52 : 0xe1e7da;
   const fogColor = new THREE.Color(base).lerp(new THREE.Color(preset.fill.color), 0.35);
   scene.fog = new THREE.Fog(fogColor, 7, 42);
 

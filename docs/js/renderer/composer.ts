@@ -26,8 +26,8 @@ const GradeShader = {
   uniforms: {
     tDiffuse: { value: null as THREE.Texture | null },
     time: { value: 0 },
-    vignetteStrength: { value: 0.26 },
-    grainStrength: { value: typeof window !== 'undefined' && (window as unknown as { __snapshotMode?: boolean }).__snapshotMode ? 0 : 0.035 },
+    vignetteStrength: { value: 0.16 },
+    grainStrength: { value: typeof window !== 'undefined' && (window as unknown as { __snapshotMode?: boolean }).__snapshotMode ? 0 : 0.012 },
   },
   vertexShader: /* glsl */ `
     varying vec2 vUv;
@@ -52,8 +52,8 @@ const GradeShader = {
       float lum = dot(color.rgb, vec3(0.299, 0.587, 0.114));
 
       // warm paper grade: sage-cream shadows / golden highlights
-      vec3 shadowTint = vec3(0.97, 1.01, 0.97);
-      vec3 highlightTint = vec3(1.05, 1.0, 0.92);
+      vec3 shadowTint = vec3(0.97, 1.01, 1.02);
+      vec3 highlightTint = vec3(1.025, 1.0, 0.97);
       color.rgb *= mix(shadowTint, highlightTint, smoothstep(0.12, 0.72, lum));
 
       // vignette

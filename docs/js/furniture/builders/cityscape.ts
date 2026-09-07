@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { registerParallaxTarget } from '../../systems/animation/parallax.js';
 import { registerCloud } from '../../systems/animation/clouds.js';
 
@@ -101,16 +102,46 @@ function buildSky(): THREE.Mesh {
   return sky;
 }
 
+// Broad painted value changes give the unlit backdrop volume without extra lights.
+function paintLandscape(geometry: THREE.BufferGeometry, base: number, height: number, relativeToBase = false): void {
+  const positions = geometry.getAttribute('position');
+  const colors: number[] = [];
+  const shade = new THREE.Color(base).multiplyScalar(0.72);
+  const light = new THREE.Color(base).lerp(new THREE.Color(0xe8e7b3), 0.24);
+  const color = new THREE.Color();
+  const baseColor = new THREE.Color(base);
+  for (let i = 0; i < positions.count; i++) {
+    const x = positions.getX(i), y = positions.getY(i), z = positions.getZ(i);
+    const wash = Math.sin(x * 2.3 + z * 1.6) * 0.025;
+    const t = THREE.MathUtils.clamp(0.42 + y / height * 0.45 + wash, 0, 1);
+    color.copy(shade).lerp(light, t);
+    colors.push(
+      color.r / (relativeToBase ? baseColor.r : 1),
+      color.g / (relativeToBase ? baseColor.g : 1),
+      color.b / (relativeToBase ? baseColor.b : 1));
+  }
+  geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+}
+
+function paintedMesh(geometry: THREE.BufferGeometry, color = 0xffffff): THREE.Mesh {
+  return new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ color, vertexColors: true, fog: false }));
+}
+
 function buildCloud(rng: () => number, x: number, y: number, z: number, scale: number): THREE.Group {
   const cloud = new THREE.Group();
   const puffs = 3 + Math.floor(rng() * 3);
+  const pieces: THREE.BufferGeometry[] = [];
   for (let i = 0; i < puffs; i++) {
     const r = (0.9 + rng() * 1.1) * scale;
-    const puff = new THREE.Mesh(new THREE.SphereGeometry(r, 10, 8), basic(0xfffbef));
-    puff.position.set((i - puffs / 2) * r * 1.15 + (rng() - 0.5) * 0.5, (rng() - 0.5) * 0.4 * scale, (rng() - 0.5) * 0.6);
-    puff.scale.y = 0.62;
-    cloud.add(puff);
+    const geometry = new THREE.SphereGeometry(r, 16, 10);
+    geometry.scale(1, 0.62, 1);
+    paintLandscape(geometry, 0xfffbef, r);
+    geometry.translate((i - puffs / 2) * r * 1.15 + (rng() - 0.5) * 0.5,
+      (rng() - 0.5) * 0.4 * scale, (rng() - 0.5) * 0.6);
+    pieces.push(geometry);
   }
+  cloud.add(paintedMesh(mergeGeometries(pieces)));
+  pieces.forEach((geometry) => geometry.dispose());
   cloud.position.set(x, y, z);
   cloud.userData._driftSpeed = 0.08 + rng() * 0.12;
   registerCloud(cloud);
@@ -118,7 +149,17 @@ function buildCloud(rng: () => number, x: number, y: number, z: number, scale: n
 }
 
 function buildHill(x: number, z: number, w: number, h: number, color: number): THREE.Mesh {
-  const hill = new THREE.Mesh(new THREE.SphereGeometry(1, 24, 16), basic(color));
+  const geometry = new THREE.SphereGeometry(1, 48, 24);
+  const positions = geometry.attributes.position;
+  for (let i = 0; i < positions.count; i++) {
+    const px = positions.getX(i), py = positions.getY(i), pz = positions.getZ(i);
+    // Low-frequency ridges break the perfect dome while keeping the meadow continuous.
+    const ridge = 1 + 0.12 * Math.sin(px * 5 + x * 0.1) + 0.07 * Math.sin(pz * 7 + px * 3);
+    positions.setXYZ(i, px, py * ridge, pz);
+  }
+  geometry.computeVertexNormals();
+  paintLandscape(geometry, color, 1, true);
+  const hill = paintedMesh(geometry, color);
   hill.scale.set(w, h, w * 0.5);
   hill.position.set(x, -2.2, z);
   return hill;
@@ -126,16 +167,23 @@ function buildHill(x: number, z: number, w: number, h: number, color: number): T
 
 function buildTree(rng: () => number, x: number, y: number, z: number, s: number): THREE.Group {
   const tree = new THREE.Group();
-  const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.06 * s, 0.09 * s, 0.7 * s, 5), basic(0x6b5138));
-  trunk.position.y = 0.35 * s;
+  const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.06 * s, 0.11 * s, 1.2 * s, 8), basic(0x68533e));
+  trunk.position.y = 0.6 * s;
+  trunk.rotation.z = (rng() - 0.5) * 0.14;
   tree.add(trunk);
-  const blobs = 2 + Math.floor(rng() * 2);
-  for (let i = 0; i < blobs; i++) {
-    const r = (0.5 + rng() * 0.35) * s;
-    const leaf = new THREE.Mesh(new THREE.SphereGeometry(r, 8, 6), basic(i === 0 ? 0x4e7a52 : 0x5d8a58));
-    leaf.position.set((rng() - 0.5) * 0.5 * s, (0.8 + i * 0.45) * s, (rng() - 0.5) * 0.3 * s);
-    tree.add(leaf);
+  const pieces: THREE.BufferGeometry[] = [];
+  // A spreading, asymmetric crown with broad overlapping boughs.
+  for (let i = 0; i < 5; i++) {
+    const r = (0.45 + rng() * 0.3) * s;
+    const geometry = new THREE.SphereGeometry(r, 16, 12);
+    geometry.scale(1.12, 0.78 + rng() * 0.25, 1);
+    paintLandscape(geometry, i % 2 ? 0x63875b : 0x476d50, r);
+    const a = i * 2.39996;
+    geometry.translate(Math.cos(a) * 0.4 * s, (1.0 + i * 0.18) * s, Math.sin(a) * 0.3 * s);
+    pieces.push(geometry);
   }
+  tree.add(paintedMesh(mergeGeometries(pieces)));
+  pieces.forEach((geometry) => geometry.dispose());
   tree.position.set(x, y, z);
   return tree;
 }
@@ -145,7 +193,7 @@ function buildCottage(wall: number, roof: number): THREE.Group {
   const body = new THREE.Mesh(new THREE.BoxGeometry(1.6, 1.1, 1.3), basic(wall));
   body.position.y = 0.55;
   g.add(body);
-  // Four-sided pyramid roof, Ghibli terracotta.
+  // Terracotta roof above cream plaster cottages.
   const roofMesh = new THREE.Mesh(new THREE.ConeGeometry(1.35, 0.85, 4), basic(roof));
   roofMesh.rotation.y = Math.PI / 4;
   roofMesh.position.y = 1.1 + 0.42;
@@ -198,15 +246,15 @@ export function buildCityscape(cfg: { position: number[]; seed?: number }): THRE
 
   // Midground: green rolling hills with career cottages and tree clusters.
   const midground = buildLayer(rng, 0.03, (group) => {
-    group.add(buildHill(-16, -26, 26, 6.5, 0x7fb08a));
-    group.add(buildHill(12, -24, 30, 7, 0x86b48e));
+    group.add(buildHill(-19, -26, 26, 5.2, 0x709878));
+    group.add(buildHill(15, -24, 30, 5.8, 0x80a18b));
     group.add(buildHill(34, -22, 20, 5.5, 0x7fb08a));
 
     for (let i = 0; i < CAREER_COTTAGES.length; i++) {
       const c = CAREER_COTTAGES[i];
       const cottage = buildCottage(c.wall, c.roof);
       const bx = -20 + i * 10 + (rng() - 0.5) * 3;
-      cottage.position.set(bx, 1.4 + rng() * 1.2, -21 - rng() * 4);
+      cottage.position.set(bx, 2.2 + rng() * 0.65, -21 - rng() * 4);
       cottage.rotation.y = (rng() - 0.5) * 0.6;
       cottage.scale.setScalar(0.9 + rng() * 0.4);
       group.add(cottage);
@@ -220,8 +268,8 @@ export function buildCityscape(cfg: { position: number[]; seed?: number }): THRE
 
   // Foreground: the nearest meadow ridge + faster, lower clouds.
   const foreground = buildLayer(rng, 0.08, (group) => {
-    group.add(buildHill(-8, -13, 24, 4.5, 0x5d9a6e));
-    group.add(buildHill(18, -12, 20, 4, 0x559264));
+    group.add(buildHill(-17, -13, 22, 2.7, 0x4e805f));
+    group.add(buildHill(24, -12, 20, 2.4, 0x437355));
     for (let i = 0; i < 3; i++) {
       group.add(buildCloud(rng, (rng() - 0.5) * 50, 6 + rng() * 6, -10 - rng() * 8, 0.9 + rng() * 0.8));
     }
@@ -230,7 +278,8 @@ export function buildCityscape(cfg: { position: number[]; seed?: number }): THRE
       group.add(buildCloud(rng, (rng() - 0.5) * 36, 3.4 + rng() * 1.8, -12 - rng() * 6, 0.55 + rng() * 0.4));
     }
     for (let i = 0; i < 6; i++) {
-      group.add(buildTree(rng, (rng() - 0.5) * 40, 1.1 + rng() * 0.8, -11 - rng() * 4, 1.1 + rng() * 0.8));
+      const side = i % 2 ? 1 : -1;
+      group.add(buildTree(rng, side * (9 + rng() * 13), 0.2 + rng() * 0.5, -11 - rng() * 4, 1.1 + rng() * 0.8));
     }
   });
 

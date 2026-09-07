@@ -30,7 +30,7 @@ const PRESETS: Record<TimeOfDayName, TimeOfDayPreset> = {
   morning: {
     name: 'morning',
     key: { color: 0xffe2b8, intensity: 14 },
-    fill: { color: 0xfff0d0, intensity: 2.4 },
+    fill: { color: 0xdce9e5, intensity: 2.2 },
     accent: 0.9,
     windowGlow: { color: 0xffe9c2, intensity: 0.7, spotIntensity: 2.0 },
     cityEmissiveMultiplier: 0.9,
@@ -38,8 +38,8 @@ const PRESETS: Record<TimeOfDayName, TimeOfDayPreset> = {
   },
   afternoon: {
     name: 'afternoon',
-    key: { color: 0xffd9a0, intensity: 12 },
-    fill: { color: 0xffcf8e, intensity: 3.0 },
+    key: { color: 0xffe5bd, intensity: 11 },
+    fill: { color: 0xcbdedc, intensity: 2.7 },
     accent: 0.9,
     windowGlow: { color: 0xffd29a, intensity: 0.9, spotIntensity: 2.6 },
     cityEmissiveMultiplier: 1.0,
@@ -142,7 +142,7 @@ export function setupLighting(scene: THREE.Scene, options?: { now?: Date }): Tim
 
   // Warm key from the ceiling-lamp position — shadow caster #1 (of 2; the
   // window spot in furniture is #2). Everything else is shadowless.
-  const key = new THREE.SpotLight(preset.key.color, preset.key.intensity, 12, 1.05, 0.55, 1.6);
+  const key = new THREE.SpotLight(preset.key.color, preset.key.intensity, 12, 1.12, 0.8, 1.6);
   key.position.set(0, 2.55, 0);
   key.target.position.set(0, 0, 0);
   key.castShadow = true;
@@ -157,11 +157,11 @@ export function setupLighting(scene: THREE.Scene, options?: { now?: Date }): Tim
   scene.add(fill, fill.target);
 
   // Lift unlit surfaces (door wall, ceiling) with warm bounced light.
-  scene.add(new THREE.AmbientLight(0xffeed6, preset.name === 'night' ? 0.18 : 0.5));
+  scene.add(new THREE.AmbientLight(0xeee8d8, preset.name === 'night' ? 0.18 : 0.5));
 
   // Warm practical accents — small, shadowless local glow.
-  const deskGlow = new THREE.PointLight(0xffc98a, preset.accent, 3.5, 1.8);
-  deskGlow.position.set(1.4, 1.2, -0.9);
+  const deskGlow = new THREE.PointLight(0xffc98a, preset.accent * 0.28, 3.5, 1.8);
+  deskGlow.position.set(1.4, 1.8, -0.9);
   scene.add(deskGlow);
 
   // Kept off the wall: hugging it produced a source-less hotspot orb.
