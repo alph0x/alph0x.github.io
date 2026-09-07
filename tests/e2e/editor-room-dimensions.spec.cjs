@@ -168,7 +168,7 @@ test.describe('Editor Room Dimensions', () => {
     await enterOutlineMode(page);
 
     // Drag a side wall (no opening) so front/back openings stay aligned.
-    await dragWallMidpoint(page, 2.25, 0, 100, 0);
+    await dragWallMidpoint(page, 2.25, 0, -100, 0);
 
     const { walls } = await getRoomWalls(page);
     expect(walls.length).toBe(4);

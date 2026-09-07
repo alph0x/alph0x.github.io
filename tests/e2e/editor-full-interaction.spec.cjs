@@ -164,7 +164,7 @@ test.describe('Editor Full Interaction', () => {
 
     // 1. Place
     await page.evaluate(() => {
-      window.__furnitureManager.place('sofa', 0, 0, 0);
+      window.__furnitureManager.place('bed', 0, 0, 0);
     });
     await page.waitForTimeout(200);
     expect(await getPlacedCount(page)).toBe(1);
@@ -220,7 +220,7 @@ test.describe('Editor Full Interaction', () => {
     expect(await getPlacedCount(page)).toBe(0);
 
     // 4. Move (via drag)
-    await page.evaluate(() => window.__furnitureManager.place('sofa', 0, 0, 0));
+    await page.evaluate(() => window.__furnitureManager.place('bed', 0, 0, 0));
     await page.waitForTimeout(300);
     const screenPos = await page.evaluate(() => window.__editorProject(0, 0));
     await page.mouse.move(screenPos.x, screenPos.y);

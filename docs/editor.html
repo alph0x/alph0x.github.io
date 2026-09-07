@@ -6,82 +6,82 @@
   <title>Room Layout Editor</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: system-ui, -apple-system, sans-serif; background: #0c0a09; color: #e7e5e4; display: flex; height: 100vh; overflow: hidden; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #e9ebde; color: #344333; display: flex; height: 100vh; overflow: hidden; }
 
     /* Sidebar */
-    #sidebar { width: 320px; flex-shrink: 0; border-right: 1px solid #292524; display: flex; flex-direction: column; overflow-y: auto; }
-    #sidebar header { padding: 16px; border-bottom: 1px solid #292524; background: #1c1917; }
-    #sidebar header h1 { font-size: 14px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: #a8a29e; }
-    #sidebar .panel { padding: 16px; border-bottom: 1px solid #292524; flex-shrink: 0; }
-    #sidebar .panel h2 { font-size: 12px; font-weight: 600; text-transform: uppercase; color: #78716c; margin-bottom: 12px; }
+    #sidebar { width: 320px; flex-shrink: 0; border-right: 1px solid #cbd0bb; display: flex; flex-direction: column; overflow-y: auto; }
+    #sidebar header { padding: 16px; border-bottom: 1px solid #cbd0bb; background: #f7f5e9; }
+    #sidebar header h1 { font-size: 14px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: #59674e; }
+    #sidebar .panel { padding: 16px; border-bottom: 1px solid #cbd0bb; flex-shrink: 0; }
+    #sidebar .panel h2 { font-size: 12px; font-weight: 600; text-transform: uppercase; color: #667459; margin-bottom: 12px; }
 
     .row { display: flex; gap: 8px; margin-bottom: 10px; align-items: center; }
-    .row label { font-size: 12px; color: #a8a29e; width: 80px; flex-shrink: 0; }
-    .row input[type="number"] { width: 60px; background: #1c1917; border: 1px solid #44403c; color: #e7e5e4; padding: 6px 8px; border-radius: 4px; font-size: 12px; }
-    .row input[type="range"] { flex: 1; accent-color: #7c3aed; }
+    .row label { font-size: 12px; color: #59674e; width: 80px; flex-shrink: 0; }
+    .row input[type="number"] { width: 60px; background: #f7f5e9; border: 1px solid #aab499; color: #344333; padding: 6px 8px; border-radius: 4px; font-size: 12px; }
+    .row input[type="range"] { flex: 1; accent-color: #607952; }
     .row input[type="color"] { width: 40px; height: 28px; border: none; background: none; cursor: pointer; }
 
     .palette { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
     .palette button {
-      background: #1c1917; border: 1px solid #44403c; color: #d6d3d1;
+      background: #f7f5e9; border: 1px solid #aab499; color: #3d4c38;
       padding: 8px 4px; border-radius: 4px; font-size: 11px; cursor: pointer;
       display: flex; flex-direction: column; align-items: center; gap: 4px;
       transition: all 0.15s;
     }
-    .palette button:hover { border-color: #7c3aed; background: #231f1e; }
-    .palette button.active { border-color: #7c3aed; background: #2e1065; color: #fff; }
+    .palette button:hover { border-color: #607952; background: #e7ead9; }
+    .palette button.active { border-color: #607952; background: #506843; color: #fff; }
     .palette button .icon { font-size: 18px; }
-    .palette-category h3 { margin: 10px 0 6px; font-size: 11px; text-transform: uppercase; color: #78716c; letter-spacing: 0.5px; }
+    .palette-category h3 { margin: 10px 0 6px; font-size: 11px; text-transform: uppercase; color: #667459; letter-spacing: 0.5px; }
 
     .spawn-row { display: flex; gap: 8px; margin-bottom: 8px; }
     .spawn-row button {
-      flex: 1; background: #1c1917; border: 1px solid #44403c; color: #d6d3d1;
+      flex: 1; background: #f7f5e9; border: 1px solid #aab499; color: #3d4c38;
       padding: 8px; border-radius: 4px; font-size: 11px; cursor: pointer;
     }
     .spawn-row button.active { border-color: #10b981; background: #064e3b; color: #fff; }
 
     .tool-row { display: flex; gap: 8px; margin-bottom: 12px; }
     .tool-row button {
-      flex: 1; background: #1c1917; border: 1px solid #44403c; color: #d6d3d1;
+      flex: 1; background: #f7f5e9; border: 1px solid #aab499; color: #3d4c38;
       padding: 8px; border-radius: 4px; font-size: 11px; cursor: pointer;
     }
-    .tool-row button:hover { border-color: #7c3aed; }
-    .tool-row button.danger { border-color: #7f1d1d; color: #fca5a5; }
-    .tool-row button.danger:hover { background: #450a0a; }
-    .tool-row button.active { border-color: #7c3aed; background: #2e1065; color: #fff; }
+    .tool-row button:hover { border-color: #607952; }
+    .tool-row button.danger { border-color: #976b4c; color: #815338; }
+    .tool-row button.danger:hover { background: #eedecd; }
+    .tool-row button.active { border-color: #607952; background: #506843; color: #fff; }
 
-    .export-area { width: 100%; background: #1c1917; border: 1px solid #44403c; color: #d6d3d1; padding: 10px; border-radius: 4px; font-family: monospace; font-size: 11px; resize: none; min-height: 160px; margin-top: 8px; }
+    .export-area { width: 100%; background: #f7f5e9; border: 1px solid #aab499; color: #3d4c38; padding: 10px; border-radius: 4px; font-family: monospace; font-size: 11px; resize: none; min-height: 160px; margin-top: 8px; }
 
     /* Canvas area */
-    #canvas-wrap { flex: 1; position: relative; background: #0c0a09; min-height: 400px; }
+    #canvas-wrap { flex: 1; position: relative; background: #e9ebde; min-height: 400px; }
     #canvas-wrap canvas { display: block; width: 100%; height: 100%; }
 
     /* Overlay HUD */
     #hud {
       position: absolute; top: 12px; left: 12px; pointer-events: none;
-      background: rgba(12,10,9,0.85); border: 1px solid #292524; border-radius: 6px;
-      padding: 10px 14px; font-size: 12px; color: #a8a29e; line-height: 1.6;
+      background: rgba(248,247,234,0.94); border: 1px solid #cbd0bb; border-radius: 6px;
+      padding: 10px 14px; font-size: 12px; color: #59674e; line-height: 1.6;
     }
     #hud kbd {
-      background: #292524; border-radius: 3px; padding: 1px 5px; font-family: monospace; font-size: 11px; color: #e7e5e4;
+      background: #cbd0bb; border-radius: 3px; padding: 1px 5px; font-family: monospace; font-size: 11px; color: #344333;
     }
 
     .selection-info {
       position: absolute; bottom: 12px; left: 12px;
-      background: rgba(12,10,9,0.9); border: 1px solid #292524; border-radius: 6px;
-      padding: 10px 14px; font-size: 12px; color: #e7e5e4; display: none;
+      background: rgba(248,247,234,0.96); border: 1px solid #cbd0bb; border-radius: 6px;
+      padding: 10px 14px; font-size: 12px; color: #344333; display: none;
     }
     .selection-info.visible { display: block; }
 
     /* Preview viewport */
     #preview-wrap {
       position: absolute; top: 12px; right: 12px; width: 160px; height: 160px;
-      background: rgba(12,10,9,0.9); border: 1px solid #292524; border-radius: 6px;
+      background: rgba(248,247,234,0.96); border: 1px solid #cbd0bb; border-radius: 6px;
       overflow: hidden; z-index: 10; display: none;
     }
     #preview-wrap .preview-label {
       position: absolute; top: 6px; left: 0; right: 0; text-align: center;
-      font-size: 10px; font-weight: 600; text-transform: uppercase; color: #a8a29e;
+      font-size: 10px; font-weight: 600; text-transform: uppercase; color: #59674e;
       pointer-events: none; z-index: 2;
     }
     #preview-wrap canvas { width: 100%; height: 100%; display: block; }
@@ -90,25 +90,33 @@
       position: absolute; top: 50%; left: 50%;
       transform: translate(-50%, -50%) scale(0.95);
       z-index: 100; width: 90%; max-width: 420px;
-      background: rgba(12,10,9,0.97); border: 1px solid #292524; border-radius: 6px;
-      box-shadow: 0 0 40px rgba(0,0,0,0.9);
+      background: rgba(248,247,234,0.98); border: 1px solid #cbd0bb; border-radius: 6px;
+      box-shadow: 0 0 40px rgba(48,65,52,0.18);
       padding: 20px; opacity: 0; pointer-events: none; transition: all 0.2s;
-      font-size: 13px; color: #e7e5e4; line-height: 1.6;
+      font-size: 13px; color: #344333; line-height: 1.6;
     }
     .legend-overlay.active { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
     .legend-overlay .legend-header {
       display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid #292524;
+      margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid #cbd0bb;
     }
-    .legend-overlay h2 { font-size: 14px; font-weight: 600; text-transform: uppercase; color: #a8a29e; letter-spacing: 0.05em; }
+    .legend-overlay h2 { font-size: 14px; font-weight: 600; text-transform: uppercase; color: #59674e; letter-spacing: 0.05em; }
     .legend-overlay .legend-close {
-      background: none; border: 1px solid #7f1d1d; color: #fca5a5;
+      background: none; border: 1px solid #976b4c; color: #815338;
       padding: 4px 10px; border-radius: 4px; font-size: 11px; cursor: pointer;
     }
-    .legend-overlay .legend-close:hover { background: #450a0a; }
+    .legend-overlay .legend-close:hover { background: #eedecd; }
     .legend-overlay .legend-grid { display: grid; gap: 8px; }
     .legend-overlay .legend-row { display: flex; align-items: center; gap: 8px; }
-    .legend-overlay .legend-row span { color: #a8a29e; }
+    .legend-overlay .legend-row span { color: #59674e; }
+    #sidebar { background: #f4f2e6; }
+    #sidebar header { padding: 24px 16px; background: #e7ead9; }
+    #sidebar header h1 { font-family: Georgia, serif; font-size: 20px; font-weight: 400; text-transform: none; letter-spacing: -.02em; color: #344333; }
+    #sidebar .panel h2, .palette-category h3 { letter-spacing: .1em; }
+    .palette button { padding: 11px 4px; }
+    button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid #607952; outline-offset: 2px; }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; } }
+    #roomAxisAligned { filter: brightness(0.6); }
   </style>
 </head>
 <body>
@@ -124,7 +132,7 @@
       </div>
       <div class="row" style="margin-bottom:6px;">
         <label>Dimensions</label>
-        <span id="roomDimensions" style="font-size:12px; color:#d6d3d1;">4.50 × 3.50 m</span>
+        <span id="roomDimensions" style="font-size:12px; color:#344333;">4.50 × 3.50 m</span>
       </div>
       <div class="row" style="margin-bottom:6px;">
         <label>Axis-aligned</label>
@@ -169,7 +177,7 @@
 
     <div class="panel" id="placedPanel">
       <h2>Placed Items</h2>
-      <div id="placedList" style="font-size:12px; color:#a8a29e;">None</div>
+      <div id="placedList" style="font-size:12px; color:#526147;">None</div>
     </div>
 
     <div class="panel">
@@ -226,7 +234,7 @@
       </div>
       <div style="margin-top:12px; border-top:1px solid #44403c; padding-top:8px;">
         <h3 style="margin:0 0 6px; font-size:11px; text-transform:uppercase; color:#78716c;">Grid Snap</h3>
-        <label style="display:flex; align-items:center; gap:8px; font-size:11px; color:#d6d3d1;">
+        <label style="display:flex; align-items:center; gap:8px; font-size:11px; color:#344333;">
           <input type="checkbox" id="snapToggle" checked>
           Enable Snap
         </label>

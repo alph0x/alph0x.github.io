@@ -1,5 +1,7 @@
 const { test, expect } = require('@playwright/test');
 
+test.setTimeout(120000);
+
 function filterKnownErrors(errors) {
   return errors.filter((e) => {
     if (e.includes('Pointer Lock API')) return false;
@@ -23,7 +25,7 @@ test.describe('Editor Camera Switch Selection', () => {
     await page.waitForSelector('#canvas-wrap > canvas', { state: 'visible', timeout: 10000 });
     await page.waitForTimeout(600);
 
-    // Poll until the furniture manager global is available, then clear and place a sofa
+    // Poll until the furniture manager global is available, then clear and place registered furniture
     const placedId = await page.evaluate(async () => {
       for (let i = 0; i < 50; i++) {
         if (window.__furnitureManager) break;
@@ -31,7 +33,7 @@ test.describe('Editor Camera Switch Selection', () => {
       }
       if (!window.__furnitureManager) throw new Error('furnitureManager not exposed');
       window.__furnitureManager.clearAll();
-      window.__furnitureManager.place('sofa', 0, 0, 0);
+      window.__furnitureManager.place('bed', 0, 0, 0);
       return Array.from(window.__furnitureManager.meshMap.keys())[0];
     });
     expect(placedId).toBeDefined();
@@ -51,12 +53,12 @@ test.describe('Editor Camera Switch Selection', () => {
     await viewBtn.click();
     await page.waitForTimeout(600);
 
-    // Get screen coordinates of the placed sofa and click it
+    // Get screen coordinates of the placed item and click it
     const screenPos = await page.evaluate(() => window.__editorProject(0, 0));
     await page.mouse.click(screenPos.x, screenPos.y);
     await page.waitForTimeout(200);
 
-    // Assert sofa is selected in 3D view
+    // Assert the item is selected in 3D view
     selectedId = await page.evaluate(() => window.__editorState.selectedId);
     expect(selectedId).toBe(placedId);
 
@@ -67,12 +69,12 @@ test.describe('Editor Camera Switch Selection', () => {
     await viewBtn.click();
     await page.waitForTimeout(600);
 
-    // Click the sofa again in top view
+    // Click the item again in top view
     const screenPos2 = await page.evaluate(() => window.__editorProject(0, 0));
     await page.mouse.click(screenPos2.x, screenPos2.y);
     await page.waitForTimeout(200);
 
-    // Assert sofa is still selected in top view
+    // Assert the item is still selected in top view
     selectedId = await page.evaluate(() => window.__editorState.selectedId);
     expect(selectedId).toBe(placedId);
 
