@@ -3,7 +3,7 @@
  * Caches the app shell on install; serves from cache when available, falls back to network.
  */
 
-const CACHE_NAME = 'alph0x-portfolio-v2';
+const CACHE_NAME = 'alph0x-portfolio-v3';
 const SHELL_ASSETS = [
   '/',
   '/index.html',
