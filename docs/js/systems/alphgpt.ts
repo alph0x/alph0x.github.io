@@ -342,6 +342,18 @@ export function askAlphGPT(
     if (dynamic) return { text: dynamic, intent: bestIntent };
   }
 
+  // State-dependent intents (time/room/moving) are pure placeholders without
+  // game context — never leak `STATE_*` to the user. Static fallback instead.
+  const pool = KNOWLEDGE_BASE[bestIntent]?.responses[lang] ?? KNOWLEDGE_BASE[bestIntent]?.responses.en ?? [];
+  if (pool.length > 0 && pool.every((r) => r.startsWith('STATE_'))) {
+    return {
+      text: lang === 'es'
+        ? 'Necesito que el juego esté cargado para responder eso. Pregúntame por sus habilidades, experiencia o cómo contactarlo.'
+        : 'I need the game loaded to answer that. Ask me about his skills, experience, or how to reach him.',
+      intent: bestIntent,
+    };
+  }
+
   return { text: pickResponse(bestIntent, lang), intent: bestIntent };
 }
 

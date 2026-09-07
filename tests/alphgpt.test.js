@@ -111,7 +111,7 @@ describe('askAlphGPT', () => {
   });
 });
 
-describe('natural-language robustness (P-01)', () => {
+describe('natural-language robustness', () => {
   it('routes what do you do to experience', () => {
     expect(askAlphGPT('what do you do?').intent).toBe('experience');
   });
@@ -162,6 +162,13 @@ describe('natural-language robustness (P-01)', () => {
 
   it('does not misroute what is interesting to room', () => {
     expect(askAlphGPT('what is interesting?').intent).not.toBe('room');
+  });
+
+  it('never leaks STATE_* placeholders without game context', () => {
+    const result = askAlphGPT('what is in this room');
+    expect(result.intent).toBe('room');
+    expect(result.text).not.toContain('STATE_ROOM');
+    expect(result.text).toMatch(/game loaded|juego esté cargado/i);
   });
 });
 
