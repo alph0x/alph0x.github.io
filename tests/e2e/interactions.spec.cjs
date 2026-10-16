@@ -179,6 +179,7 @@ test.describe('Interaction validation suite', () => {
               dpr: window.devicePixelRatio,
               pixelRatio: game.renderer.getPixelRatio(),
               shadows: game.renderer.shadowMap.enabled,
+              heartbeat: { frame: game.renderer.info.render.frame, prevTime: game.prevTime },
             };
           });
           state.fixture = { ...fixture, glbStatuses };
@@ -190,7 +191,7 @@ test.describe('Interaction validation suite', () => {
           expect(fixture.sceneType).toBe('Group');
           expect(fixture.meshes, 'loaded GLTF scene has rendered meshes').toBeGreaterThan(0);
           expect(fixture.composer, 'desktop effects remain active').toBe(true);
-          const initial = await heartbeat();
+          const initial = fixture.heartbeat;
           state.activeAction = 'render frame and game-loop heartbeat';
           await page.waitForFunction(({ frame, prevTime }) =>
             window.__game.renderer.info.render.frame >= frame + 2
@@ -207,20 +208,40 @@ test.describe('Interaction validation suite', () => {
       const { before, openHeartbeat } = await phase('Open terminal through E and zoom', 30000, async () => {
         const mac = TARGETS.find(t => t.type === 'macBook');
         state.activeAction = 'aim and actionable prompt';
-        await aim(page, mac.pos, mac.look);
-        expect(await promptText(page)).toBe(`[E] ${mac.label}`);
-        expect(await page.evaluate(() => {
+        // Keep aim and pre-E observations in one main-thread snapshot.
+        const aimState = await page.evaluate(({ pos, look }) => {
+          const camera = window.__camera;
+          camera.position.set(...pos);
+          camera.lookAt(...look);
+          camera.updateMatrixWorld(true);
+          window.__game.interaction.updatePrompt();
+          const prompt = document.querySelector('#prompt');
           const target = document.activeElement;
-          return !['INPUT', 'TEXTAREA', 'SELECT'].includes(target?.tagName) && !target?.isContentEditable;
-        }), 'E must reach the game, not a typing target').toBe(true);
+          return {
+            prompt: prompt?.classList.contains('active') ? prompt.textContent : null,
+            canPressE: !['INPUT', 'TEXTAREA', 'SELECT'].includes(target?.tagName) && !target?.isContentEditable,
+          };
+        }, mac);
+        expect(aimState.prompt).toBe(`[E] ${mac.label}`);
+        expect(aimState.canPressE, 'E must reach the game, not a typing target').toBe(true);
         state.activeAction = 'real E key and terminal zoom';
         await page.keyboard.press('e');
         await page.waitForSelector('#panel-alphgpt.active.terminal-mode', { timeout: 30000 });
-        expect(await page.evaluate(() => window.__camera.position.toArray()), 'terminal zoom moved the camera').not.toEqual(mac.pos);
-        state.activeAction = 'ready terminal input and prior bot count';
+        state.activeAction = 'visible terminal input';
         await input.waitFor({ state: 'visible', timeout: 30000 });
+        state.activeAction = 'enabled terminal input';
         await expect(input).toBeEnabled({ timeout: 30000 });
-        return { before: await page.locator(botSelector).count(), openHeartbeat: await heartbeat() };
+        state.activeAction = 'capture zoom and prior bot count';
+        const snapshot = await page.evaluate(selector => ({
+          camera: window.__camera.position.toArray(),
+          before: document.querySelectorAll(selector).length,
+          openHeartbeat: {
+            frame: window.__game.renderer.info.render.frame,
+            prevTime: window.__game.prevTime,
+          },
+        }), botSelector);
+        expect(snapshot.camera, 'terminal zoom moved the camera').not.toEqual(mac.pos);
+        return snapshot;
       });
       state.openHeartbeat = openHeartbeat;
 
@@ -233,21 +254,28 @@ test.describe('Interaction validation suite', () => {
 
       await phase('Fresh bot command response with active render', 10000, async () => {
         state.activeAction = 'new bot help, clear and exit with advancing renderer and game loop';
-        const responseBaseline = await heartbeat();
-        state.responseBaseline = responseBaseline;
-        await expect.poll(() => page.evaluate(({ selector, before, frame, prevTime }) => {
-          const freshBots = Array.from(document.querySelectorAll(selector)).slice(before);
-          const answered = freshBots.some(node => {
-            const body = node.lastElementChild?.textContent ?? '';
-            return /^\s*help\b/im.test(body) && /^\s*clear\b/im.test(body) && /^\s*exit\b/im.test(body);
-          });
-          const game = window.__game;
-          return answered && game.renderer.info.render.frame > frame && game.prevTime > prevTime;
-        }, { selector: botSelector, before, ...responseBaseline }), {
+        await expect.poll(async () => {
+          const sample = await page.evaluate(({ selector, before }) => {
+            const freshBots = Array.from(document.querySelectorAll(selector)).slice(before);
+            const answered = freshBots.some(node => {
+              const body = node.lastElementChild?.textContent ?? '';
+              return /^\s*help\b/im.test(body) && /^\s*clear\b/im.test(body) && /^\s*exit\b/im.test(body);
+            });
+            const game = window.__game;
+            return { answered, frame: game.renderer.info.render.frame, prevTime: game.prevTime };
+          }, { selector: botSelector, before });
+          if (!state.responseBaseline) {
+            state.responseBaseline = sample;
+            return false;
+          }
+          const passed = sample.answered && sample.frame > state.responseBaseline.frame
+            && sample.prevTime > state.responseBaseline.prevTime;
+          if (passed) state.replyHeartbeat = sample;
+          return passed;
+        }, {
           timeout: 10000,
           message: 'a newly appended bot body must list help, clear and exit while the real renderer advances',
         }).toBe(true);
-        state.replyHeartbeat = await heartbeat();
       });
     });
   });

@@ -273,6 +273,8 @@ The renderer and game-loop heartbeat must advance after command submission. The 
 
 Only this case has a load-time 125-second limit. Native steps bound boot, opening, sending and response to 60, 30, 20 and 10 seconds respectively; the remaining five seconds are a nominal setup/accounting reserve, not a separate fixture guarantee. Input fill and Enter have explicit 15- and 5-second action limits. The shared boot helper passes `waitForFunction` options in its third argument, so all callers receive the intended 60-second readiness cap; other cases keep their own global and navigation limits.
 
+Case-local snapshots group aim/prompt/focus and the post-readiness camera/bot-count observations without replacing native visibility or enabled checks. The first post-Enter response sample establishes the heartbeat baseline and cannot pass; a later sample must contain the fresh command reply and advance both signals. The passing sample supplies the final diagnostic heartbeat, avoiding an unnecessary browser round trip.
+
 `[terminal-e2e]` stdout records phase starts, ends and failures, the active action, runtime, viewport, real renderer identity when available, fixture state and final errors. Unobserved setup time or trace capture remains unknown; inspect runner artifacts rather than inferring a graphics backend from warnings.
 
 ```sh
