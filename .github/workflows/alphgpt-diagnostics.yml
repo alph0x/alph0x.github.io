@@ -1,0 +1,67 @@
+name: AlphGPT Diagnostics
+
+on:
+  push:
+    branches: [maintenance/ci]
+    paths:
+      - scripts/diagnose-alphgpt.cjs
+      - .github/workflows/alphgpt-diagnostics.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alphgpt-diagnostics-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  diagnose:
+    name: Native terminal diagnostic collection
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        timeout-minutes: 1
+
+      - name: Prepare failure evidence directory
+        timeout-minutes: 1
+        shell: bash
+        run: |
+          mkdir -p diagnostic-artifacts
+          printf '%s\n' 'Diagnostic job started; a platform hard kill can prevent upload or finalization.' > diagnostic-artifacts/job.log
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        timeout-minutes: 1
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Install current dependencies and Chromium
+        timeout-minutes: 5
+        shell: bash
+        run: |
+          set -o pipefail
+          npm ci 2>&1 | tee diagnostic-artifacts/npm-ci.log
+          npx playwright install --with-deps chromium 2>&1 | tee diagnostic-artifacts/browser-install.log
+
+      - name: Collect fresh untraced traced untraced samples
+        timeout-minutes: 23
+        shell: bash
+        env:
+          ALPHGPT_EVENT_BEFORE: ${{ github.event.before }}
+        run: |
+          set -o pipefail
+          node scripts/diagnose-alphgpt.cjs --output diagnostic-artifacts/collection 2>&1 | tee diagnostic-artifacts/collection.log
+
+      - name: Upload raw and partial diagnostic evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        timeout-minutes: 2
+        with:
+          name: alphgpt-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}
+          path: diagnostic-artifacts/
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 7
