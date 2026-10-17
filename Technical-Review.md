@@ -1,7 +1,7 @@
 # Technical Review
 
-**Document Version:** 1.0  
-**Last Updated:** 2026-04-12  
+**Document Version:** 1.1  
+**Last Updated:** 2026-10-16  
 **Project:** Alfredo Pérez — Mobile Engineer Portfolio
 
 ---
@@ -264,6 +264,28 @@ Local → Git Push → GitHub Actions → Vercel → Production
               ↓
          PR creates preview deployment
 ```
+
+### 9.3 Terminal Command Regression
+
+`tests/e2e/interactions.spec.cjs` exercises the desktop AlphGPT terminal through the real MacBook GLB, E key and camera zoom. It requires a newly appended bot body listing `help`, `clear` and `exit`; user echoes, old bot replies and typing indicators cannot satisfy the response check.
+
+The renderer and game-loop heartbeat must advance after command submission. The test requires the desktop composer and leaves production graphics settings unchanged; it records shadows and native pixel ratio rather than asserting those incidental values. Procedural fallback, a missing composer or paused rendering is not a passing fixture. Mobile retains the suite's existing desktop-only skip.
+
+Only this case has a load-time 125-second limit. Native steps bound boot, opening, sending and response to 60, 30, 20 and 10 seconds respectively; the remaining five seconds are a nominal setup/accounting reserve, not a separate fixture guarantee. Input fill and Enter have explicit 15- and 5-second action limits. The shared boot helper passes `waitForFunction` options in its third argument, so all callers receive the intended 60-second readiness cap; other cases keep their own global and navigation limits.
+
+Case-local snapshots group aim/prompt/focus and the post-readiness camera/bot-count observations without replacing native visibility or enabled checks. The first post-Enter response sample establishes the heartbeat baseline and cannot pass; a later sample must contain the fresh command reply and advance both signals. The passing sample supplies the final diagnostic heartbeat, avoiding an unnecessary browser round trip.
+
+`[terminal-e2e]` stdout records phase starts, ends and failures, the active action, runtime, viewport, real renderer identity when available, fixture state and final errors. Unobserved setup time or trace capture remains unknown; inspect runner artifacts rather than inferring a graphics backend from warnings.
+
+```sh
+CI=1 npx --no-install playwright test tests/e2e/interactions.spec.cjs -g "AlphGPT terminal" --project=chromium
+CI=1 npm run test:e2e
+npm test -- --run
+npm run typecheck
+npm run build
+```
+
+A selected local case is not evidence for the full regression suite or remote CI; validate the same committed source in CI before treating the correction as accepted.
 
 ---
 
