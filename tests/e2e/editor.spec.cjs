@@ -26,7 +26,7 @@ test.describe('Editor E2E', () => {
     });
   });
 
-  test('loads, zooms, and toggles 3D/top view', async ({ page }) => {
+  test('loads, zooms, and toggles 3D/top view', async ({ page }, testInfo) => {
     // Wait for the next rendered frame (used instead of fixed sleeps)
     const nextFrame = () => page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
 
@@ -40,30 +40,30 @@ test.describe('Editor E2E', () => {
     await expect(viewBtn).toBeVisible();
 
     // Screenshot 1: initial top view
-    await page.screenshot({ path: 'tests/e2e/screenshots/editor-01-top-view.png' });
+    await page.screenshot({ path: testInfo.outputPath('screenshots', testInfo.project.name, 'retry-' + testInfo.retry, 'editor-01-top-view.png') });
 
     // Zoom in (scroll wheel up on canvas)
     await page.mouse.move(640, 360);
     await page.mouse.wheel(0, -500);
     await nextFrame();
-    await page.screenshot({ path: 'tests/e2e/screenshots/editor-02-zoom-in.png' });
+    await page.screenshot({ path: testInfo.outputPath('screenshots', testInfo.project.name, 'retry-' + testInfo.retry, 'editor-02-zoom-in.png') });
 
     // Zoom out (scroll wheel down on canvas)
     await page.mouse.wheel(0, 500);
     await nextFrame();
-    await page.screenshot({ path: 'tests/e2e/screenshots/editor-03-zoom-out.png' });
+    await page.screenshot({ path: testInfo.outputPath('screenshots', testInfo.project.name, 'retry-' + testInfo.retry, 'editor-03-zoom-out.png') });
 
     // Toggle to 3D view
     await viewBtn.click({ force: true });
     await page.waitForFunction(() => window.__editorState.viewMode === '3d');
     await nextFrame();
-    await page.screenshot({ path: 'tests/e2e/screenshots/editor-04-3d-view.png' });
+    await page.screenshot({ path: testInfo.outputPath('screenshots', testInfo.project.name, 'retry-' + testInfo.retry, 'editor-04-3d-view.png') });
 
     // Toggle back to top view
     await viewBtn.click({ force: true });
     await page.waitForFunction(() => window.__editorState.viewMode === 'top');
     await nextFrame();
-    await page.screenshot({ path: 'tests/e2e/screenshots/editor-05-back-to-top.png' });
+    await page.screenshot({ path: testInfo.outputPath('screenshots', testInfo.project.name, 'retry-' + testInfo.retry, 'editor-05-back-to-top.png') });
 
     const realErrors = filterKnownErrors(page.errors);
     expect(realErrors).toHaveLength(0);

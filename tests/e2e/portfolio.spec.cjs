@@ -31,7 +31,7 @@ test.describe('Portfolio Desktop', () => {
     });
   });
 
-  test('start screen loads and portfolio renders', async ({ page, isMobile }) => {
+  test('start screen loads and portfolio renders', async ({ page, isMobile }, testInfo) => {
     test.skip(isMobile, 'Desktop-only test');
     await page.goto('/');
 
@@ -45,7 +45,7 @@ test.describe('Portfolio Desktop', () => {
     const startScreen = page.locator('#start-screen');
     await expect(startScreen).toBeVisible();
 
-    await page.screenshot({ path: 'tests/e2e/screenshots/01-start-screen.png' });
+    await page.screenshot({ path: testInfo.outputPath('screenshots', testInfo.project.name, 'retry-' + testInfo.retry, '01-start-screen.png') });
 
     await page.locator('#start-btn').click({ force: true });
     await expect(startScreen).toBeHidden();
@@ -69,7 +69,7 @@ test.describe('Portfolio Desktop', () => {
       };
       requestAnimationFrame(tick);
     }));
-    await page.screenshot({ path: 'tests/e2e/screenshots/02-room-desktop.png' });
+    await page.screenshot({ path: testInfo.outputPath('screenshots', testInfo.project.name, 'retry-' + testInfo.retry, '02-room-desktop.png') });
 
     const realErrors = filterKnownErrors(page.errors);
     expect(realErrors).toHaveLength(0);
@@ -77,7 +77,7 @@ test.describe('Portfolio Desktop', () => {
 });
 
 test.describe('Portfolio Mobile', () => {
-  test('touch controls are visible on mobile landscape', async ({ page, isMobile }) => {
+  test('touch controls are visible on mobile landscape', async ({ page, isMobile }, testInfo) => {
     test.skip(!isMobile, 'Mobile-only test');
     // Set mobile landscape viewport BEFORE navigating so initGame() detects it
     await page.setViewportSize({ width: 851, height: 393 });
@@ -105,7 +105,7 @@ test.describe('Portfolio Mobile', () => {
     const interactBtn = page.locator('#touch-interact');
     await expect(interactBtn).toBeVisible();
 
-    await page.screenshot({ path: 'tests/e2e/screenshots/04-mobile-controls.png' });
+    await page.screenshot({ path: testInfo.outputPath('screenshots', testInfo.project.name, 'retry-' + testInfo.retry, '04-mobile-controls.png') });
 
     const realErrors = filterKnownErrors(page.errors);
     expect(realErrors).toHaveLength(0);

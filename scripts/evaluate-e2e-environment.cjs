@@ -1,6 +1,6 @@
 'use strict';
 
-// Capture the ordinary E2E workload without modifying its tests or acceptance limits.
+// Capture the ordinary E2E workload and project-specific outputs with unchanged acceptance limits.
 const fs = require('node:fs');
 const path = require('node:path');
 const os = require('node:os');
@@ -9,10 +9,10 @@ const cp = require('node:child_process');
 const { isDeepStrictEqual } = require('node:util');
 const { performance } = require('node:perf_hooks');
 
-const BASE = '04b267f5cdfce9c8f7e9319f71c5a316e9499ad1';
-const BRANCH = 'codex/macos15-evaluation';
+const BASE = 'a67f9d9750ff44593cd86ba22f6fb8d2c446cee1';
+const BRANCH = 'codex/macos15-collector-repair';
 const REPOSITORY = 'alph0x/alph0x.github.io';
-const WRITES = ['.github/workflows/macos-environment-evaluation.yml', 'scripts/evaluate-e2e-environment.cjs', 'vercel.json'];
+const WRITES = ['.github/workflows/macos-environment-evaluation.yml', 'scripts/evaluate-e2e-environment.cjs', 'vercel.json', 'tests/e2e/editor.spec.cjs', 'tests/e2e/portfolio.spec.cjs'];
 const LOG_CAP = 32 * 1024 ** 2;
 const EVIDENCE_CAP = 512 * 1024 ** 2;
 const EXPECTED = [
@@ -407,7 +407,7 @@ function contextErrors(c, full) {
   require(c.ref === 'refs/heads/' + BRANCH && String(c.attempt) === '1', 'ref/run attempt');
   require(/^[a-f0-9]{40}$/.test(c.sha || '') && c.head === c.sha, 'checkout SHA');
   require(isDeepStrictEqual(c.parents, [BASE]), 'single direct parent');
-  require(isDeepStrictEqual([...(c.changed || [])].sort(), [...WRITES].sort()), 'exact three-file diff');
+  require(isDeepStrictEqual([...(c.changed || [])].sort(), [...WRITES].sort()), 'exact five-file diff');
   require(c.clean === true && c.vercelOnlyRule === true, 'protected source/Vercel rule');
   const e = c.event || {};
   require(e.before === '0'.repeat(40) && e.created === true && e.deleted === false, 'new non-deletion branch push');
@@ -603,6 +603,106 @@ function reportCases(report, capture) {
   return cases;
 }
 const identity = item => JSON.stringify([item.project, item.file, item.titlePath]);
+// The ordinary writer map is fixed by the protected selected specs, not by file counts.
+const EDITOR_PNGS = ['editor-01-top-view.png', 'editor-02-zoom-in.png', 'editor-03-zoom-out.png', 'editor-04-3d-view.png', 'editor-05-back-to-top.png'];
+const PNG_WRITERS = EXPECTED.filter(item => item.status === 'passed' && ['tests/e2e/editor.spec.cjs', 'tests/e2e/portfolio.spec.cjs'].includes(item.file)).map(item => ({ ...item, names: item.file.endsWith('editor.spec.cjs') ? EDITOR_PNGS : item.project === 'chromium' ? ['01-start-screen.png', '02-room-desktop.png'] : ['04-mobile-controls.png'] }));
+function finalFiles(directory, optional = false) {
+  let stat;
+  try { stat = fs.lstatSync(directory); }
+  catch (error) { if (optional && error.code === 'ENOENT') return []; throw error; }
+  if (stat.isSymbolicLink() || !stat.isDirectory()) throw new Error('Unsafe evidence directory: ' + directory);
+  return fs.readdirSync(directory, { withFileTypes: true }).flatMap(entry => {
+    const file = path.join(directory, entry.name);
+    const current = fs.lstatSync(file);
+    if (current.isSymbolicLink()) throw new Error('Unexpected evidence symlink: ' + file);
+    if (current.isDirectory()) return finalFiles(file, false);
+    if (!current.isFile()) throw new Error('Unexpected evidence type: ' + file);
+    return [file];
+  }).sort();
+}
+function pngOutputDirectory(item, retry, resultsRoot, cwd) {
+  // Reuse the locked producer's utilities. No heuristic fallback if its API drifts.
+  const { sanitizeForFilePath, trimLongString } = require('playwright-core/lib/coreBundle').utils;
+  const relative = path.relative(path.join(cwd, 'tests'), path.join(cwd, item.file.replace(/\.(?:spec|test)\.(?:js|ts|jsx|tsx|mjs|mts|cjs|cts)$/, ''))).split(path.sep).join('-');
+  const name = trimLongString(relative + '-' + sanitizeForFilePath(item.titlePath.join(' ')), 60) + '-' + sanitizeForFilePath(item.project) + (retry ? '-retry' + retry : '');
+  return path.join(resultsRoot, name);
+}
+function inspectPngOutputs(report, capture, resultsRoot = path.join(root, 'test-results')) {
+  const errors = [], images = [], coverage = [], slots = new Map(), attachments = new Map();
+  const cwd = capture.cwd || root;
+  const cases = reportCases(report, capture);
+  if (PNG_WRITERS.length !== 4 || PNG_WRITERS.reduce((n, w) => n + w.names.length, 0) !== 13) errors.push('png-writer-contract');
+  for (const writer of PNG_WRITERS) {
+    const matches = cases.filter(item => identity(item) === identity(writer));
+    if (matches.length !== 1 || !matches[0].test.results?.length) { errors.push('png-writer-result-unresolved: ' + identity(writer)); continue; }
+    for (const result of matches[0].test.results) {
+      const entry = { project: writer.project, spec: writer.file, titlePath: writer.titlePath, retry: result.retry, nativeStatus: result.status, required: [...writer.names], produced: [] };
+      coverage.push(entry);
+      if (![0, 1, 2].includes(result.retry) || result.status === 'skipped') { errors.push('png-writer-attempt-anomaly: ' + identity(writer)); continue; }
+      let directory;
+      try { directory = pngOutputDirectory(writer, result.retry, resultsRoot, cwd); }
+      catch (error) { errors.push('png-directory-derivation-failed: ' + error.message); continue; }
+      for (const name of writer.names) {
+        const file = path.join(directory, 'screenshots', writer.project, 'retry-' + result.retry, name);
+        if (slots.has(file)) errors.push('png-duplicate-result-identity: ' + file);
+        slots.set(file, { entry, name });
+      }
+    }
+  }
+  for (const item of cases) for (const result of item.test.results || []) for (const attachment of result.attachments || []) {
+    if (!attachment.path) continue;
+    const file = path.resolve(cwd, attachment.path);
+    if (!file.startsWith(path.resolve(resultsRoot) + path.sep)) { errors.push('native-attachment-outside-results: ' + attachment.path); continue; }
+    if (!fs.existsSync(file)) errors.push('native-attachment-missing: ' + attachment.path);
+    if (/\.png$/i.test(file)) {
+      if (attachments.has(file)) errors.push('png-duplicate-attachment: ' + file);
+      attachments.set(file, { item, result });
+    }
+  }
+  for (const file of finalFiles(resultsRoot, true).filter(file => /\.png$/i.test(file))) {
+    const slot = slots.get(file), attachment = attachments.get(file);
+    const record = { run: process.env.GITHUB_RUN_ID || null, runAttempt: process.env.GITHUB_RUN_ATTEMPT || null, job: process.env.GITHUB_JOB || null, head: process.env.GITHUB_SHA || null, relativePath: path.relative(cwd, file).split(path.sep).join('/'), logicalBasename: path.basename(file), project: null, spec: null, titlePath: [], retry: null, kind: 'unknown-png', bytes: fs.statSync(file).size, sha256: digestFile(file), width: 0, height: 0 };
+    const header = Buffer.alloc(24), fd = fs.openSync(file, 'r');
+    let length;
+    try { length = fs.readSync(fd, header, 0, 24, 0); } finally { fs.closeSync(fd); }
+    if (length === 24 && header.subarray(0, 8).equals(Buffer.from('89504e470d0a1a0a', 'hex')) && header.toString('ascii', 12, 16) === 'IHDR') { record.width = header.readUInt32BE(16); record.height = header.readUInt32BE(20); }
+    if (!record.width || !record.height) errors.push('png-invalid-header-or-dimensions: ' + record.relativePath);
+    if (slot) {
+      Object.assign(record, { project: slot.entry.project, spec: slot.entry.spec, titlePath: slot.entry.titlePath, retry: slot.entry.retry, kind: 'ordinary-screenshot' });
+      slot.entry.produced.push(slot.name); slots.delete(file);
+    } else if (attachment) {
+      Object.assign(record, { project: attachment.item.project, spec: attachment.item.file, titlePath: attachment.item.titlePath, retry: attachment.result.retry, kind: 'native-failure-screenshot' });
+      if (attachment.result.status === 'skipped') errors.push('png-on-skipped-result: ' + record.relativePath);
+    } else {
+      const inner = record.relativePath.match(/\/screenshots\/([^/]+)\/retry-(\d+)\/([^/]+)$/);
+      let reason = 'png-unmapped';
+      if (inner) {
+        const owners = PNG_WRITERS.filter(w => w.names.includes(inner[3]));
+        if (!owners.some(w => w.project === inner[1])) reason = 'png-project-mismatch';
+        else if (!coverage.some(e => e.project === inner[1] && e.retry === Number(inner[2]))) reason = 'png-retry-mismatch';
+        else reason = 'png-outer-directory-or-case-mismatch';
+      }
+      errors.push(reason + ': ' + record.relativePath);
+    }
+    images.push(record);
+  }
+  for (const [file, slot] of slots) errors.push((slot.entry.nativeStatus === 'passed' ? 'png-required-image-missing' : 'png-failed-writer-coverage-unresolved') + ': ' + path.relative(cwd, file));
+  return { complete: errors.length === 0, errors, counts: { writerInstances: 4, callSites: 8, retryZeroImagesOnPassingWriters: 13, actualImages: images.length }, coverage, images, provenanceLimit: 'Identity combines frozen source/producer, fresh result roots and native report; PNG header/hashes alone do not attest pixel origin. Identical bytes remain distinct members.' };
+}
+function pngMemberErrors(inventory, members) {
+  const errors = [], seen = new Set();
+  const pngs = members.filter(member => /\.png$/i.test(member.path));
+  const expected = new Map(inventory.images.map(image => [image.relativePath, image]));
+  for (const member of pngs) {
+    const image = expected.get(member.path);
+    if (seen.has(member.path)) errors.push('png-duplicate-member: ' + member.path);
+    seen.add(member.path);
+    if (!image || image.bytes !== member.bytes || image.sha256 !== member.sha256) errors.push('png-member-identity-or-bytes: ' + member.path);
+  }
+  for (const file of expected.keys()) if (!seen.has(file)) errors.push('png-member-missing: ' + file);
+  return errors;
+}
+
 function classifyReport(report, capture) {
   const errors = [];
   const cases = reportCases(report, capture);
@@ -637,7 +737,7 @@ function classifyReport(report, capture) {
   if (terminal?.test.timeout !== 125000 || summary?.status !== 'passed' || summary?.runtime !== 'v24.21.0' || summary?.browser !== '149.0.7827.55' || summary?.host?.platform !== 'darwin' || summary?.host?.arch !== 'arm64' || summary?.tracePolicy !== 'on-first-retry' || summary?.errors?.length || !fixtureValid || !progressValid) errors.push('terminal timeout/real fixture/fresh-response progress evidence');
   if (!PHASES.every(title => nativeResult?.steps?.some(step => step.title === title && !step.error))) errors.push('native phase steps missing/error');
   const allResults = cases.flatMap(item => item.test.results || []);
-  const complete = coverage && !!report && !report.errors?.length && allResults.length >= EXPECTED.length && cases.every(item => item.test.results?.length) && !capture.signal && !capture.spawnError && !capture.timedOut && !capture.resourceStop && capture.logsComplete && capture.cleanup?.complete;
+  const complete = Number.isInteger(capture.exit) && capture.exit >= 0 && coverage && !!report && !report.errors?.length && allResults.length >= EXPECTED.length && cases.every(item => item.test.results?.length) && !capture.signal && !capture.spawnError && !capture.timedOut && !capture.resourceStop && capture.logsComplete && capture.cleanup?.complete;
   return { eligible: errors.length === 0, complete: !!complete, errors, nativeExit: capture.exit, nativeSignal: capture.signal, observations, terminalEvents: events, timingPolicy: 'Native protected timeouts only; phase durations are observations, absent action/setup/dispatch splits unknown. No new duration predicate.', tracePolicy: 'on-first-retry; no trace is expected on a retry-zero success, never force a retry', cohortLimit: 'Full-workload environment observation only, not a controlled comparison, percentile/capacity estimate, causal attribution or product acceptance.' };
 }
 
@@ -686,20 +786,41 @@ function classify() {
   try { report = read(path.join(output, 'native-report.json')); } catch (error) { missing.push('invalid JSON: ' + error.message); }
   try { receipt = read(path.join(output, 'native-capture.json')); } catch { receipt = { exit: null, logsComplete: false, cleanup: { complete: false } }; }
   const classification = classifyReport(report, receipt);
+  classification.productVerdict = !Number.isInteger(receipt.exit) || receipt.exit < 0 || receipt.signal || receipt.timedOut || receipt.resourceStop || receipt.spawnError ? 'CENSORED_OR_UNPROVEN' : receipt.exit !== 0 ? 'FAILED' : !report || !Array.isArray(report.suites) ? 'CENSORED_OR_UNPROVEN' : classification.eligible ? 'PASSED' : 'FAILED';
+  classification.captureReasons = classification.complete ? [] : ['native-report-streams-or-cleanup-incomplete'];
+  let pngOutputs;
+  try { pngOutputs = inspectPngOutputs(report, receipt); }
+  catch (error) { pngOutputs = { complete: false, images: [], coverage: [], errors: ['png-enumeration-failed: ' + error.message] }; }
+  classification.pngOutputs = pngOutputs;
+  if (!pngOutputs.complete) { classification.complete = false; classification.captureReasons.push(...pngOutputs.errors); }
+  classification.errors.push(...pngOutputs.errors);
+  write(path.join(output, 'png-outputs.json'), pngOutputs);
   const before = missing.includes('identity-before-workload.json') ? null : read(path.join(output, 'identity-before-workload.json'));
   classification.errors.push(...missing, ...after.errors, ...(before?.errors || ['initial identity missing']));
-  if (after.errors.length || missing.length || before?.errors?.length) classification.complete = false;
+  if (after.errors.length || missing.length || before?.errors?.length) {
+    classification.complete = false;
+    classification.captureReasons.push(...missing.map(e => 'native-record-missing: ' + e), ...after.errors.map(e => 'after-identity-or-source: ' + e), ...(before?.errors || []).map(e => 'before-identity-or-source: ' + e));
+  }
   classification.eligible = classification.eligible && classification.errors.length === 0;
-  classification.actualTraceFiles = files(path.join(root, 'test-results')).filter(file => file.endsWith('.zip')).map(file => path.relative(root, file));
+  const allFiles = [];
+  for (const directory of rawRoots) {
+    try { allFiles.push(...finalFiles(directory, directory !== output)); }
+    catch (error) { classification.complete = false; classification.captureReasons.push('raw-evidence-enumeration-failed: ' + error.message); }
+  }
+  classification.actualTraceFiles = allFiles.filter(file => file.endsWith('.zip')).map(file => path.relative(root, file));
+  let members = allFiles.map(file => ({ path: path.relative(root, file).split(path.sep).join('/'), bytes: fs.statSync(file).size, sha256: digestFile(file) }));
+  const memberErrors = pngMemberErrors(pngOutputs, members);
+  if (memberErrors.length) { classification.complete = false; classification.captureReasons.push(...memberErrors); classification.errors.push(...memberErrors); }
+  classification.eligible = classification.eligible && classification.complete;
   write(path.join(output, 'classification.json'), classification);
-  const allFiles = rawRoots.flatMap(files);
-  const members = allFiles.map(file => ({ path: path.relative(root, file).replaceAll('\\', '/'), bytes: fs.statSync(file).size, sha256: digestFile(file) }));
+  const classificationFile = path.join(output, 'classification.json');
+  members.push({ path: 'environment-results/classification.json', bytes: fs.statSync(classificationFile).size, sha256: digestFile(classificationFile) });
   // A conservative ZIP-overhead margin prevents an oversized upload; originals are never removed.
   const fullFits = members.reduce((n, m) => n + m.bytes, 0) + members.reduce((n, m) => n + 4096 + Buffer.byteLength(m.path) * 16, 0) + 1048576 <= EVIDENCE_CAP;
   const selected = fullFits ? members : members.filter(m => m.bytes <= LOG_CAP && /(?:\.json|stdout\.log|stderr\.log)$/.test(m.path));
   let sum = 1048576; const bounded = selected.filter(m => { if (sum + m.bytes + 4096 + Buffer.byteLength(m.path) * 16 > EVIDENCE_CAP) return false; sum += m.bytes + 4096 + Buffer.byteLength(m.path) * 16; return true; });
   const completeUpload = fullFits && bounded.length === members.length;
-  const manifest = { version: 1, createdAt: stamp(), repository: REPOSITORY, head: process.env.GITHUB_SHA, run: process.env.GITHUB_RUN_ID, attempt: process.env.GITHUB_RUN_ATTEMPT, job: process.env.GITHUB_JOB, complete: classification.complete && completeUpload, eligibleBeforeArchive: classification.eligible && completeUpload, partialReason: completeUpload ? (classification.complete ? null : 'native/identity/report capture incomplete') : 'raw set exceeds conservative complete-ZIP budget; original raw retained on VM, bounded subset only', missingMembers: members.filter(m => !bounded.includes(m)), members: bounded, limits: { logs: LOG_CAP, archive: EVIDENCE_CAP, sampledRawSoftStop: EVIDENCE_CAP }, hardwareClass: 'Fixed standard macos-15 label requested; native OS/arch/image guarded, CPU/RAM/model recorded only, no independent class/capacity attestation', observer: { cadenceMs: 100, overhead: 'additional ps/stat sampling and JSON reporter; CPU/IO/timing perturbation unmeasured, no controlled A/B claim' }, caveat: 'No artifact delivery guaranteed after platform hard kill; no silent pruning or reconstructed success.' };
+  const manifest = { version: 2, productVerdict: classification.productVerdict, captureReasons: classification.captureReasons, pngOutputs, createdAt: stamp(), repository: REPOSITORY, head: process.env.GITHUB_SHA, run: process.env.GITHUB_RUN_ID, attempt: process.env.GITHUB_RUN_ATTEMPT, job: process.env.GITHUB_JOB, complete: classification.complete && completeUpload, eligibleBeforeArchive: classification.eligible && completeUpload, partialReason: completeUpload ? (classification.complete ? null : 'incomplete captured evidence; see captureReasons and PNG coverage') : 'raw set exceeds conservative complete-ZIP budget; original raw retained on VM, bounded subset only', missingMembers: members.filter(m => !bounded.includes(m)), members: bounded, limits: { logs: LOG_CAP, archive: EVIDENCE_CAP, sampledRawSoftStop: EVIDENCE_CAP }, hardwareClass: 'Fixed standard macos-15 label requested; native OS/arch/image guarded, CPU/RAM/model recorded only, no independent class/capacity attestation', observer: { cadenceMs: 100, overhead: 'additional ps/stat sampling and JSON reporter; CPU/IO/timing perturbation unmeasured, no controlled A/B claim' }, caveat: 'No artifact delivery guaranteed after platform hard kill; no silent pruning or reconstructed success.' };
   const stage = path.join(process.env.RUNNER_TEMP, 'environment-evidence-' + process.env.GITHUB_JOB);
   fs.mkdirSync(stage, { recursive: false });
   for (const member of bounded) { const to = path.join(stage, member.path); fs.mkdirSync(path.dirname(to), { recursive: true }); try { fs.linkSync(path.join(root, member.path), to); } catch { fs.copyFileSync(path.join(root, member.path), to); } }
@@ -776,5 +897,5 @@ async function main() {
   if (mode === 'verify-artifact' && process.argv.length === 3) return verifyArtifact();
   throw new Error('Expected guard, capture [install], classify or verify-artifact; no custom workload or deadline options.');
 }
-module.exports = { contextErrors, sameProcess, runOwned, classifyReport, verifyArchiveFile, artifactMetadataErrors, processSnapshot, byteSize, writeAll };
+module.exports = { contextErrors, sameProcess, runOwned, classifyReport, verifyArchiveFile, artifactMetadataErrors, processSnapshot, byteSize, writeAll, inspectPngOutputs, pngMemberErrors, pngOutputDirectory, finalFiles };
 if (require.main === module) main().then(code => { process.exitCode = code; }).catch(error => { console.error(error.stack); process.exitCode = 1; });

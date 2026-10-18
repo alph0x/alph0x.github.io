@@ -1,7 +1,8 @@
 {
   "git": {
     "deploymentEnabled": {
-      "codex/macos15-evaluation": false
+      "codex/macos15-evaluation": false,
+      "codex/macos15-collector-repair": false
     }
   },
   "framework": null,

@@ -3,12 +3,14 @@
   "on": {
     "push": {
       "branches": [
-        "codex/macos15-evaluation"
+        "codex/macos15-collector-repair"
       ],
       "paths": [
         ".github/workflows/macos-environment-evaluation.yml",
         "scripts/evaluate-e2e-environment.cjs",
-        "vercel.json"
+        "vercel.json",
+        "tests/e2e/editor.spec.cjs",
+        "tests/e2e/portfolio.spec.cjs"
       ]
     }
   },
@@ -25,7 +27,7 @@
       "name": "Measure ordinary workload 1",
       "runs-on": "macos-15",
       "timeout-minutes": 30,
-      "if": "${{ github.repository == 'alph0x/alph0x.github.io' && github.ref == 'refs/heads/codex/macos15-evaluation' && github.event_name == 'push' && github.run_attempt == 1 }}",
+      "if": "${{ github.repository == 'alph0x/alph0x.github.io' && github.ref == 'refs/heads/codex/macos15-collector-repair' && github.event_name == 'push' && github.run_attempt == 1 }}",
       "outputs": {
         "eligible": "${{ steps.archive.outputs.eligible }}",
         "image": "${{ steps.identity.outputs.image }}"
@@ -113,7 +115,7 @@
       "name": "Measure ordinary workload 2",
       "runs-on": "macos-15",
       "timeout-minutes": 30,
-      "if": "${{ needs.measure_1.result == 'success' && needs.measure_1.outputs.eligible == 'true' && github.repository == 'alph0x/alph0x.github.io' && github.ref == 'refs/heads/codex/macos15-evaluation' && github.event_name == 'push' && github.run_attempt == 1 }}",
+      "if": "${{ needs.measure_1.result == 'success' && needs.measure_1.outputs.eligible == 'true' && github.repository == 'alph0x/alph0x.github.io' && github.ref == 'refs/heads/codex/macos15-collector-repair' && github.event_name == 'push' && github.run_attempt == 1 }}",
       "outputs": {
         "eligible": "${{ steps.archive.outputs.eligible }}",
         "image": "${{ steps.identity.outputs.image }}"
