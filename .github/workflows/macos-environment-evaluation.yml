@@ -1,0 +1,204 @@
+{
+  "name": "macOS Environment Evaluation",
+  "on": {
+    "push": {
+      "branches": [
+        "codex/macos15-evaluation"
+      ],
+      "paths": [
+        ".github/workflows/macos-environment-evaluation.yml",
+        "scripts/evaluate-e2e-environment.cjs",
+        "vercel.json"
+      ]
+    }
+  },
+  "permissions": {
+    "contents": "read",
+    "actions": "read"
+  },
+  "concurrency": {
+    "group": "macos-environment-${{ github.ref }}",
+    "cancel-in-progress": false
+  },
+  "jobs": {
+    "measure_1": {
+      "name": "Measure ordinary workload 1",
+      "runs-on": "macos-15",
+      "timeout-minutes": 30,
+      "if": "${{ github.repository == 'alph0x/alph0x.github.io' && github.ref == 'refs/heads/codex/macos15-evaluation' && github.event_name == 'push' && github.run_attempt == 1 }}",
+      "outputs": {
+        "eligible": "${{ steps.archive.outputs.eligible }}",
+        "image": "${{ steps.identity.outputs.image }}"
+      },
+      "env": {
+        "FIRST_IMAGE": ""
+      },
+      "steps": [
+        {
+          "name": "Checkout exact event commit",
+          "uses": "actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "timeout-minutes": 1,
+          "with": {
+            "ref": "${{ github.sha }}",
+            "fetch-depth": 2,
+            "persist-credentials": false
+          }
+        },
+        {
+          "name": "Guard source and host identity",
+          "id": "identity",
+          "timeout-minutes": 1,
+          "run": "node scripts/evaluate-e2e-environment.cjs guard"
+        },
+        {
+          "name": "Setup exact Node",
+          "uses": "actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+          "timeout-minutes": 1,
+          "with": {
+            "node-version": "24.21.0",
+            "check-latest": false
+          }
+        },
+        {
+          "name": "Install locked dependencies and bundled Chromium",
+          "id": "install",
+          "timeout-minutes": 5,
+          "run": "node scripts/evaluate-e2e-environment.cjs capture install"
+        },
+        {
+          "name": "Capture ordinary native workload and owned cleanup",
+          "id": "capture",
+          "timeout-minutes": 18,
+          "continue-on-error": true,
+          "run": "node scripts/evaluate-e2e-environment.cjs capture"
+        },
+        {
+          "name": "Classify native result and stage immutable evidence",
+          "id": "classify",
+          "if": "${{ always() }}",
+          "timeout-minutes": 1,
+          "run": "node scripts/evaluate-e2e-environment.cjs classify"
+        },
+        {
+          "name": "Upload original complete or labelled partial evidence",
+          "id": "upload",
+          "if": "${{ always() && steps.classify.outcome == 'success' }}",
+          "uses": "actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+          "timeout-minutes": 1,
+          "with": {
+            "name": "${{ steps.classify.outputs.artifact-name }}",
+            "path": "${{ steps.classify.outputs.path }}",
+            "if-no-files-found": "error",
+            "include-hidden-files": true,
+            "overwrite": false,
+            "retention-days": 7,
+            "compression-level": 0
+          }
+        },
+        {
+          "name": "Verify original archive within shared two-minute budget",
+          "id": "archive",
+          "if": "${{ always() }}",
+          "timeout-minutes": 1,
+          "env": {
+            "GITHUB_TOKEN": "${{ github.token }}",
+            "ARTIFACT_ID": "${{ steps.upload.outputs.artifact-id }}",
+            "ARTIFACT_DIGEST": "${{ steps.upload.outputs.artifact-digest }}"
+          },
+          "run": "node scripts/evaluate-e2e-environment.cjs verify-artifact"
+        }
+      ]
+    },
+    "measure_2": {
+      "name": "Measure ordinary workload 2",
+      "runs-on": "macos-15",
+      "timeout-minutes": 30,
+      "if": "${{ needs.measure_1.result == 'success' && needs.measure_1.outputs.eligible == 'true' && github.repository == 'alph0x/alph0x.github.io' && github.ref == 'refs/heads/codex/macos15-evaluation' && github.event_name == 'push' && github.run_attempt == 1 }}",
+      "outputs": {
+        "eligible": "${{ steps.archive.outputs.eligible }}",
+        "image": "${{ steps.identity.outputs.image }}"
+      },
+      "env": {
+        "FIRST_IMAGE": "${{ needs.measure_1.outputs.image }}"
+      },
+      "steps": [
+        {
+          "name": "Checkout exact event commit",
+          "uses": "actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "timeout-minutes": 1,
+          "with": {
+            "ref": "${{ github.sha }}",
+            "fetch-depth": 2,
+            "persist-credentials": false
+          }
+        },
+        {
+          "name": "Guard source and host identity",
+          "id": "identity",
+          "timeout-minutes": 1,
+          "run": "node scripts/evaluate-e2e-environment.cjs guard"
+        },
+        {
+          "name": "Setup exact Node",
+          "uses": "actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+          "timeout-minutes": 1,
+          "with": {
+            "node-version": "24.21.0",
+            "check-latest": false
+          }
+        },
+        {
+          "name": "Install locked dependencies and bundled Chromium",
+          "id": "install",
+          "timeout-minutes": 5,
+          "run": "node scripts/evaluate-e2e-environment.cjs capture install"
+        },
+        {
+          "name": "Capture ordinary native workload and owned cleanup",
+          "id": "capture",
+          "timeout-minutes": 18,
+          "continue-on-error": true,
+          "run": "node scripts/evaluate-e2e-environment.cjs capture"
+        },
+        {
+          "name": "Classify native result and stage immutable evidence",
+          "id": "classify",
+          "if": "${{ always() }}",
+          "timeout-minutes": 1,
+          "run": "node scripts/evaluate-e2e-environment.cjs classify"
+        },
+        {
+          "name": "Upload original complete or labelled partial evidence",
+          "id": "upload",
+          "if": "${{ always() && steps.classify.outcome == 'success' }}",
+          "uses": "actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+          "timeout-minutes": 1,
+          "with": {
+            "name": "${{ steps.classify.outputs.artifact-name }}",
+            "path": "${{ steps.classify.outputs.path }}",
+            "if-no-files-found": "error",
+            "include-hidden-files": true,
+            "overwrite": false,
+            "retention-days": 7,
+            "compression-level": 0
+          }
+        },
+        {
+          "name": "Verify original archive within shared two-minute budget",
+          "id": "archive",
+          "if": "${{ always() }}",
+          "timeout-minutes": 1,
+          "env": {
+            "GITHUB_TOKEN": "${{ github.token }}",
+            "ARTIFACT_ID": "${{ steps.upload.outputs.artifact-id }}",
+            "ARTIFACT_DIGEST": "${{ steps.upload.outputs.artifact-digest }}"
+          },
+          "run": "node scripts/evaluate-e2e-environment.cjs verify-artifact"
+        }
+      ],
+      "needs": [
+        "measure_1"
+      ]
+    }
+  }
+}

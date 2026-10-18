@@ -1,4 +1,9 @@
 {
+  "git": {
+    "deploymentEnabled": {
+      "codex/macos15-evaluation": false
+    }
+  },
   "framework": null,
   "buildCommand": null,
   "outputDirectory": "dist",
